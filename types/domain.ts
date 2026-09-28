@@ -2,7 +2,7 @@
  * types/domain.ts
  *
  * Handgeschriebene Domain-Typen auf Basis von types/database.ts.
- * Bildet u. a. die Spalten-Grants aus schema.sql ab, damit unerlaubte
+ * Bildet u. a. die Spalten-Grants aus supabase/migrations/ ab, damit unerlaubte
  * Schreibzugriffe (z. B. profiles.role) bereits zur Compile-Zeit auffallen.
  */
 import {

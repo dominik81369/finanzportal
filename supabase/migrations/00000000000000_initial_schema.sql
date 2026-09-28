@@ -1,5 +1,5 @@
 -- =====================================================================
---  supabase/schema.sql
+--  supabase/migrations/00000000000000_init.sql
 --  Phase 1 · Datenbankschema, Auth-Trigger & RLS-Sicherheit
 --  Zielplattform: Supabase · PostgreSQL 15+ · Region eu-central-1 (Frankfurt)
 --
