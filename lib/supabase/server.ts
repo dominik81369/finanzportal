@@ -99,3 +99,29 @@ export async function requireAdvisor(): Promise<User> {
   }
   return user;
 }
+
+/**
+ * Hat der angemeldete Nutzer selbst ein Passwort festgelegt? Per Einladung
+ * angelegte Konten zunächst nicht (profiles.password_set_at, nur per Trigger
+ * gepflegt – siehe Migration 20260928000000_profiles_password_set_at.sql).
+ * null = konnte nicht ermittelt werden.
+ */
+export async function currentUserHasPassword(): Promise<boolean | null> {
+  const user = await getSessionUser();
+  if (!user) {
+    return null;
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('password_set_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error('[auth] password_set_at nicht lesbar', { code: error?.code });
+    return null;
+  }
+  return data.password_set_at !== null;
+}

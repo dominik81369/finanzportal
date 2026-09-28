@@ -33,6 +33,7 @@ export type Database = {
           locale: string;
           base_currency: string;
           onboarding_completed_at: string | null;
+          password_set_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -44,6 +45,7 @@ export type Database = {
           locale?: string;
           base_currency?: string;
           onboarding_completed_at?: string | null;
+          password_set_at?: never;
           created_at?: string;
           updated_at?: string;
         };
@@ -55,6 +57,7 @@ export type Database = {
           locale?: string;
           base_currency?: string;
           onboarding_completed_at?: string | null;
+          password_set_at?: never;
           created_at?: string;
           updated_at?: string;
         };

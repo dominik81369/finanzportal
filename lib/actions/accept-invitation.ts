@@ -16,7 +16,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { invitePath, isWellFormedInviteToken } from '@/lib/invite-token';
-import { createClient, getSessionUser } from '@/lib/supabase/server';
+import { createClient, currentUserHasPassword, getSessionUser } from '@/lib/supabase/server';
 import { DEFAULT_REDIRECT_PATH } from '@/lib/url';
 
 export type AcceptInvitationState = {
@@ -71,5 +71,14 @@ export async function acceptInvitation(
   }
 
   revalidatePath('/', 'layout');
-  redirect(DEFAULT_REDIRECT_PATH);
+
+  // Per Einladung neu angelegte Konten haben noch kein Passwort → zuerst
+  // festlegen. Bestehende Konten (Anmeldelink) direkt ins Dashboard. Ist der
+  // Zustand unbekannt (null), prüft /set-password selbst erneut.
+  const hasPassword = await currentUserHasPassword();
+  redirect(
+    hasPassword
+      ? DEFAULT_REDIRECT_PATH
+      : `/set-password?next=${encodeURIComponent(DEFAULT_REDIRECT_PATH)}`,
+  );
 }
