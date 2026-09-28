@@ -18,6 +18,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { getSupabasePublicEnv } from '@/lib/supabase/env';
+import { getAppOrigin } from '@/lib/url';
 import type { Database } from '@/types/database';
 
 const LOGIN_PATH = '/login';
@@ -79,9 +80,10 @@ export async function middleware(request: NextRequest) {
 
   /** Redirect, der aktualisierte Session-Cookies und Cache-Header übernimmt. */
   const redirectTo = (target: string, params?: Record<string, string>) => {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = target;
-    redirectUrl.search = '';
+    // Öffentliche Origin statt request.nextUrl: Unter `next start` enthält
+    // nextUrl den internen Host (localhost:3000) – hinter einem Reverse Proxy
+    // landete der Redirect sonst auf der falschen Domain, ohne Session-Cookies.
+    const redirectUrl = new URL(target, getAppOrigin(request.headers, request.nextUrl));
     if (params) {
       for (const [key, value] of Object.entries(params)) {
         redirectUrl.searchParams.set(key, value);
