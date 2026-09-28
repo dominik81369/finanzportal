@@ -2,7 +2,7 @@
  * types/database.ts
  *
  * Typdefinitionen im Format von `supabase gen types typescript`, 1:1 passend
- * zu supabase/schema.sql. Nach jeder Migration neu generieren:
+ * zu supabase/migrations/. Nach jeder Migration neu generieren:
  *
  *   npx supabase gen types typescript --project-id <ref> --schema public > types/database.ts
  *
