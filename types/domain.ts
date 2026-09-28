@@ -23,10 +23,21 @@ export type Transaction = Tables<'transactions'>;
 export type Portfolio = Tables<'portfolios'>;
 export type Asset = Tables<'assets'>;
 export type RealEstateObject = Tables<'real_estate_objects'>;
+export type Tag = Tables<'tags'>;
+export type TransactionTag = Tables<'transaction_tags'>;
+export type Budget = Tables<'budgets'>;
+export type RecurringContract = Tables<'recurring_contracts'>;
+export type CategorizationRule = Tables<'categorization_rules'>;
 
 export type UserRole = Enums<'user_role'>;
 export type MarketRegion = Enums<'market_region'>;
 export type AssetClass = Enums<'asset_class'>;
+export type TransactionSource = Enums<'transaction_source'>;
+export type BudgetPeriod = Enums<'budget_period'>;
+export type ContractRhythm = Enums<'contract_rhythm'>;
+export type ContractStatus = Enums<'contract_status'>;
+export type RuleMatchField = Enums<'rule_match_field'>;
+export type RuleMatchType = Enums<'rule_match_type'>;
 
 // Schreib-Typen gemäß Spalten-Grants ------------------------------------
 /** Einzige Spalten, die `authenticated` in profiles ändern darf. */
@@ -42,6 +53,21 @@ export type AdvisorInvitationInsert = Required<
 
 /** Einziger erlaubter Statuswechsel über die Data API. */
 export type AdvisorLinkRevoke = { status: 'revoked' };
+
+/**
+ * Budget mit genau einer Bezugsgröße (CHECK budgets_single_scope):
+ * Kategorie ODER Tag ODER Konto.
+ */
+export type BudgetScope =
+  | { category_id: string; tag_id?: null; account_id?: null }
+  | { tag_id: string; category_id?: null; account_id?: null }
+  | { account_id: string; category_id?: null; tag_id?: null };
+
+export type BudgetInsert = Omit<
+  TablesInsert<'budgets'>,
+  'category_id' | 'tag_id' | 'account_id'
+> &
+  BudgetScope;
 
 // Look-through-Exposure (assets.exposure) -------------------------------
 /** Gewichte jeweils 0..1 (Anteil am Positionswert). */
