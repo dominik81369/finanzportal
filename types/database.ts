@@ -190,7 +190,7 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          parent_id: string | null;
+          parent_category_id: string | null;
           name: string;
           kind: Database['public']['Enums']['category_kind'];
           color: string | null;
@@ -203,7 +203,7 @@ export type Database = {
         Insert: {
           id?: string;
           user_id?: string;
-          parent_id?: string | null;
+          parent_category_id?: string | null;
           name: string;
           kind: Database['public']['Enums']['category_kind'];
           color?: string | null;
@@ -216,7 +216,7 @@ export type Database = {
         Update: {
           id?: string;
           user_id?: string;
-          parent_id?: string | null;
+          parent_category_id?: string | null;
           name?: string;
           kind?: Database['public']['Enums']['category_kind'];
           color?: string | null;
@@ -229,7 +229,7 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: 'categories_parent_fkey';
-            columns: ['parent_id', 'user_id'];
+            columns: ['parent_category_id', 'user_id'];
             isOneToOne: false;
             referencedRelation: 'categories';
             referencedColumns: ['id', 'user_id'];
@@ -254,6 +254,8 @@ export type Database = {
           import_hash: string | null;
           notes: string | null;
           exclude_from_budget: boolean;
+          source: Database['public']['Enums']['transaction_source'];
+          recurring_contract_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -273,6 +275,8 @@ export type Database = {
           import_hash?: string | null;
           notes?: string | null;
           exclude_from_budget?: boolean;
+          source?: Database['public']['Enums']['transaction_source'];
+          recurring_contract_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -292,6 +296,8 @@ export type Database = {
           import_hash?: string | null;
           notes?: string | null;
           exclude_from_budget?: boolean;
+          source?: Database['public']['Enums']['transaction_source'];
+          recurring_contract_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -308,6 +314,13 @@ export type Database = {
             columns: ['category_id', 'user_id'];
             isOneToOne: false;
             referencedRelation: 'categories';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'transactions_recurring_contract_fkey';
+            columns: ['recurring_contract_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'recurring_contracts';
             referencedColumns: ['id', 'user_id'];
           },
         ];
@@ -513,6 +526,321 @@ export type Database = {
           },
         ];
       };
+
+      tags: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          color: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string;
+          name: string;
+          color?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          color?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+
+      transaction_tags: {
+        Row: {
+          transaction_id: string;
+          tag_id: string;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          transaction_id: string;
+          tag_id: string;
+          user_id?: string;
+          created_at?: string;
+        };
+        Update: {
+          transaction_id?: string;
+          tag_id?: string;
+          user_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'transaction_tags_transaction_fkey';
+            columns: ['transaction_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'transactions';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'transaction_tags_tag_fkey';
+            columns: ['tag_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'tags';
+            referencedColumns: ['id', 'user_id'];
+          },
+        ];
+      };
+
+      budgets: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          category_id: string | null;
+          tag_id: string | null;
+          account_id: string | null;
+          period: Database['public']['Enums']['budget_period'];
+          starts_on: string;
+          ends_on: string | null;
+          amount: number;
+          currency: string;
+          alert_threshold_pct: number;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string;
+          name: string;
+          category_id?: string | null;
+          tag_id?: string | null;
+          account_id?: string | null;
+          period?: Database['public']['Enums']['budget_period'];
+          starts_on?: string;
+          ends_on?: string | null;
+          amount: number;
+          currency?: string;
+          alert_threshold_pct?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          category_id?: string | null;
+          tag_id?: string | null;
+          account_id?: string | null;
+          period?: Database['public']['Enums']['budget_period'];
+          starts_on?: string;
+          ends_on?: string | null;
+          amount?: number;
+          currency?: string;
+          alert_threshold_pct?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'budgets_category_fkey';
+            columns: ['category_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'budgets_tag_fkey';
+            columns: ['tag_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'tags';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'budgets_account_fkey';
+            columns: ['account_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'accounts';
+            referencedColumns: ['id', 'user_id'];
+          },
+        ];
+      };
+
+      recurring_contracts: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          counterparty_name: string | null;
+          match_pattern: string | null;
+          account_id: string | null;
+          category_id: string | null;
+          rhythm: Database['public']['Enums']['contract_rhythm'];
+          interval_count: number;
+          expected_amount: number | null;
+          amount_tolerance_pct: number;
+          currency: string;
+          first_booking_date: string | null;
+          last_booking_date: string | null;
+          next_expected_date: string | null;
+          notice_period_days: number | null;
+          term_end_date: string | null;
+          cancellation_deadline: string | null;
+          auto_renewal: boolean;
+          status: Database['public']['Enums']['contract_status'];
+          detection_source: Database['public']['Enums']['contract_detection'];
+          detection_confidence: number | null;
+          cancelled_on: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string;
+          name: string;
+          counterparty_name?: string | null;
+          match_pattern?: string | null;
+          account_id?: string | null;
+          category_id?: string | null;
+          rhythm?: Database['public']['Enums']['contract_rhythm'];
+          interval_count?: number;
+          expected_amount?: number | null;
+          amount_tolerance_pct?: number;
+          currency?: string;
+          first_booking_date?: string | null;
+          last_booking_date?: string | null;
+          next_expected_date?: string | null;
+          notice_period_days?: number | null;
+          term_end_date?: string | null;
+          cancellation_deadline?: never;
+          auto_renewal?: boolean;
+          status?: Database['public']['Enums']['contract_status'];
+          detection_source?: Database['public']['Enums']['contract_detection'];
+          detection_confidence?: number | null;
+          cancelled_on?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          counterparty_name?: string | null;
+          match_pattern?: string | null;
+          account_id?: string | null;
+          category_id?: string | null;
+          rhythm?: Database['public']['Enums']['contract_rhythm'];
+          interval_count?: number;
+          expected_amount?: number | null;
+          amount_tolerance_pct?: number;
+          currency?: string;
+          first_booking_date?: string | null;
+          last_booking_date?: string | null;
+          next_expected_date?: string | null;
+          notice_period_days?: number | null;
+          term_end_date?: string | null;
+          cancellation_deadline?: never;
+          auto_renewal?: boolean;
+          status?: Database['public']['Enums']['contract_status'];
+          detection_source?: Database['public']['Enums']['contract_detection'];
+          detection_confidence?: number | null;
+          cancelled_on?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recurring_contracts_account_fkey';
+            columns: ['account_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'accounts';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'recurring_contracts_category_fkey';
+            columns: ['category_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id', 'user_id'];
+          },
+        ];
+      };
+
+      categorization_rules: {
+        Row: {
+          id: string;
+          user_id: string;
+          category_id: string;
+          name: string | null;
+          match_field: Database['public']['Enums']['rule_match_field'];
+          match_type: Database['public']['Enums']['rule_match_type'];
+          pattern: string;
+          case_sensitive: boolean;
+          account_id: string | null;
+          amount_min: number | null;
+          amount_max: number | null;
+          priority: number;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string;
+          category_id: string;
+          name?: string | null;
+          match_field?: Database['public']['Enums']['rule_match_field'];
+          match_type?: Database['public']['Enums']['rule_match_type'];
+          pattern: string;
+          case_sensitive?: boolean;
+          account_id?: string | null;
+          amount_min?: number | null;
+          amount_max?: number | null;
+          priority?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          category_id?: string;
+          name?: string | null;
+          match_field?: Database['public']['Enums']['rule_match_field'];
+          match_type?: Database['public']['Enums']['rule_match_type'];
+          pattern?: string;
+          case_sensitive?: boolean;
+          account_id?: string | null;
+          amount_min?: number | null;
+          amount_max?: number | null;
+          priority?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'categorization_rules_category_fkey';
+            columns: ['category_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'categorization_rules_account_fkey';
+            columns: ['account_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'accounts';
+            referencedColumns: ['id', 'user_id'];
+          },
+        ];
+      };
     };
 
     Views: {
@@ -544,6 +872,13 @@ export type Database = {
         | 'emerging_markets'
         | 'other';
       real_estate_usage: 'self_occupied' | 'rented' | 'mixed' | 'vacant';
+      transaction_source: 'manual' | 'csv_import' | 'bank_sync';
+      budget_period: 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+      contract_rhythm: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly';
+      contract_status: 'suggested' | 'active' | 'cancellation_pending' | 'cancelled' | 'dismissed';
+      contract_detection: 'manual' | 'auto';
+      rule_match_field: 'counterparty' | 'purpose' | 'counterparty_or_purpose';
+      rule_match_type: 'contains' | 'equals' | 'starts_with' | 'regex';
     };
 
     CompositeTypes: {
@@ -591,6 +926,13 @@ export const Constants = {
         'other',
       ],
       real_estate_usage: ['self_occupied', 'rented', 'mixed', 'vacant'],
+      transaction_source: ['manual', 'csv_import', 'bank_sync'],
+      budget_period: ['weekly', 'monthly', 'quarterly', 'yearly'],
+      contract_rhythm: ['weekly', 'monthly', 'quarterly', 'semiannual', 'yearly'],
+      contract_status: ['suggested', 'active', 'cancellation_pending', 'cancelled', 'dismissed'],
+      contract_detection: ['manual', 'auto'],
+      rule_match_field: ['counterparty', 'purpose', 'counterparty_or_purpose'],
+      rule_match_type: ['contains', 'equals', 'starts_with', 'regex'],
     },
   },
 } as const;
