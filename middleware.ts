@@ -4,11 +4,13 @@
  * 1. Erneuert die Supabase-Session (Token-Refresh) bei jedem Request.
  * 2. Leitet nicht angemeldete Nutzer nach /login um (mit ?next=…).
  * 3. Schützt /advisor/** – nur für profiles.role = 'advisor'.
+ * 4. Erzwingt /set-password für Konten ohne eigenes Passwort
+ *    (profiles.password_set_at IS NULL – per Berater-Einladung angelegt).
  *
  * Authentifizierung ausschließlich über `supabase.auth.getUser()`.
  *
  * Die Middleware ist die ERSTE Schutzschicht, nicht die einzige: Layouts und
- * Server Actions prüfen zusätzlich mit requireUser()/requireAdvisor(), und RLS
+ * Server Actions prüfen zusätzlich mit requireOnboardedUser()/requireAdvisor(), und RLS
  * erzwingt die Datentrennung in der Datenbank.
  *
  * Next.js 16: Datei in `proxy.ts` umbenennen und die Funktion als
@@ -18,9 +20,11 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { getSupabasePublicEnv } from '@/lib/supabase/env';
+import { getAppOrigin } from '@/lib/url';
 import type { Database } from '@/types/database';
 
 const LOGIN_PATH = '/login';
+const SET_PASSWORD_PATH = '/set-password';
 const CLIENT_HOME = '/dashboard';
 const ADVISOR_HOME = '/advisor';
 const ADVISOR_PREFIX = '/advisor';
@@ -28,6 +32,21 @@ const API_PREFIX = '/api';
 
 /** Ohne Anmeldung erreichbar (inkl. Pflichtseiten nach TMG/DSGVO). */
 const PUBLIC_PREFIXES = [
+  '/login',
+  '/signup',
+  '/auth',
+  '/invite',
+  '/impressum',
+  '/datenschutz',
+] as const;
+
+/**
+ * Auch ohne eigenes Passwort erreichbar. /invite gehört dazu, damit
+ * Eingeladene die Einladung annehmen können, bevor sie ein Passwort
+ * festlegen (die Annahme leitet danach selbst zu /set-password).
+ */
+const PASSWORD_SETUP_EXEMPT_PREFIXES = [
+  SET_PASSWORD_PATH,
   '/login',
   '/signup',
   '/auth',
@@ -79,9 +98,10 @@ export async function middleware(request: NextRequest) {
 
   /** Redirect, der aktualisierte Session-Cookies und Cache-Header übernimmt. */
   const redirectTo = (target: string, params?: Record<string, string>) => {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = target;
-    redirectUrl.search = '';
+    // Öffentliche Origin statt request.nextUrl: Unter `next start` enthält
+    // nextUrl den internen Host (localhost:3000) – hinter einem Reverse Proxy
+    // landete der Redirect sonst auf der falschen Domain, ohne Session-Cookies.
+    const redirectUrl = new URL(target, getAppOrigin(request.headers, request.nextUrl));
     if (params) {
       for (const [key, value] of Object.entries(params)) {
         redirectUrl.searchParams.set(key, value);
@@ -129,21 +149,36 @@ export async function middleware(request: NextRequest) {
     return redirectTo(LOGIN_PATH, { next: `${pathname}${search}` });
   }
 
-  // --- Angemeldet: Rolle nur laden, wo sie gebraucht wird ----------------
-  if (!isAdvisorRoute && !isAuthPage) {
+  // --- Angemeldet ---------------------------------------------------------
+  const isPasswordSetupExempt = PASSWORD_SETUP_EXEMPT_PREFIXES.some((prefix) =>
+    matchesPrefix(pathname, prefix),
+  );
+  if (isPasswordSetupExempt && !isAuthPage) {
     return response;
   }
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, password_set_at')
     .eq('user_id', user.id)
     .maybeSingle();
 
+  // Nur bei eindeutigem Befund umleiten. Ist das Profil nicht lesbar, greifen
+  // requireOnboardedUser()/requireAdvisor() als zweite Linie.
+  const needsPassword = profile !== null && profile.password_set_at === null;
   const isAdvisor = profile?.role === 'advisor';
 
   if (isAuthPage) {
+    if (needsPassword) {
+      return redirectTo(SET_PASSWORD_PATH);
+    }
     return redirectTo(isAdvisor ? ADVISOR_HOME : CLIENT_HOME);
+  }
+
+  if (needsPassword) {
+    return isApiRoute
+      ? apiError(403)
+      : redirectTo(SET_PASSWORD_PATH, { next: `${pathname}${search}` });
   }
 
   if (isAdvisorRoute && !isAdvisor) {

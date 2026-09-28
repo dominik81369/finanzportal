@@ -18,3 +18,21 @@ jobs:
         run: supabase db reset
       - name: Run tests
         run: supabase test db
+
+  # Eigener Job: läuft parallel zu den Datenbanktests und braucht kein Docker.
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      # Erzeugt next-env.d.ts und .next/types (beide gitignored). Damit prüft tsc
+      # auch die Signaturen von Route Handlern und Layouts wie `next build`.
+      - name: Generate Next.js route types
+        run: npx next typegen
+      - name: Typecheck
+        run: npm run typecheck

@@ -159,7 +159,7 @@ site_url = "http://127.0.0.1:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+additional_redirect_urls = ["https://127.0.0.1:3000", "http://localhost:3000/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -242,10 +242,20 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Berater-Einladungen (inviteUserByEmail) und Anmeldelinks für bestehende Konten
+# werden serverseitig ausgelöst. Im Browser des Empfängers existiert daher kein
+# PKCE-code_verifier; die Links werden stattdessen in app/auth/callback per
+# token_hash + verifyOtp() eingelöst. Die Templates erwarten, dass {{ .RedirectTo }}
+# auf /auth/callback?next=… zeigt (gesetzt in lib/actions/invite-client.ts).
+# Gehostetes Projekt: denselben Inhalt unter Authentication → Email Templates
+# ("Invite user" bzw. "Magic Link") hinterlegen.
+[auth.email.template.invite]
+subject = "Einladung zum Finanzportal"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.magic_link]
+subject = "Ihr Anmeldelink zum Finanzportal"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
