@@ -187,7 +187,30 @@
       "deleted": "The transaction has been deleted.",
       "edit": "Edit",
       "editLabel": "Edit booking \"{counterparty}\" of {date}",
-      "actions": "Actions"
+      "actions": "Actions",
+      "noMatches": "No transactions for this search or these filters.",
+      "resultCount": "{count, plural, one {# transaction found} other {# transactions found}}",
+      "resultCountLimited": "More than {limit} matches – showing the latest {limit}. Please narrow down your search."
+    },
+    "filters": {
+      "heading": "Search and filter transactions",
+      "search": "Search",
+      "searchPlaceholder": "Payee or reference",
+      "type": "Type",
+      "allTypes": "All",
+      "expense": "Expenses",
+      "income": "Income",
+      "account": "Account",
+      "allAccounts": "All accounts",
+      "category": "Category",
+      "allCategories": "All categories",
+      "uncategorized": "Uncategorised",
+      "tag": "Tag",
+      "allTags": "All tags",
+      "from": "From",
+      "to": "To",
+      "apply": "Filter",
+      "reset": "Reset"
     },
     "form": {
       "metaTitle": "Add transaction",

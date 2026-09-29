@@ -2,7 +2,8 @@
  * app/[locale]/dashboard/transactions/page.tsx
  *
  * Liste der letzten Buchungen des angemeldeten Nutzers mit Kategorie, Tags
- * und Konto. Erfassung unter ./new.
+ * und Konto, mit Suche und Filtern (lib/transaction-filters.ts, Werte als
+ * Query-Parameter). Erfassung unter ./new.
  *
  * Die Abfrage filtert ausdrücklich auf user_id = eigener Nutzer: RLS lässt
  * Berater zusätzlich die Buchungen ihrer Mandanten lesen.
@@ -13,16 +14,22 @@ import { getFormatter, getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { toAppLocale } from '@/i18n/routing';
 import { createClient, requireOnboardedUser } from '@/lib/supabase/server';
+import {
+  UNCATEGORIZED,
+  hasActiveFilters,
+  ilikeContainsPattern,
+  parseTransactionFilters,
+} from '@/lib/transaction-filters';
+
+import { loadTransactionFormOptions } from './form-options';
+import { TransactionFiltersForm } from './transaction-filters-form';
 
 const LIST_LIMIT = 100;
 
+
 type TransactionsPageProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{
-    saved?: string | string[];
-    updated?: string | string[];
-    deleted?: string | string[];
-  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export async function generateMetadata({
@@ -50,19 +57,59 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
   const format = await getFormatter();
   const collator = new Intl.Collator(await getLocale());
 
+  const filters = parseTransactionFilters(query);
+  const filtered = hasActiveFilters(filters);
+
   const supabase = await createClient();
-  const { data: transactions, error } = await supabase
+  let request = supabase
     .from('transactions')
+    // tag_filter: eigener Alias nur für den Tag-Filter, damit transaction_tags
+    // weiterhin ALLE Tags der Buchung liefert.
     .select(
       `id, source, booking_date, amount, currency, counterparty_name, purpose,
        account:accounts!transactions_account_fkey ( name ),
        category:categories!transactions_category_fkey ( name, color ),
-       transaction_tags ( tag:tags!transaction_tags_tag_fkey ( id, name ) )`,
+       transaction_tags ( tag:tags!transaction_tags_tag_fkey ( id, name ) ),
+       tag_filter:transaction_tags ( tag_id )`,
     )
-    .eq('user_id', user.id)
-    .order('booking_date', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(LIST_LIMIT);
+    .eq('user_id', user.id);
+
+  if (filters.q) {
+    const pattern = ilikeContainsPattern(filters.q);
+    request = request.or(`counterparty_name.ilike.${pattern},purpose.ilike.${pattern}`);
+  }
+  if (filters.type === 'expense') {
+    request = request.lt('amount', 0);
+  } else if (filters.type === 'income') {
+    request = request.gt('amount', 0);
+  }
+  if (filters.accountId) {
+    request = request.eq('account_id', filters.accountId);
+  }
+  if (filters.categoryId === UNCATEGORIZED) {
+    request = request.is('category_id', null);
+  } else if (filters.categoryId) {
+    request = request.eq('category_id', filters.categoryId);
+  }
+  if (filters.tagId) {
+    // Eingebettete Zeilen filtern und Buchungen ohne Treffer ausschließen
+    // (PostgREST: Null-Filter auf der Einbettung wirkt wie ein Inner Join).
+    request = request.eq('tag_filter.tag_id', filters.tagId).not('tag_filter', 'is', null);
+  }
+  if (filters.from) {
+    request = request.gte('booking_date', filters.from);
+  }
+  if (filters.to) {
+    request = request.lte('booking_date', filters.to);
+  }
+
+  const [{ data: transactions, error }, options] = await Promise.all([
+    request
+      .order('booking_date', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(LIST_LIMIT),
+    loadTransactionFormOptions(user.id),
+  ]);
 
   if (error) {
     console.error('[transactions] Laden fehlgeschlagen', { code: error.code });
@@ -84,12 +131,25 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
         </p>
       ) : null}
 
+      {/* Ohne Buchungen und ohne Filter gibt es nichts zu filtern. */}
+      {options && (filtered || (transactions && transactions.length > 0)) ? (
+        <TransactionFiltersForm filters={filters} active={filtered} {...options} />
+      ) : null}
+
+      {filtered && transactions ? (
+        <p role="status" className="result-count">
+          {transactions.length >= LIST_LIMIT
+            ? t('resultCountLimited', { limit: LIST_LIMIT })
+            : t('resultCount', { count: transactions.length })}
+        </p>
+      ) : null}
+
       {error ? (
         <p role="alert" className="form-error">
           {t('loadError')}
         </p>
       ) : !transactions || transactions.length === 0 ? (
-        <p className="empty-state">{t('empty')}</p>
+        <p className="empty-state">{filtered ? t('noMatches') : t('empty')}</p>
       ) : (
         <div className="table-scroll">
           <table className="transactions-table">

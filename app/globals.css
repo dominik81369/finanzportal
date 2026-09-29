@@ -556,6 +556,61 @@
   white-space: nowrap;
 }
 
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: end;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.filter-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.filter-field input,
+.filter-field select {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+  background: var(--background);
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+}
+
+.filter-search {
+  grid-column: 1 / -1;
+}
+
+.filter-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-actions .button {
+  margin-top: 0;
+}
+
+.result-count {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--muted-foreground);
+}
+
 .row-actions {
   text-align: right;
   white-space: nowrap;

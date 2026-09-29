@@ -187,7 +187,30 @@
       "deleted": "Die Transaktion wurde gelöscht.",
       "edit": "Bearbeiten",
       "editLabel": "Buchung „{counterparty}“ vom {date} bearbeiten",
-      "actions": "Aktionen"
+      "actions": "Aktionen",
+      "noMatches": "Keine Transaktionen für diese Suche bzw. Filter.",
+      "resultCount": "{count, plural, one {# Transaktion gefunden} other {# Transaktionen gefunden}}",
+      "resultCountLimited": "Mehr als {limit} Treffer – angezeigt werden die neuesten {limit}. Grenzen Sie die Suche weiter ein."
+    },
+    "filters": {
+      "heading": "Transaktionen durchsuchen und filtern",
+      "search": "Suche",
+      "searchPlaceholder": "Empfänger oder Verwendungszweck",
+      "type": "Art",
+      "allTypes": "Alle",
+      "expense": "Ausgaben",
+      "income": "Einnahmen",
+      "account": "Konto",
+      "allAccounts": "Alle Konten",
+      "category": "Kategorie",
+      "allCategories": "Alle Kategorien",
+      "uncategorized": "Ohne Kategorie",
+      "tag": "Tag",
+      "allTags": "Alle Tags",
+      "from": "Von",
+      "to": "Bis",
+      "apply": "Filtern",
+      "reset": "Zurücksetzen"
     },
     "form": {
       "metaTitle": "Transaktion erfassen",
