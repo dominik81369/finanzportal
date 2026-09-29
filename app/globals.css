@@ -178,15 +178,76 @@
   margin-top: 0.5rem;
 }
 
-.form input {
+.form input:not([type='radio'], [type='checkbox']),
+.form select,
+.form textarea {
   padding: 0.6rem 0.75rem;
   font: inherit;
-  border: 1px solid var(--border);
+  background: var(--background);
+  border: 1px solid var(--input);
   border-radius: var(--radius-md);
 }
 
-.form input[aria-invalid='true'] {
+.form input[aria-invalid='true'],
+.form select[aria-invalid='true'],
+.form textarea[aria-invalid='true'] {
   border-color: var(--destructive);
+}
+
+.form fieldset {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  border: none;
+}
+
+.form legend {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.choice-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Radio/Checkbox als Chip; Fokus und Auswahl über :has() sichtbar. */
+.form .choice,
+.form .tag-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.4rem 0.8rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.form .choice:has(input:checked),
+.form .tag-option:has(input:checked) {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 8%, transparent);
+}
+
+.form .choice:has(input:focus-visible),
+.form .tag-option:has(input:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.tag-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tag-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .form button,
@@ -401,6 +462,134 @@
 .placeholder-box ul {
   margin: 0;
   padding-left: 1.25rem;
+}
+
+/* ---------------------------------------------------------------------
+   Transaktionen
+   --------------------------------------------------------------------- */
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.page-header .button {
+  margin-top: 0;
+}
+
+.page-narrow {
+  max-width: 36rem;
+}
+
+.back-link {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--muted-foreground);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.muted {
+  color: var(--muted-foreground);
+}
+
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.transactions-table caption {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.transactions-table th,
+.transactions-table td {
+  padding: 0.6rem 1rem;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid var(--border);
+}
+
+.transactions-table th {
+  font-weight: 600;
+  background: var(--muted);
+}
+
+.transactions-table .amount {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount-negative {
+  color: var(--foreground);
+}
+
+.amount-positive {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.cell-note {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.category-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 9999px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-list li {
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8rem;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border-radius: 9999px;
 }
 
 @media (max-width: 48rem) {
