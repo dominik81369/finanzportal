@@ -119,6 +119,7 @@
   "Dashboard": {
     "skipLink": "Zum Inhalt springen",
     "signOut": "Abmelden",
+    "toAdvisorArea": "Beraterbereich",
     "navLabel": "Bereiche",
     "placeholderLabel": "In Vorbereitung",
     "nav": {
@@ -126,7 +127,8 @@
       "transactions": "Transaktionen",
       "budgets": "Budgets",
       "contracts": "Verträge",
-      "netWorth": "Net Worth"
+      "netWorth": "Net Worth",
+      "advisors": "Berater"
     },
     "overview": {
       "title": "Übersicht",
@@ -165,6 +167,21 @@
         "allocation": "Vermögen nach Anlageklasse und Region",
         "history": "Entwicklung über die Zeit"
       }
+    },
+    "advisors": {
+      "title": "Berater",
+      "description": "Berater, denen Sie Lesezugriff auf Ihre Finanzdaten gegeben haben. Sie können den Zugriff jederzeit widerrufen.",
+      "empty": "Kein Berater hat derzeit Zugriff auf Ihre Finanzdaten.",
+      "loadError": "Die Verbindungen konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+      "noName": "Berater (ohne Namen im Profil)",
+      "access": "Lesezugriff auf Konten, Umsätze, Kategorien, Depots und Immobilien",
+      "since": "Verbunden seit {date}",
+      "revoke": "Zugriff widerrufen",
+      "revokeLabel": "Zugriff von {name} widerrufen",
+      "revokeQuestion": "Zugriff wirklich widerrufen? Der Berater sieht Ihre Finanzdaten danach sofort nicht mehr. Für eine erneute Verbindung ist eine neue Einladung nötig.",
+      "revokeConfirm": "Ja, Zugriff widerrufen",
+      "revoking": "Wird widerrufen …",
+      "revoked": "Der Zugriff wurde widerrufen."
     }
   },
   "Transactions": {
@@ -298,5 +315,54 @@
     "savings_investments": "Sparen & Investieren",
     "loan_repayment": "Kredittilgung",
     "transfer": "Umbuchung"
+  },
+  "Advisor": {
+    "metaTitle": "Beraterbereich",
+    "heading": "Beraterbereich",
+    "intro": "Laden Sie Mandanten ein und verwalten Sie, wer Ihnen Lesezugriff auf seine Finanzdaten gegeben hat.",
+    "toOwnFinances": "Meine Finanzen",
+    "loadError": "Die Mandanten und Einladungen konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+    "cancel": "Abbrechen",
+    "invite": {
+      "heading": "Mandant einladen",
+      "email": "E-Mail-Adresse des Mandanten",
+      "hint": "Der Mandant erhält einen Link, der {days} Tage gültig ist. Erst mit seiner ausdrücklichen Zustimmung erhalten Sie Lesezugriff.",
+      "submit": "Einladung senden",
+      "submitting": "Wird gesendet …"
+    },
+    "clients": {
+      "heading": "Verbundene Mandanten",
+      "empty": "Noch keine Mandanten verbunden.",
+      "noName": "Mandant (ohne Namen im Profil)",
+      "since": "Verbunden seit {date}",
+      "end": "Zugriff beenden",
+      "endLabel": "Zugriff auf {name} beenden",
+      "endQuestion": "Zugriff auf diesen Mandanten wirklich beenden? Sie sehen seine Daten danach nicht mehr; für eine neue Verbindung ist eine neue Einladung nötig.",
+      "endConfirm": "Ja, Zugriff beenden",
+      "ending": "Wird beendet …",
+      "ended": "Der Zugriff auf den Mandanten wurde beendet."
+    },
+    "pending": {
+      "heading": "Offene Einladungen",
+      "empty": "Keine offenen Einladungen.",
+      "invitedOn": "Eingeladen am {date}",
+      "validUntil": "gültig bis {date}",
+      "expired": "abgelaufen",
+      "resend": "Erneut senden",
+      "resendLabel": "Einladung an {email} erneut senden",
+      "resending": "Wird gesendet …",
+      "withdraw": "Zurückziehen",
+      "withdrawLabel": "Einladung an {email} zurückziehen",
+      "withdrawQuestion": "Einladung wirklich zurückziehen? Der Link in der E-Mail wird sofort ungültig.",
+      "withdrawConfirm": "Ja, zurückziehen",
+      "withdrawing": "Wird zurückgezogen …",
+      "withdrawn": "Die Einladung wurde zurückgezogen."
+    }
+  },
+  "AdvisorLinks": {
+    "errors": {
+      "notFound": "Diese Verbindung gibt es nicht (mehr) oder sie wurde bereits beendet. Bitte laden Sie die Seite neu.",
+      "generic": "Das hat leider nicht geklappt. Bitte versuchen Sie es erneut."
+    }
   }
 }

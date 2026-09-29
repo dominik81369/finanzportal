@@ -14,9 +14,9 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 
 import { toAppLocale } from '@/i18n/routing';
-import { signOut } from '@/lib/actions/auth';
-import { requireOnboardedUser } from '@/lib/supabase/server';
+import { getCurrentUserRole, requireOnboardedUser } from '@/lib/supabase/server';
 
+import { AppHeader } from '../app-header';
 import { DashboardNav } from './dashboard-nav';
 
 type DashboardLayoutProps = {
@@ -42,7 +42,8 @@ export async function generateMetadata({
 export default async function DashboardLayout({ children }: DashboardLayoutProps) {
   const user = await requireOnboardedUser('/dashboard');
   const t = await getTranslations('Dashboard');
-  const tMeta = await getTranslations('Metadata');
+  // Berater nutzen das Dashboard für ihre eigenen Finanzen – mit Rückweg.
+  const isAdvisor = (await getCurrentUserRole()) === 'advisor';
 
   return (
     <div className="dashboard">
@@ -50,17 +51,10 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
         {t('skipLink')}
       </a>
 
-      <header className="dashboard-header">
-        <span className="dashboard-brand">{tMeta('appName')}</span>
-        <div className="dashboard-account">
-          <span className="dashboard-user">{user.email}</span>
-          <form action={signOut}>
-            <button type="submit" className="link-button">
-              {t('signOut')}
-            </button>
-          </form>
-        </div>
-      </header>
+      <AppHeader
+        email={user.email}
+        switchLink={isAdvisor ? { href: '/advisor', label: t('toAdvisorArea') } : undefined}
+      />
 
       <div className="dashboard-body">
         <DashboardNav />

@@ -194,6 +194,6 @@ export async function inviteClient(
     return { status: 'error', message: sendErrorMessage(sendError, t), values };
   }
 
-  revalidatePath('/advisor', 'layout');
+  revalidatePath('/[locale]/advisor', 'page');
   return { status: 'success', message: t('success', { email, days: INVITE_TTL_DAYS }) };
 }
