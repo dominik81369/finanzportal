@@ -197,6 +197,7 @@ export type Database = {
           icon: string | null;
           is_default: boolean;
           sort_order: number;
+          default_key: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -210,6 +211,7 @@ export type Database = {
           icon?: string | null;
           is_default?: boolean;
           sort_order?: number;
+          default_key?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -223,6 +225,7 @@ export type Database = {
           icon?: string | null;
           is_default?: boolean;
           sort_order?: number;
+          default_key?: string | null;
           created_at?: string;
           updated_at?: string;
         };

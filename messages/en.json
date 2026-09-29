@@ -272,5 +272,25 @@
       "transactionNotFound": "This transaction does not exist (any more).",
       "transactionNotEditable": "This transaction was imported and cannot be edited or deleted."
     }
+  },
+  "DefaultCategories": {
+    "salary": "Salary & wages",
+    "investment_income": "Investment income",
+    "rental_income": "Rental income",
+    "other_income": "Other income",
+    "housing": "Housing",
+    "groceries": "Groceries",
+    "mobility": "Transport",
+    "insurance": "Insurance",
+    "health": "Health",
+    "leisure_travel": "Leisure & travel",
+    "subscriptions_media": "Subscriptions & media",
+    "shopping": "Shopping",
+    "education": "Education",
+    "taxes": "Taxes & fees",
+    "other_expenses": "Other expenses",
+    "savings_investments": "Saving & investing",
+    "loan_repayment": "Loan repayment",
+    "transfer": "Transfer"
   }
 }
