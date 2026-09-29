@@ -192,7 +192,8 @@
       "expense": "Ausgabe",
       "income": "Einnahme",
       "amount": "Betrag",
-      "amountHint": "In {currency}, z. B. 12,50",
+      "amountHint": "z. B. 12,50",
+      "currency": "Währung",
       "date": "Datum",
       "counterparty": "Empfänger / Zahler",
       "purpose": "Verwendungszweck (optional)",
@@ -213,6 +214,7 @@
     },
     "errors": {
       "amountInvalid": "Bitte geben Sie einen Betrag größer als 0 mit höchstens zwei Nachkommastellen ein, z. B. 12,50.",
+      "currencyInvalid": "Bitte wählen Sie eine der angebotenen Währungen.",
       "dateInvalid": "Bitte geben Sie ein gültiges Datum ein.",
       "typeInvalid": "Bitte wählen Sie Ausgabe oder Einnahme.",
       "counterpartyRequired": "Bitte geben Sie einen Empfänger bzw. Zahler an.",

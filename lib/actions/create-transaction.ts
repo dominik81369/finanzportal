@@ -7,7 +7,8 @@
  *
  * Ablauf
  *   1. requireOnboardedUser() – angemeldet und mit eigenem Passwort.
- *   2. FormData prüfen (Beträge in der Schreibweise der Seitensprache).
+ *   2. FormData prüfen (Beträge in der Schreibweise der Seitensprache,
+ *      Währung aus lib/currency.ts; Originalwährung, keine Umrechnung).
  *   3. RPC create_manual_transaction(): legt Buchung, neue Tags und
  *      Zuordnungen in EINER Datenbanktransaktion an (SECURITY INVOKER, RLS
  *      aktiv) und prüft Konto, Kategorie und Tags auf Eigentum sowie die
@@ -21,6 +22,7 @@ import { redirect } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 
 import { localizedPath } from '@/i18n/paths';
+import { isSupportedCurrency } from '@/lib/currency';
 import { createClient, requireOnboardedUser } from '@/lib/supabase/server';
 import {
   COUNTERPARTY_MAX_LENGTH,
@@ -40,6 +42,7 @@ export type TransactionType = 'expense' | 'income';
 export type TransactionField =
   | 'type'
   | 'amount'
+  | 'currency'
   | 'bookingDate'
   | 'counterparty'
   | 'purpose'
@@ -55,6 +58,7 @@ export type CreateTransactionState = {
   values?: {
     type: TransactionType;
     amount: string;
+    currency: string;
     bookingDate: string;
     counterparty: string;
     purpose: string;
@@ -75,6 +79,8 @@ function rpcError(
   switch (error.message) {
     case 'invalid_amount':
       return { fieldErrors: { amount: t('amountInvalid') } };
+    case 'invalid_currency':
+      return { fieldErrors: { currency: t('currencyInvalid') } };
     case 'invalid_booking_date':
       return { fieldErrors: { bookingDate: t('dateInvalid') } };
     case 'account_not_found':
@@ -110,6 +116,7 @@ export async function createTransaction(
   const values: NonNullable<CreateTransactionState['values']> = {
     type: rawType === 'income' ? 'income' : 'expense',
     amount: readTrimmed(formData, 'amount'),
+    currency: readTrimmed(formData, 'currency'),
     bookingDate: readTrimmed(formData, 'booking_date'),
     counterparty: readTrimmed(formData, 'counterparty'),
     purpose: readTrimmed(formData, 'purpose'),
@@ -127,6 +134,10 @@ export async function createTransaction(
   const amount = parseAmountInput(values.amount, locale);
   if (amount === null) {
     fieldErrors.amount = t('amountInvalid');
+  }
+  // Leer → Kontowährung (Standard der RPC).
+  if (values.currency && !isSupportedCurrency(values.currency)) {
+    fieldErrors.currency = t('currencyInvalid');
   }
   const bookingDate = parseIsoDate(values.bookingDate);
   if (!bookingDate) {
@@ -178,6 +189,7 @@ export async function createTransaction(
     p_category_id: values.categoryId || undefined,
     p_tag_ids: tagIds,
     p_new_tag_names: newTagNames,
+    p_currency: values.currency || undefined,
   });
 
   if (error) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { startTransition, useActionState, useState, type FormEvent, type ReactNode } from 'react';
 
 import {
@@ -9,6 +9,7 @@ import {
   type TransactionField,
   type TransactionType,
 } from '@/lib/actions/create-transaction';
+import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import { COUNTERPARTY_MAX_LENGTH, PURPOSE_MAX_LENGTH } from '@/lib/transactions';
 import type { Account, Category, Tag } from '@/types/domain';
 
@@ -32,16 +33,20 @@ const KINDS_FOR_TYPE: Record<TransactionType, readonly Category['kind'][]> = {
 
 export function TransactionForm({ accounts, categories, tags, today }: TransactionFormProps) {
   const t = useTranslations('Transactions.form');
+  const locale = useLocale();
   const [state, formAction, isPending] = useActionState(createTransaction, initialState);
   const values = state.values;
   const fieldErrors = state.fieldErrors ?? {};
 
-  // Kontrolliert, weil Art und Konto die Kategorieauswahl bzw. den
-  // Währungshinweis steuern.
+  // Kontrolliert, weil Art und Konto die Kategorie- bzw. Währungsauswahl
+  // steuern.
   const [type, setType] = useState<TransactionType>(values?.type ?? 'expense');
   const [accountId, setAccountId] = useState(values?.accountId ?? accounts[0]?.id ?? '');
   const [categoryId, setCategoryId] = useState(values?.categoryId ?? '');
-  const currency = accounts.find((a) => a.id === accountId)?.currency ?? 'EUR';
+  const accountCurrency = (id: string) => accounts.find((a) => a.id === id)?.currency ?? 'EUR';
+  // Originalwährung der Buchung; Vorschlag ist die Kontowährung.
+  const [currency, setCurrency] = useState(values?.currency || accountCurrency(accountId));
+  const currencyNames = new Intl.DisplayNames([locale], { type: 'currency' });
 
   const errorProps = (field: TransactionField, id: string, hintId?: string) => {
     const describedBy = [fieldErrors[field] ? `${id}-error` : null, hintId].filter(Boolean).join(' ');
@@ -118,9 +123,25 @@ export function TransactionForm({ accounts, categories, tags, today }: Transacti
         {...errorProps('amount', 'amount', 'amount-hint')}
       />
       <p id="amount-hint" className="hint">
-        {t('amountHint', { currency })}
+        {t('amountHint')}
       </p>
       {fieldError('amount', 'amount')}
+
+      <label htmlFor="currency">{t('currency')}</label>
+      <select
+        id="currency"
+        name="currency"
+        value={currency}
+        onChange={(event) => setCurrency(event.target.value)}
+        {...errorProps('currency', 'currency')}
+      >
+        {SUPPORTED_CURRENCIES.map((code) => (
+          <option key={code} value={code}>
+            {code} – {currencyNames.of(code)}
+          </option>
+        ))}
+      </select>
+      {fieldError('currency', 'currency')}
 
       <label htmlFor="booking_date">{t('date')}</label>
       <input
@@ -163,7 +184,10 @@ export function TransactionForm({ accounts, categories, tags, today }: Transacti
             id="account_id"
             name="account_id"
             value={accountId}
-            onChange={(event) => setAccountId(event.target.value)}
+            onChange={(event) => {
+              setAccountId(event.target.value);
+              setCurrency(accountCurrency(event.target.value));
+            }}
             {...errorProps('account', 'account_id')}
           >
             {accounts.map((account) => (
