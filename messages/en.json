@@ -145,7 +145,7 @@
     },
     "budgets": {
       "title": "Budgets",
-      "description": "Spending limits per category, tag or account.",
+      "description": "Your spending by the 50/30/20 rule: needs, wants and savings relative to your income.",
       "planned": {
         "periods": "Budgets per week, month, quarter or year",
         "progress": "Progress and alert from a freely selectable threshold"
@@ -363,6 +363,56 @@
     "errors": {
       "notFound": "This connection does not exist (any more) or has already been ended. Please reload the page.",
       "generic": "Something went wrong. Please try again."
+    }
+  },
+  "Budgets": {
+    "period": {
+      "label": "Period",
+      "from": "From (month)",
+      "to": "To (month)",
+      "apply": "Show",
+      "presets": {
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "last3Months": "Last 3 months",
+        "thisYear": "This year"
+      },
+      "single": "Period: {month}",
+      "range": "Period: {from} to {to} ({count} months)"
+    },
+    "loadError": "The analysis could not be loaded right now. Please reload the page.",
+    "empty": "No counted transactions in this period.",
+    "rules": "All transactions count – entered manually, imported or synced – except transfers, categories without a group and transactions excluded from budgets. Refunds reduce the spending of their group. Amounts in different currencies are not converted but shown separately. Tip: if you also track your savings account, categorize the incoming payment there as “Transfer” – otherwise deposit and withdrawal cancel each other out.",
+    "currencyHeading": "{currency}",
+    "income": "Income",
+    "noIncome": "There is no income in this currency for this period, so shares cannot be calculated.",
+    "caption": "Actual vs. 50/30/20 target in {currency}",
+    "monthsCaption": "Monthly breakdown in {currency}",
+    "columns": {
+      "group": "Group",
+      "actual": "Actual",
+      "share": "Share of income",
+      "target": "Target",
+      "targetAmount": "Target amount",
+      "month": "Month"
+    },
+    "groups": {
+      "needs": "Needs",
+      "wants": "Wants",
+      "savings": "Savings"
+    },
+    "unassigned": "Uncategorized",
+    "remaining": "Remaining",
+    "assignment": {
+      "heading": "Category assignment",
+      "intro": "Choose which group each expense and transfer category belongs to. “Not counted” suits transfers between your own accounts. Income categories form the basis and have no group.",
+      "excluded": "Not counted",
+      "save": "Save assignment",
+      "saving": "Saving …",
+      "saved": "{count, plural, =0 {No changes.} one {# category changed.} other {# categories changed.}}",
+      "invalid": "The assignment is invalid. Please reload the page.",
+      "generic": "The assignment could not be saved right now. Please try again.",
+      "loadError": "The categories could not be loaded right now. Please reload the page."
     }
   }
 }

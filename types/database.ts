@@ -198,6 +198,7 @@ export type Database = {
           is_default: boolean;
           sort_order: number;
           default_key: string | null;
+          budget_group: Database['public']['Enums']['budget_group'] | null;
           created_at: string;
           updated_at: string;
         };
@@ -212,6 +213,7 @@ export type Database = {
           is_default?: boolean;
           sort_order?: number;
           default_key?: string | null;
+          budget_group?: Database['public']['Enums']['budget_group'] | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -226,6 +228,7 @@ export type Database = {
           is_default?: boolean;
           sort_order?: number;
           default_key?: string | null;
+          budget_group?: Database['public']['Enums']['budget_group'] | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -888,6 +891,22 @@ export type Database = {
         Args: { p_id: string };
         Returns: undefined;
       };
+      budget_rule_summary: {
+        Args: { p_user_id: string; p_from: string; p_to: string };
+        Returns: {
+          month: string;
+          currency: string;
+          income: number;
+          needs: number;
+          wants: number;
+          savings: number;
+          unassigned: number;
+        }[];
+      };
+      set_category_budget_groups: {
+        Args: { p_assignments: Json };
+        Returns: number;
+      };
     };
 
     Enums: {
@@ -910,6 +929,7 @@ export type Database = {
       real_estate_usage: 'self_occupied' | 'rented' | 'mixed' | 'vacant';
       transaction_source: 'manual' | 'csv_import' | 'bank_sync';
       budget_period: 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+      budget_group: 'needs' | 'wants' | 'savings';
       contract_rhythm: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly';
       contract_status: 'suggested' | 'active' | 'cancellation_pending' | 'cancelled' | 'dismissed';
       contract_detection: 'manual' | 'auto';
@@ -964,6 +984,7 @@ export const Constants = {
       real_estate_usage: ['self_occupied', 'rented', 'mixed', 'vacant'],
       transaction_source: ['manual', 'csv_import', 'bank_sync'],
       budget_period: ['weekly', 'monthly', 'quarterly', 'yearly'],
+      budget_group: ['needs', 'wants', 'savings'],
       contract_rhythm: ['weekly', 'monthly', 'quarterly', 'semiannual', 'yearly'],
       contract_status: ['suggested', 'active', 'cancellation_pending', 'cancelled', 'dismissed'],
       contract_detection: ['manual', 'auto'],

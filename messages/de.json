@@ -145,7 +145,7 @@
     },
     "budgets": {
       "title": "Budgets",
-      "description": "Ausgabengrenzen je Kategorie, Tag oder Konto.",
+      "description": "Ihre Ausgaben nach der 50/30/20-Regel: Bedarf, Wünsche und Sparen im Verhältnis zum Einkommen.",
       "planned": {
         "periods": "Budgets für Woche, Monat, Quartal oder Jahr",
         "progress": "Fortschritt und Warnung ab einer frei wählbaren Schwelle"
@@ -363,6 +363,56 @@
     "errors": {
       "notFound": "Diese Verbindung gibt es nicht (mehr) oder sie wurde bereits beendet. Bitte laden Sie die Seite neu.",
       "generic": "Das hat leider nicht geklappt. Bitte versuchen Sie es erneut."
+    }
+  },
+  "Budgets": {
+    "period": {
+      "label": "Zeitraum",
+      "from": "Von (Monat)",
+      "to": "Bis (Monat)",
+      "apply": "Anzeigen",
+      "presets": {
+        "thisMonth": "Dieser Monat",
+        "lastMonth": "Letzter Monat",
+        "last3Months": "Letzte 3 Monate",
+        "thisYear": "Dieses Jahr"
+      },
+      "single": "Zeitraum: {month}",
+      "range": "Zeitraum: {from} bis {to} ({count} Monate)"
+    },
+    "loadError": "Die Auswertung konnte gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+    "empty": "Keine gezählten Buchungen in diesem Zeitraum.",
+    "rules": "Gezählt werden alle Buchungen – manuell erfasst, importiert oder synchronisiert – außer Umbuchungen, Kategorien ohne Gruppe und vom Budget ausgenommenen Buchungen. Erstattungen mindern die Ausgaben ihrer Gruppe. Beträge in unterschiedlichen Währungen werden nicht umgerechnet, sondern getrennt ausgewiesen. Tipp: Erfassen Sie auch Ihr Sparkonto, kategorisieren Sie die Gutschrift dort als „Umbuchung“ – sonst heben sich Ein- und Auszahlung auf.",
+    "currencyHeading": "{currency}",
+    "income": "Einkommen",
+    "noIncome": "In diesem Zeitraum gibt es kein Einkommen in dieser Währung – Anteile lassen sich daher nicht berechnen.",
+    "caption": "Ist und Ziel nach 50/30/20 in {currency}",
+    "monthsCaption": "Verlauf je Monat in {currency}",
+    "columns": {
+      "group": "Gruppe",
+      "actual": "Ist",
+      "share": "Anteil am Einkommen",
+      "target": "Ziel",
+      "targetAmount": "Zielbetrag",
+      "month": "Monat"
+    },
+    "groups": {
+      "needs": "Bedarf (Needs)",
+      "wants": "Wünsche (Wants)",
+      "savings": "Sparen (Savings)"
+    },
+    "unassigned": "Ohne Kategorie",
+    "remaining": "Verbleibend",
+    "assignment": {
+      "heading": "Zuordnung der Kategorien",
+      "intro": "Legen Sie fest, welcher Gruppe jede Ausgaben- und Transferkategorie angehört. „Nicht gezählt“ eignet sich für Umbuchungen zwischen eigenen Konten. Einkommenskategorien bilden die Basis und haben keine Gruppe.",
+      "excluded": "Nicht gezählt",
+      "save": "Zuordnung speichern",
+      "saving": "Wird gespeichert …",
+      "saved": "{count, plural, =0 {Keine Änderungen.} one {# Kategorie geändert.} other {# Kategorien geändert.}}",
+      "invalid": "Die Zuordnung ist ungültig. Bitte laden Sie die Seite neu.",
+      "generic": "Die Zuordnung konnte gerade nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      "loadError": "Die Kategorien konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu."
     }
   }
 }

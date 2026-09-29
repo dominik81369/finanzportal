@@ -34,6 +34,7 @@ export type MarketRegion = Enums<'market_region'>;
 export type AssetClass = Enums<'asset_class'>;
 export type TransactionSource = Enums<'transaction_source'>;
 export type BudgetPeriod = Enums<'budget_period'>;
+export type BudgetGroup = Enums<'budget_group'>;
 export type ContractRhythm = Enums<'contract_rhythm'>;
 export type ContractStatus = Enums<'contract_status'>;
 export type RuleMatchField = Enums<'rule_match_field'>;

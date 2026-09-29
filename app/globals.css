@@ -874,3 +874,137 @@
     padding-right: 1rem;
   }
 }
+
+/* ---------------------------------------------------------------------
+   Budgets (50/30/20)
+   --------------------------------------------------------------------- */
+.budget-period {
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+}
+
+.budget-presets {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.budget-presets a[aria-current] {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.budget-currency {
+  margin-top: 1.5rem;
+}
+
+.budget-currency h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.budget-income {
+  margin: 0 0 0.75rem;
+}
+
+.budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.budget-table caption {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.budget-table th,
+.budget-table td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-top: 1px solid var(--border);
+}
+
+.budget-table .amount {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.budget-table tbody th,
+.budget-table tfoot th {
+  font-weight: 500;
+  min-width: 12rem;
+}
+
+.budget-table tfoot th,
+.budget-table tfoot td {
+  font-weight: 600;
+}
+
+.budget-months {
+  margin-top: 1rem;
+}
+
+.budget-bar {
+  position: relative;
+  display: block;
+  height: 0.5rem;
+  margin-top: 0.35rem;
+  background: var(--muted);
+  border-radius: 999px;
+}
+
+.budget-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.budget-bar-needs {
+  background: var(--chart-5);
+}
+
+.budget-bar-wants {
+  background: var(--chart-3);
+}
+
+.budget-bar-savings {
+  background: var(--chart-1);
+}
+
+/* Zielmarke (50 / 30 / 20 %). */
+.budget-bar-target {
+  position: absolute;
+  top: -0.2rem;
+  bottom: -0.2rem;
+  width: 2px;
+  background: var(--foreground);
+}
+
+.budget-rules {
+  margin-top: 1.5rem;
+}
+
+.budget-group-form .link-item {
+  align-items: center;
+}
+
+.budget-group-form .link-item label {
+  margin: 0;
+  font-weight: 400;
+}
+
+.budget-group-form .link-item select {
+  flex: 0 1 14rem;
+}
+
+.link-item-child label {
+  padding-left: 1.25rem;
+}
