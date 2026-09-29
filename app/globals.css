@@ -1008,3 +1008,10 @@
 .link-item-child label {
   padding-left: 1.25rem;
 }
+
+.read-only-note {
+  padding: 0.75rem 1rem;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  border-radius: var(--radius-xl);
+}

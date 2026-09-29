@@ -136,6 +136,7 @@ export type Database = {
           institution_name: string | null;
           iban_last4: string | null;
           currency: string;
+          opening_balance: number;
           balance: number;
           balance_updated_at: string | null;
           is_liability: boolean;
@@ -155,6 +156,7 @@ export type Database = {
           institution_name?: string | null;
           iban_last4?: string | null;
           currency?: string;
+          opening_balance?: number;
           balance?: number;
           balance_updated_at?: string | null;
           is_liability?: never;
@@ -174,6 +176,7 @@ export type Database = {
           institution_name?: string | null;
           iban_last4?: string | null;
           currency?: string;
+          opening_balance?: number;
           balance?: number;
           balance_updated_at?: string | null;
           is_liability?: never;

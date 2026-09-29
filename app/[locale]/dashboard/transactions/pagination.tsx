@@ -9,6 +9,8 @@ import { Link } from '@/i18n/navigation';
 import { listQueryString, type TransactionFilters } from '@/lib/transaction-filters';
 
 type PaginationProps = {
+  /** Pfad der Liste ohne Sprachpräfix. */
+  basePath: string;
   filters: TransactionFilters;
   page: number;
   pages: number;
@@ -17,9 +19,9 @@ type PaginationProps = {
   lastRow: number;
 };
 
-export async function Pagination({ filters, page, pages, total, firstRow, lastRow }: PaginationProps) {
+export async function Pagination({ basePath, filters, page, pages, total, firstRow, lastRow }: PaginationProps) {
   const t = await getTranslations('Transactions.pagination');
-  const href = (target: number) => `/dashboard/transactions${listQueryString(filters, target)}`;
+  const href = (target: number) => `${basePath}${listQueryString(filters, target)}`;
 
   return (
     <nav className="pagination" aria-label={t('label')}>
