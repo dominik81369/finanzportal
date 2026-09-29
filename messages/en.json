@@ -173,7 +173,7 @@
       "saved": "The transaction has been saved.",
       "empty": "No transactions yet. Add your first booking.",
       "loadError": "The transactions could not be loaded right now. Please reload the page.",
-      "caption": "Your latest bookings (at most {limit})",
+      "caption": "Your bookings, newest first",
       "columns": {
         "date": "Date",
         "counterparty": "Payee / payer",
@@ -189,8 +189,7 @@
       "editLabel": "Edit booking \"{counterparty}\" of {date}",
       "actions": "Actions",
       "noMatches": "No transactions for this search or these filters.",
-      "resultCount": "{count, plural, one {# transaction found} other {# transactions found}}",
-      "resultCountLimited": "More than {limit} matches – showing the latest {limit}. Please narrow down your search."
+      "resultCount": "{count, plural, one {# transaction found} other {# transactions found}}"
     },
     "filters": {
       "heading": "Search and filter transactions",
@@ -211,6 +210,13 @@
       "to": "To",
       "apply": "Filter",
       "reset": "Reset"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {page} of {pages}",
+      "range": "Entries {from}–{to} of {total}"
     },
     "form": {
       "metaTitle": "Add transaction",

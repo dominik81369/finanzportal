@@ -85,3 +85,49 @@ export function ilikeContainsPattern(text: string): string {
   return `"*${quoted}*"`;
 }
 
+
+/** Buchungen je Seite der Transaktionsliste. */
+export const PAGE_SIZE = 50;
+
+/** Obergrenze gegen absurde Offsets aus manipulierten URLs. */
+const PAGE_MAX = 10_000;
+
+/** Seitennummer aus ?page= (ganze Zahl ≥ 1), sonst 1. */
+export function parsePage(params: SearchParams): number {
+  const raw = single(params.page);
+  if (!/^\d{1,5}$/.test(raw)) {
+    return 1;
+  }
+  const page = Number(raw);
+  return page >= 1 && page <= PAGE_MAX ? page : 1;
+}
+
+/** Nullbasierte, einschließliche Zeilengrenzen für .range(from, to). */
+export function pageRange(page: number): { from: number; to: number } {
+  const from = (page - 1) * PAGE_SIZE;
+  return { from, to: from + PAGE_SIZE - 1 };
+}
+
+export function pageCount(total: number): number {
+  return Math.max(1, Math.ceil(total / PAGE_SIZE));
+}
+
+/**
+ * Query-String mit den aktiven Filtern und der Seite (Seite 1 wird
+ * weggelassen). Für Seitenlinks – die Filter bleiben beim Blättern erhalten.
+ * Das Filterformular selbst enthält KEIN page-Feld: Jede Filteränderung
+ * beginnt dadurch wieder auf Seite 1.
+ */
+export function listQueryString(filters: TransactionFilters, page: number): string {
+  const params = new URLSearchParams();
+  if (filters.q) params.set('q', filters.q);
+  if (filters.type) params.set('type', filters.type);
+  if (filters.accountId) params.set('account', filters.accountId);
+  if (filters.categoryId) params.set('category', filters.categoryId);
+  if (filters.tagId) params.set('tag', filters.tagId);
+  if (filters.from) params.set('from', filters.from);
+  if (filters.to) params.set('to', filters.to);
+  if (page > 1) params.set('page', String(page));
+  const query = params.toString();
+  return query ? `?${query}` : '';
+}
