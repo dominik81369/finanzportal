@@ -1,0 +1,175 @@
+{
+  "Metadata": {
+    "appName": "Finanzportal",
+    "titleTemplate": "%s · Finanzportal"
+  },
+  "Validation": {
+    "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+    "maxLength": "Maximal {max} Zeichen.",
+    "passwordHint": "Mindestens {min} Zeichen.",
+    "passwordTooShort": "Das Passwort muss mindestens {min} Zeichen lang sein.",
+    "passwordTooLong": "Das Passwort ist zu lang (maximal 72 Byte).",
+    "passwordWeak": "Das Passwort ist zu schwach. Bitte wählen Sie ein längeres Passwort ohne gängige Wörter.",
+    "checkInput": "Bitte prüfen Sie Ihre Eingaben."
+  },
+  "AuthErrors": {
+    "missingCredentials": "Bitte geben Sie Ihre E-Mail-Adresse und Ihr Passwort ein.",
+    "invalidCredentials": "E-Mail-Adresse oder Passwort ist falsch.",
+    "emailNotConfirmed": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse über den Link in unserer E-Mail.",
+    "emailExists": "Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Falls Sie bereits ein Konto haben, melden Sie sich bitte an.",
+    "signupDisabled": "Registrierungen sind derzeit nicht möglich.",
+    "userBanned": "Dieses Konto ist gesperrt. Bitte wenden Sie sich an den Support.",
+    "rateLimited": "Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.",
+    "generic": "Das hat leider nicht geklappt. Bitte versuchen Sie es später erneut."
+  },
+  "Login": {
+    "metaTitle": "Anmelden",
+    "heading": "Anmelden",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "submit": "Anmelden",
+    "submitting": "Anmeldung läuft …",
+    "noAccount": "Noch kein Konto? <link>Jetzt registrieren</link>"
+  },
+  "Signup": {
+    "metaTitle": "Registrieren",
+    "heading": "Konto erstellen",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "privacyNotice": "Informationen zur Verarbeitung Ihrer Daten finden Sie in unserer <link>Datenschutzerklärung</link>.",
+    "submit": "Konto erstellen",
+    "submitting": "Konto wird erstellt …",
+    "alreadyRegistered": "Bereits registriert? <link>Anmelden</link>",
+    "success": "Fast geschafft! Wir haben Ihnen eine E-Mail an {email} gesendet. Bitte öffnen Sie den Bestätigungslink in diesem Browser, um die Registrierung abzuschließen.",
+    "noEmailReceived": "Keine E-Mail erhalten? Prüfen Sie Ihren Spam-Ordner oder <link>melden Sie sich an</link>, falls Sie bereits ein Konto haben."
+  },
+  "SetPassword": {
+    "metaTitle": "Passwort festlegen",
+    "heading": "Passwort festlegen",
+    "welcome": "Willkommen im Finanzportal! Legen Sie ein Passwort fest, damit Sie sich künftig mit <strong>{email}</strong> anmelden können.",
+    "checkFailed": "Ihr Konto konnte gerade nicht geprüft werden. Bitte laden Sie die Seite neu.",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Passwort wiederholen",
+    "submit": "Passwort speichern",
+    "submitting": "Wird gespeichert …",
+    "errors": {
+      "generic": "Das Passwort konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      "mismatch": "Die Passwörter stimmen nicht überein.",
+      "reauthenticationNeeded": "Aus Sicherheitsgründen ist eine erneute Anmeldung nötig. Bitte öffnen Sie den Einladungslink erneut."
+    }
+  },
+  "AuthCodeError": {
+    "metaTitle": "Link ungültig",
+    "toLogin": "Zur Anmeldung",
+    "signup": "Registrieren",
+    "reasons": {
+      "expired": {
+        "title": "Link abgelaufen",
+        "text": "Dieser Link ist abgelaufen oder wurde bereits verwendet. Falls Sie sich registriert haben, versuchen Sie, sich anzumelden. Für eine Einladung bitten Sie Ihren Berater, sie erneut zu senden."
+      },
+      "other_browser": {
+        "title": "Bitte denselben Browser verwenden",
+        "text": "Der Bestätigungslink muss in dem Browser geöffnet werden, in dem Sie sich registriert haben. Ihre E-Mail-Adresse ist möglicherweise trotzdem bereits bestätigt – versuchen Sie, sich anzumelden."
+      },
+      "invalid": {
+        "title": "Anmeldung fehlgeschlagen",
+        "text": "Der Link ist ungültig oder unvollständig. Bitte öffnen Sie ihn direkt aus der E-Mail oder fordern Sie einen neuen an."
+      }
+    }
+  },
+  "NotFound": {
+    "metaTitle": "Seite nicht gefunden",
+    "heading": "Seite nicht gefunden",
+    "text": "Diese Seite gibt es nicht oder nicht mehr. Bitte prüfen Sie die Adresse.",
+    "toPortal": "Zum Portal"
+  },
+  "Invite": {
+    "metaTitle": "Einladung annehmen",
+    "invalidHeading": "Einladung ungültig",
+    "invalidText": "Dieser Einladungslink ist unvollständig oder ungültig. Bitte öffnen Sie den Link direkt aus der E-Mail oder bitten Sie Ihren Berater, die Einladung erneut zu senden.",
+    "guestHeading": "Einladung von Ihrem Berater",
+    "guestText": "Ihr Finanzberater hat Sie eingeladen, das Finanzportal gemeinsam zu nutzen. Bitte melden Sie sich an oder erstellen Sie ein Konto – mit der E-Mail-Adresse, an die die Einladung gesendet wurde.",
+    "login": "Anmelden",
+    "signup": "Konto erstellen",
+    "heading": "Einladung annehmen",
+    "signedInAs": "Angemeldet als <strong>{email}</strong>",
+    "consent": "Mit der Annahme erhält Ihr Berater <strong>Lesezugriff</strong> auf Ihre Finanzdaten im Portal: Konten, Umsätze, Kategorien, Depots und Immobilien. Ändern kann er diese Daten nicht. Die Verbindung kann jederzeit widerrufen werden.",
+    "notYourAccount": "Nicht Ihr Konto? Die Einladung gilt nur für die eingeladene E-Mail-Adresse.",
+    "switchAccount": "Mit einem anderen Konto anmelden",
+    "submit": "Einladung annehmen",
+    "submitting": "Einladung wird angenommen …",
+    "errors": {
+      "invalidOrExpired": "Diese Einladung ist ungültig oder abgelaufen. Bitte prüfen Sie, ob Sie mit der E-Mail-Adresse angemeldet sind, an die die Einladung ging – oder bitten Sie Ihren Berater, die Einladung erneut zu senden.",
+      "emailNotConfirmed": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse über den Link in unserer E-Mail und versuchen Sie es dann erneut.",
+      "alreadyConnected": "Sie sind mit diesem Berater bereits verbunden.",
+      "generic": "Die Einladung konnte nicht angenommen werden. Bitte versuchen Sie es später erneut."
+    }
+  },
+  "InviteClient": {
+    "selfInvite": "Sie können sich nicht selbst als Mandant einladen.",
+    "alreadyConnected": "Dieser Mandant ist bereits mit Ihnen verbunden.",
+    "duplicateInvitation": "Für diese Adresse wurde soeben bereits eine Einladung erstellt.",
+    "rateLimited": "Es wurden zu viele E-Mails versendet. Bitte versuchen Sie es in einigen Minuten erneut.",
+    "sendFailed": "Die Einladungs-E-Mail konnte nicht versendet werden. Bitte versuchen Sie es später erneut.",
+    "generic": "Die Einladung konnte nicht erstellt werden. Bitte versuchen Sie es später erneut.",
+    "success": "Die Einladung an {email} wurde versendet. Sie ist {days} Tage gültig."
+  },
+  "Dashboard": {
+    "skipLink": "Zum Inhalt springen",
+    "signOut": "Abmelden",
+    "navLabel": "Bereiche",
+    "placeholderLabel": "In Vorbereitung",
+    "nav": {
+      "overview": "Übersicht",
+      "transactions": "Transaktionen",
+      "budgets": "Budgets",
+      "contracts": "Verträge",
+      "netWorth": "Net Worth"
+    },
+    "overview": {
+      "title": "Übersicht",
+      "description": "Ihre Finanzen auf einen Blick.",
+      "planned": {
+        "balances": "Kontostände und Vermögen im Überblick",
+        "cashflow": "Einnahmen und Ausgaben des laufenden Monats",
+        "alerts": "Hinweise zu Budgets und anstehenden Kündigungsfristen"
+      }
+    },
+    "transactions": {
+      "title": "Transaktionen",
+      "description": "Alle Buchungen Ihrer Konten – manuell erfasst, importiert oder synchronisiert.",
+      "planned": {
+        "manualEntry": "Manuelle Erfassung mit Kategorie und Tags",
+        "filters": "Suche und Filter nach Konto, Kategorie, Tag und Zeitraum",
+        "rules": "Automatische Kategorisierung über eigene Regeln"
+      }
+    },
+    "budgets": {
+      "title": "Budgets",
+      "description": "Ausgabengrenzen je Kategorie, Tag oder Konto.",
+      "planned": {
+        "periods": "Budgets für Woche, Monat, Quartal oder Jahr",
+        "progress": "Fortschritt und Warnung ab einer frei wählbaren Schwelle"
+      }
+    },
+    "contracts": {
+      "title": "Verträge",
+      "description": "Wiederkehrende Zahlungen wie Abos, Versicherungen und Mitgliedschaften.",
+      "planned": {
+        "detection": "Automatisch erkannte Verträge bestätigen oder verwerfen",
+        "schedule": "Rhythmus, erwarteter Betrag und nächste Abbuchung",
+        "cancellation": "Kündigungsfristen mit Erinnerung vor dem Stichtag"
+      }
+    },
+    "netWorth": {
+      "title": "Net Worth",
+      "description": "Ihr Nettovermögen: Konten, Depots und Immobilien abzüglich Verbindlichkeiten.",
+      "planned": {
+        "allocation": "Vermögen nach Anlageklasse und Region",
+        "history": "Entwicklung über die Zeit"
+      }
+    }
+  }
+}

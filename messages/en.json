@@ -1,0 +1,175 @@
+{
+  "Metadata": {
+    "appName": "Finanzportal",
+    "titleTemplate": "%s · Finanzportal"
+  },
+  "Validation": {
+    "emailInvalid": "Please enter a valid email address.",
+    "maxLength": "Maximum {max} characters.",
+    "passwordHint": "At least {min} characters.",
+    "passwordTooShort": "The password must be at least {min} characters long.",
+    "passwordTooLong": "The password is too long (maximum 72 bytes).",
+    "passwordWeak": "The password is too weak. Please choose a longer password without common words.",
+    "checkInput": "Please check your entries."
+  },
+  "AuthErrors": {
+    "missingCredentials": "Please enter your email address and password.",
+    "invalidCredentials": "Email address or password is incorrect.",
+    "emailNotConfirmed": "Please confirm your email address first using the link in our email.",
+    "emailExists": "Registration is not possible with this email address. If you already have an account, please sign in.",
+    "signupDisabled": "Registration is currently not possible.",
+    "userBanned": "This account is locked. Please contact support.",
+    "rateLimited": "Too many attempts. Please wait a few minutes and try again.",
+    "generic": "Something went wrong. Please try again later."
+  },
+  "Login": {
+    "metaTitle": "Sign in",
+    "heading": "Sign in",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in …",
+    "noAccount": "No account yet? <link>Register now</link>"
+  },
+  "Signup": {
+    "metaTitle": "Register",
+    "heading": "Create account",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email address",
+    "password": "Password",
+    "privacyNotice": "Information on how we process your data can be found in our <link>privacy policy</link>.",
+    "submit": "Create account",
+    "submitting": "Creating account …",
+    "alreadyRegistered": "Already registered? <link>Sign in</link>",
+    "success": "Almost done! We have sent an email to {email}. Please open the confirmation link in this browser to complete your registration.",
+    "noEmailReceived": "No email received? Check your spam folder or <link>sign in</link> if you already have an account."
+  },
+  "SetPassword": {
+    "metaTitle": "Set password",
+    "heading": "Set password",
+    "welcome": "Welcome to Finanzportal! Set a password so that you can sign in with <strong>{email}</strong> in future.",
+    "checkFailed": "Your account could not be checked right now. Please reload the page.",
+    "newPassword": "New password",
+    "confirmPassword": "Repeat password",
+    "submit": "Save password",
+    "submitting": "Saving …",
+    "errors": {
+      "generic": "The password could not be saved. Please try again.",
+      "mismatch": "The passwords do not match.",
+      "reauthenticationNeeded": "For security reasons you need to sign in again. Please open the invitation link again."
+    }
+  },
+  "AuthCodeError": {
+    "metaTitle": "Invalid link",
+    "toLogin": "Go to sign in",
+    "signup": "Register",
+    "reasons": {
+      "expired": {
+        "title": "Link expired",
+        "text": "This link has expired or has already been used. If you have registered, try signing in. For an invitation, ask your advisor to send it again."
+      },
+      "other_browser": {
+        "title": "Please use the same browser",
+        "text": "The confirmation link must be opened in the browser you registered with. Your email address may already be confirmed – try signing in."
+      },
+      "invalid": {
+        "title": "Sign-in failed",
+        "text": "The link is invalid or incomplete. Please open it directly from the email or request a new one."
+      }
+    }
+  },
+  "NotFound": {
+    "metaTitle": "Page not found",
+    "heading": "Page not found",
+    "text": "This page does not exist or no longer exists. Please check the address.",
+    "toPortal": "Go to the portal"
+  },
+  "Invite": {
+    "metaTitle": "Accept invitation",
+    "invalidHeading": "Invalid invitation",
+    "invalidText": "This invitation link is incomplete or invalid. Please open the link directly from the email or ask your advisor to send the invitation again.",
+    "guestHeading": "Invitation from your advisor",
+    "guestText": "Your financial advisor has invited you to use Finanzportal together. Please sign in or create an account – using the email address the invitation was sent to.",
+    "login": "Sign in",
+    "signup": "Create account",
+    "heading": "Accept invitation",
+    "signedInAs": "Signed in as <strong>{email}</strong>",
+    "consent": "By accepting, your advisor gets <strong>read access</strong> to your financial data in the portal: accounts, transactions, categories, portfolios and real estate. They cannot change this data. The connection can be revoked at any time.",
+    "notYourAccount": "Not your account? The invitation only applies to the invited email address.",
+    "switchAccount": "Sign in with a different account",
+    "submit": "Accept invitation",
+    "submitting": "Accepting invitation …",
+    "errors": {
+      "invalidOrExpired": "This invitation is invalid or has expired. Please check that you are signed in with the email address the invitation was sent to – or ask your advisor to send the invitation again.",
+      "emailNotConfirmed": "Please confirm your email address first using the link in our email, then try again.",
+      "alreadyConnected": "You are already connected to this advisor.",
+      "generic": "The invitation could not be accepted. Please try again later."
+    }
+  },
+  "InviteClient": {
+    "selfInvite": "You cannot invite yourself as a client.",
+    "alreadyConnected": "This client is already connected to you.",
+    "duplicateInvitation": "An invitation for this address has just been created.",
+    "rateLimited": "Too many emails have been sent. Please try again in a few minutes.",
+    "sendFailed": "The invitation email could not be sent. Please try again later.",
+    "generic": "The invitation could not be created. Please try again later.",
+    "success": "The invitation to {email} has been sent. It is valid for {days} days."
+  },
+  "Dashboard": {
+    "skipLink": "Skip to content",
+    "signOut": "Sign out",
+    "navLabel": "Sections",
+    "placeholderLabel": "Coming soon",
+    "nav": {
+      "overview": "Overview",
+      "transactions": "Transactions",
+      "budgets": "Budgets",
+      "contracts": "Contracts",
+      "netWorth": "Net Worth"
+    },
+    "overview": {
+      "title": "Overview",
+      "description": "Your finances at a glance.",
+      "planned": {
+        "balances": "Account balances and assets at a glance",
+        "cashflow": "Income and expenses for the current month",
+        "alerts": "Notes on budgets and upcoming cancellation deadlines"
+      }
+    },
+    "transactions": {
+      "title": "Transactions",
+      "description": "All bookings of your accounts – entered manually, imported or synchronised.",
+      "planned": {
+        "manualEntry": "Manual entry with category and tags",
+        "filters": "Search and filter by account, category, tag and period",
+        "rules": "Automatic categorisation using your own rules"
+      }
+    },
+    "budgets": {
+      "title": "Budgets",
+      "description": "Spending limits per category, tag or account.",
+      "planned": {
+        "periods": "Budgets per week, month, quarter or year",
+        "progress": "Progress and alert from a freely selectable threshold"
+      }
+    },
+    "contracts": {
+      "title": "Contracts",
+      "description": "Recurring payments such as subscriptions, insurance and memberships.",
+      "planned": {
+        "detection": "Confirm or dismiss automatically detected contracts",
+        "schedule": "Rhythm, expected amount and next debit",
+        "cancellation": "Cancellation deadlines with a reminder before the due date"
+      }
+    },
+    "netWorth": {
+      "title": "Net Worth",
+      "description": "Your net worth: accounts, portfolios and real estate minus liabilities.",
+      "planned": {
+        "allocation": "Assets by asset class and region",
+        "history": "Development over time"
+      }
+    }
+  }
+}

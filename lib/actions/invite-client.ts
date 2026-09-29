@@ -19,10 +19,15 @@
  * Eine noch offene Einladung an dieselbe Adresse wird ersetzt ("erneut
  * senden"): Der alte Link wird ungültig, weil der Trigger beim Widerruf den
  * Token-Hash löscht.
+ *
+ * Der Link zeigt bewusst auf die deutsche Fassung (ohne Sprachpräfix): Die
+ * Sprache des Eingeladenen ist unbekannt, und die E-Mail-Templates in
+ * supabase/templates/ sind deutsch.
  */
 import type { AuthError } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
 import {
   INVITE_TTL_DAYS,
@@ -38,8 +43,6 @@ import type { AdvisorInvitationInsert, AdvisorLinkRevoke } from '@/types/domain'
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const GENERIC_ERROR = 'Die Einladung konnte nicht erstellt werden. Bitte versuchen Sie es später erneut.';
-
 export type InviteClientState = {
   status: 'idle' | 'error' | 'success';
   message?: string;
@@ -47,16 +50,17 @@ export type InviteClientState = {
 };
 
 type AdminClient = ReturnType<typeof createAdminClient>;
+type InviteClientTranslator = Awaited<ReturnType<typeof getTranslations<'InviteClient'>>>;
 
-function sendErrorMessage(error: AuthError): string {
+function sendErrorMessage(error: AuthError, t: InviteClientTranslator): string {
   if (error.code === 'over_email_send_rate_limit' || error.status === 429) {
-    return 'Es wurden zu viele E-Mails versendet. Bitte versuchen Sie es in einigen Minuten erneut.';
+    return t('rateLimited');
   }
   console.error('[invite-client] E-Mail-Versand fehlgeschlagen', {
     code: error.code,
     status: error.status,
   });
-  return 'Die Einladungs-E-Mail konnte nicht versendet werden. Bitte versuchen Sie es später erneut.';
+  return t('sendFailed');
 }
 
 /**
@@ -96,16 +100,19 @@ export async function inviteClient(
 ): Promise<InviteClientState> {
   // 1. Berechtigung – leitet Nicht-Berater um, bevor irgendetwas passiert.
   const advisor = await requireAdvisor();
+  const t = await getTranslations('InviteClient');
+  const genericError = t('generic');
 
   const rawEmail = formData.get('email');
   const values = { email: typeof rawEmail === 'string' ? rawEmail.trim() : '' };
   const email = parseEmail(rawEmail);
 
   if (!email) {
-    return { status: 'error', message: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.', values };
+    const tValidation = await getTranslations('Validation');
+    return { status: 'error', message: tValidation('emailInvalid'), values };
   }
   if (email === advisor.email?.toLowerCase()) {
-    return { status: 'error', message: 'Sie können sich nicht selbst als Mandant einladen.', values };
+    return { status: 'error', message: t('selfInvite'), values };
   }
 
   // Früh erzeugen: Fehlt die Admin-Konfiguration, scheitert die Action, bevor
@@ -123,10 +130,10 @@ export async function inviteClient(
 
   if (lookupError) {
     console.error('[invite-client] Lookup fehlgeschlagen', { code: lookupError.code });
-    return { status: 'error', message: GENERIC_ERROR, values };
+    return { status: 'error', message: genericError, values };
   }
   if (existing.some((link) => link.status === 'active')) {
-    return { status: 'error', message: 'Dieser Mandant ist bereits mit Ihnen verbunden.', values };
+    return { status: 'error', message: t('alreadyConnected'), values };
   }
 
   const openInvitationIds = existing
@@ -143,7 +150,7 @@ export async function inviteClient(
       console.error('[invite-client] Widerruf der offenen Einladung fehlgeschlagen', {
         code: revokeError.code,
       });
-      return { status: 'error', message: GENERIC_ERROR, values };
+      return { status: 'error', message: genericError, values };
     }
   }
 
@@ -164,14 +171,10 @@ export async function inviteClient(
   if (insertError) {
     // 23505: parallele Einladung an dieselbe Adresse (advisor_clients_open_invite_key)
     if (insertError.code === '23505') {
-      return {
-        status: 'error',
-        message: 'Für diese Adresse wurde soeben bereits eine Einladung erstellt.',
-        values,
-      };
+      return { status: 'error', message: t('duplicateInvitation'), values };
     }
     console.error('[invite-client] Insert fehlgeschlagen', { code: insertError.code });
-    return { status: 'error', message: GENERIC_ERROR, values };
+    return { status: 'error', message: genericError, values };
   }
 
   // 4. Versand
@@ -188,12 +191,9 @@ export async function inviteClient(
     if (cleanupError) {
       console.error('[invite-client] Aufräumen fehlgeschlagen', { code: cleanupError.code });
     }
-    return { status: 'error', message: sendErrorMessage(sendError), values };
+    return { status: 'error', message: sendErrorMessage(sendError, t), values };
   }
 
   revalidatePath('/advisor', 'layout');
-  return {
-    status: 'success',
-    message: `Die Einladung an ${email} wurde versendet. Sie ist ${INVITE_TTL_DAYS} Tage gültig.`,
-  };
+  return { status: 'success', message: t('success', { email, days: INVITE_TTL_DAYS }) };
 }
