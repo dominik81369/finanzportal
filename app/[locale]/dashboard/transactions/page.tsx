@@ -3,40 +3,24 @@
  *
  * Buchungen des angemeldeten Nutzers mit Kategorie, Tags und Konto, mit
  * Suche, Filtern und Seiten (lib/transaction-filters.ts, Werte als
- * Query-Parameter). Erfassung unter ./new.
- *
- * Reihenfolge: booking_date absteigend, bei gleichem Datum die neueste
- * Erfassung oben (created_at absteigend), id als letzter Tiebreaker – genau
- * die Reihenfolge des Index transactions_user_booking_created_idx
- * (Migration 20261002130000). Seiten per LIMIT/OFFSET (.range()).
- *
- * Die Abfrage filtert ausdrücklich auf user_id = eigener Nutzer: RLS lässt
- * Berater zusätzlich die Buchungen ihrer Mandanten lesen.
+ * Query-Parameter). Erfassung unter ./new. Laden und Reihenfolge:
+ * ./transaction-list.ts (gemeinsam mit der Leseansicht des Beraters).
  */
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-import { getFormatter, getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
-import { localizedPath } from '@/i18n/paths';
 import { toAppLocale } from '@/i18n/routing';
-import { categoryDisplayName } from '@/lib/categories';
-import { createClient, requireOnboardedUser } from '@/lib/supabase/server';
-import {
-  UNCATEGORIZED,
-  hasActiveFilters,
-  ilikeContainsPattern,
-  listQueryString,
-  pageCount,
-  pageRange,
-  parsePage,
-  parseTransactionFilters,
-} from '@/lib/transaction-filters';
+import { requireOnboardedUser } from '@/lib/supabase/server';
+import { hasActiveFilters, parsePage, parseTransactionFilters } from '@/lib/transaction-filters';
 
 import { loadTransactionFormOptions } from './form-options';
 import { Pagination } from './pagination';
 import { TransactionFiltersForm } from './transaction-filters-form';
+import { loadTransactionList } from './transaction-list';
+import { TransactionTable } from './transaction-table';
 
+const LIST_PATH = '/dashboard/transactions';
 
 type TransactionsPageProps = {
   params: Promise<{ locale: string }>;
@@ -52,7 +36,7 @@ export async function generateMetadata({
 }
 
 export default async function TransactionsPage({ searchParams }: TransactionsPageProps) {
-  const user = await requireOnboardedUser('/dashboard/transactions');
+  const user = await requireOnboardedUser(LIST_PATH);
   const query = await searchParams;
   // Bestätigung nach Anlegen, Bearbeiten bzw. Löschen (Weiterleitung der Actions).
   const notice =
@@ -65,85 +49,15 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
           : null;
   const t = await getTranslations('Transactions.list');
   const tDashboard = await getTranslations('Dashboard');
-  const tCategories = await getTranslations('DefaultCategories');
-  const format = await getFormatter();
-  const collator = new Intl.Collator(await getLocale());
 
   const filters = parseTransactionFilters(query);
   const filtered = hasActiveFilters(filters);
   const page = parsePage(query);
 
-  const supabase = await createClient();
-
-  /** Gefilterte Abfrage; head: nur zählen (für Seiten jenseits des Endes). */
-  const buildQuery = (head = false) => {
-    let request = supabase
-      .from('transactions')
-      // tag_filter: eigener Alias nur für den Tag-Filter, damit transaction_tags
-      // weiterhin ALLE Tags der Buchung liefert.
-      .select(
-        `id, source, booking_date, amount, currency, counterparty_name, purpose,
-         account:accounts!transactions_account_fkey ( name ),
-         category:categories!transactions_category_fkey ( name, default_key, color ),
-         transaction_tags ( tag:tags!transaction_tags_tag_fkey ( id, name ) ),
-         tag_filter:transaction_tags ( tag_id )`,
-        { count: 'exact', head },
-      )
-      .eq('user_id', user.id);
-
-    if (filters.q) {
-      const pattern = ilikeContainsPattern(filters.q);
-      request = request.or(`counterparty_name.ilike.${pattern},purpose.ilike.${pattern}`);
-    }
-    if (filters.type === 'expense') {
-      request = request.lt('amount', 0);
-    } else if (filters.type === 'income') {
-      request = request.gt('amount', 0);
-    }
-    if (filters.accountId) {
-      request = request.eq('account_id', filters.accountId);
-    }
-    if (filters.categoryId === UNCATEGORIZED) {
-      request = request.is('category_id', null);
-    } else if (filters.categoryId) {
-      request = request.eq('category_id', filters.categoryId);
-    }
-    if (filters.tagId) {
-      // Eingebettete Zeilen filtern und Buchungen ohne Treffer ausschließen
-      // (PostgREST: Null-Filter auf der Einbettung wirkt wie ein Inner Join).
-      request = request.eq('tag_filter.tag_id', filters.tagId).not('tag_filter', 'is', null);
-    }
-    if (filters.from) {
-      request = request.gte('booking_date', filters.from);
-    }
-    if (filters.to) {
-      request = request.lte('booking_date', filters.to);
-    }
-    return request;
-  };
-
-  const { from, to } = pageRange(page);
-  const [{ data: transactions, count, error }, options] = await Promise.all([
-    buildQuery()
-      .order('booking_date', { ascending: false })
-      .order('created_at', { ascending: false })
-      .order('id', { ascending: true })
-      .range(from, to),
+  const [{ transactions, total, pages, firstRow }, options] = await Promise.all([
+    loadTransactionList({ userId: user.id, filters, page, listPath: LIST_PATH }),
     loadTransactionFormOptions(user.id),
   ]);
-
-  // Seite jenseits des Endes (alter Link, manipulierte URL): PostgREST
-  // antwortet mit PGRST103 ohne Gesamtzahl → zählen und zur letzten Seite.
-  if (error?.code === 'PGRST103') {
-    const { count: total } = await buildQuery(true);
-    const listPath = await localizedPath('/dashboard/transactions');
-    redirect(`${listPath}${listQueryString(filters, pageCount(total ?? 0))}`);
-  }
-  if (error) {
-    console.error('[transactions] Laden fehlgeschlagen', { code: error.code });
-  }
-  const total = count ?? 0;
-  const pages = pageCount(total);
 
   return (
     <section aria-labelledby="page-title">
@@ -163,121 +77,35 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
 
       {/* Ohne Buchungen und ohne Filter gibt es nichts zu filtern. */}
       {options && (filtered || (transactions && transactions.length > 0)) ? (
-        <TransactionFiltersForm filters={filters} active={filtered} {...options} />
+        <TransactionFiltersForm filters={filters} active={filtered} basePath={LIST_PATH} {...options} />
       ) : null}
 
-      {filtered && !error ? (
+      {filtered && transactions ? (
         <p role="status" className="result-count">
           {t('resultCount', { count: total })}
         </p>
       ) : null}
 
-      {error ? (
+      {!transactions ? (
         <p role="alert" className="form-error">
           {t('loadError')}
         </p>
-      ) : !transactions || transactions.length === 0 ? (
+      ) : transactions.length === 0 ? (
         <p className="empty-state">{filtered ? t('noMatches') : t('empty')}</p>
       ) : (
-        <div className="table-scroll">
-          <table className="transactions-table">
-            <caption>{t('caption')}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{t('columns.date')}</th>
-                <th scope="col">{t('columns.counterparty')}</th>
-                <th scope="col">{t('columns.category')}</th>
-                <th scope="col">{t('columns.tags')}</th>
-                <th scope="col">{t('columns.account')}</th>
-                <th scope="col" className="amount">
-                  {t('columns.amount')}
-                </th>
-                <th scope="col">
-                  <span className="sr-only">{t('actions')}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((tx) => {
-                // booking_date ist ein reines Datum: als UTC lesen und anzeigen.
-                const date = format.dateTime(new Date(`${tx.booking_date}T00:00:00Z`), {
-                  dateStyle: 'medium',
-                  timeZone: 'UTC',
-                });
-                return (
-                  <tr key={tx.id}>
-                    <td className="nowrap">{date}</td>
-                    <td>
-                      {tx.counterparty_name}
-                      {tx.purpose ? <span className="cell-note">{tx.purpose}</span> : null}
-                    </td>
-                    <td>
-                      {tx.category ? (
-                        <span className="category">
-                          <span
-                            className="category-dot"
-                            aria-hidden="true"
-                            style={{ background: tx.category.color ?? 'var(--muted-foreground)' }}
-                          />
-                          {categoryDisplayName(tx.category, tCategories)}
-                        </span>
-                      ) : (
-                        <span className="muted">{t('uncategorized')}</span>
-                      )}
-                    </td>
-                    <td>
-                      <TagList
-                        tags={tx.transaction_tags
-                          .flatMap(({ tag }) => (tag ? [tag] : []))
-                          .sort((a, b) => collator.compare(a.name, b.name))}
-                      />
-                    </td>
-                    <td>{tx.account?.name}</td>
-                    <td className={`amount ${tx.amount < 0 ? 'amount-negative' : 'amount-positive'}`}>
-                      {format.number(tx.amount, { style: 'currency', currency: tx.currency })}
-                    </td>
-                    <td className="row-actions">
-                      {/* Nur manuell erfasste Buchungen sind bearbeitbar. */}
-                      {tx.source === 'manual' ? (
-                        <Link
-                          href={`/dashboard/transactions/${tx.id}/edit`}
-                          aria-label={t('editLabel', { counterparty: tx.counterparty_name ?? '', date })}
-                        >
-                          {t('edit')}
-                        </Link>
-                      ) : null}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <TransactionTable transactions={transactions} caption={t('caption')} editable />
+          <Pagination
+            basePath={LIST_PATH}
+            filters={filters}
+            page={page}
+            pages={pages}
+            total={total}
+            firstRow={firstRow}
+            lastRow={firstRow + transactions.length - 1}
+          />
+        </>
       )}
-
-      {!error && transactions && transactions.length > 0 ? (
-        <Pagination
-          filters={filters}
-          page={page}
-          pages={pages}
-          total={total}
-          firstRow={from + 1}
-          lastRow={from + transactions.length}
-        />
-      ) : null}
     </section>
-  );
-}
-
-function TagList({ tags }: { tags: { id: string; name: string }[] }) {
-  if (tags.length === 0) {
-    return null;
-  }
-  return (
-    <ul className="tag-list">
-      {tags.map((tag) => (
-        <li key={tag.id}>{tag.name}</li>
-      ))}
-    </ul>
   );
 }

@@ -357,6 +357,21 @@
       "withdrawConfirm": "Ja, zurückziehen",
       "withdrawing": "Wird zurückgezogen …",
       "withdrawn": "Die Einladung wurde zurückgezogen."
+    },
+    "client": {
+      "metaTitle": "Mandantendaten",
+      "back": "← Zurück zum Beraterbereich",
+      "readOnly": "Lesezugriff: Sie sehen die Daten, die der Mandant im Portal erfasst hat. Ändern kann sie nur der Mandant selbst.",
+      "accounts": {
+        "heading": "Konten",
+        "empty": "Noch keine Konten vorhanden.",
+        "loadError": "Die Konten konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu."
+      },
+      "transactions": {
+        "heading": "Buchungen",
+        "empty": "Der Mandant hat noch keine Buchungen erfasst.",
+        "caption": "Buchungen von {name}, neueste zuerst"
+      }
     }
   },
   "AdvisorLinks": {
@@ -364,5 +379,14 @@
       "notFound": "Diese Verbindung gibt es nicht (mehr) oder sie wurde bereits beendet. Bitte laden Sie die Seite neu.",
       "generic": "Das hat leider nicht geklappt. Bitte versuchen Sie es erneut."
     }
+  },
+  "AccountTypes": {
+    "checking": "Girokonto",
+    "savings": "Sparkonto",
+    "credit_card": "Kreditkarte",
+    "depot": "Depot",
+    "loan": "Kredit",
+    "cash": "Bargeld",
+    "other": "Sonstiges"
   }
 }
