@@ -852,6 +852,19 @@ export type Database = {
         Args: { p_token: string };
         Returns: string;
       };
+      create_manual_transaction: {
+        Args: {
+          p_booking_date: string;
+          p_amount: number;
+          p_counterparty_name: string;
+          p_purpose?: string;
+          p_account_id?: string;
+          p_category_id?: string;
+          p_tag_ids?: string[];
+          p_new_tag_names?: string[];
+        };
+        Returns: string;
+      };
     };
 
     Enums: {

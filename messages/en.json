@@ -139,12 +139,7 @@
     },
     "transactions": {
       "title": "Transactions",
-      "description": "All bookings of your accounts – entered manually, imported or synchronised.",
-      "planned": {
-        "manualEntry": "Manual entry with category and tags",
-        "filters": "Search and filter by account, category, tag and period",
-        "rules": "Automatic categorisation using your own rules"
-      }
+      "description": "All bookings of your accounts – entered manually, imported or synchronised."
     },
     "budgets": {
       "title": "Budgets",
@@ -170,6 +165,64 @@
         "allocation": "Assets by asset class and region",
         "history": "Development over time"
       }
+    }
+  },
+  "Transactions": {
+    "list": {
+      "add": "Add transaction",
+      "saved": "The transaction has been saved.",
+      "empty": "No transactions yet. Add your first booking.",
+      "loadError": "The transactions could not be loaded right now. Please reload the page.",
+      "caption": "Your latest bookings (at most {limit})",
+      "columns": {
+        "date": "Date",
+        "counterparty": "Payee / payer",
+        "category": "Category",
+        "tags": "Tags",
+        "account": "Account",
+        "amount": "Amount"
+      },
+      "uncategorized": "Uncategorised"
+    },
+    "form": {
+      "metaTitle": "Add transaction",
+      "heading": "Add transaction",
+      "back": "Back to transactions",
+      "type": "Type",
+      "expense": "Expense",
+      "income": "Income",
+      "amount": "Amount",
+      "amountHint": "In {currency}, e.g. 12.50",
+      "date": "Date",
+      "counterparty": "Payee / payer",
+      "purpose": "Reference (optional)",
+      "account": "Account",
+      "noAccountHint": "You have not created an account yet. The booking will be assigned to the account \"Bargeld\" (cash), which is created automatically.",
+      "category": "Category",
+      "noCategory": "No category",
+      "categoryGroups": {
+        "expense": "Expenses",
+        "income": "Income",
+        "transfer": "Transfers"
+      },
+      "tags": "Tags",
+      "newTags": "New tags (optional)",
+      "newTagsHint": "Separate several with commas, e.g. Holiday, Family. Existing tags are reused.",
+      "submit": "Save transaction",
+      "submitting": "Saving …"
+    },
+    "errors": {
+      "amountInvalid": "Please enter an amount greater than 0 with at most two decimal places, e.g. 12.50.",
+      "dateInvalid": "Please enter a valid date.",
+      "typeInvalid": "Please choose expense or income.",
+      "counterpartyRequired": "Please enter a payee or payer.",
+      "accountNotFound": "This account is not available (any more). Please choose another one.",
+      "categoryNotFound": "This category is not available (any more). Please choose another one.",
+      "categoryMismatch": "This category does not match the booking type. Income categories are for income only, expense categories for expenses only.",
+      "tagNotFound": "A selected tag is not available (any more). Please reload the page.",
+      "tagTooLong": "Tags may be at most {max} characters long.",
+      "tooManyTags": "Please use at most {newMax} new and {totalMax} tags in total per booking.",
+      "generic": "The transaction could not be saved. Please try again."
     }
   }
 }

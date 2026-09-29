@@ -139,12 +139,7 @@
     },
     "transactions": {
       "title": "Transaktionen",
-      "description": "Alle Buchungen Ihrer Konten – manuell erfasst, importiert oder synchronisiert.",
-      "planned": {
-        "manualEntry": "Manuelle Erfassung mit Kategorie und Tags",
-        "filters": "Suche und Filter nach Konto, Kategorie, Tag und Zeitraum",
-        "rules": "Automatische Kategorisierung über eigene Regeln"
-      }
+      "description": "Alle Buchungen Ihrer Konten – manuell erfasst, importiert oder synchronisiert."
     },
     "budgets": {
       "title": "Budgets",
@@ -170,6 +165,64 @@
         "allocation": "Vermögen nach Anlageklasse und Region",
         "history": "Entwicklung über die Zeit"
       }
+    }
+  },
+  "Transactions": {
+    "list": {
+      "add": "Transaktion erfassen",
+      "saved": "Die Transaktion wurde gespeichert.",
+      "empty": "Noch keine Transaktionen vorhanden. Erfassen Sie Ihre erste Buchung.",
+      "loadError": "Die Transaktionen konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+      "caption": "Ihre letzten Buchungen (höchstens {limit})",
+      "columns": {
+        "date": "Datum",
+        "counterparty": "Empfänger / Zahler",
+        "category": "Kategorie",
+        "tags": "Tags",
+        "account": "Konto",
+        "amount": "Betrag"
+      },
+      "uncategorized": "Ohne Kategorie"
+    },
+    "form": {
+      "metaTitle": "Transaktion erfassen",
+      "heading": "Transaktion erfassen",
+      "back": "Zurück zu den Transaktionen",
+      "type": "Art",
+      "expense": "Ausgabe",
+      "income": "Einnahme",
+      "amount": "Betrag",
+      "amountHint": "In {currency}, z. B. 12,50",
+      "date": "Datum",
+      "counterparty": "Empfänger / Zahler",
+      "purpose": "Verwendungszweck (optional)",
+      "account": "Konto",
+      "noAccountHint": "Sie haben noch kein Konto angelegt. Die Buchung wird dem Konto „Bargeld“ zugeordnet, das dabei automatisch angelegt wird.",
+      "category": "Kategorie",
+      "noCategory": "Keine Kategorie",
+      "categoryGroups": {
+        "expense": "Ausgaben",
+        "income": "Einnahmen",
+        "transfer": "Umbuchungen"
+      },
+      "tags": "Tags",
+      "newTags": "Neue Tags (optional)",
+      "newTagsHint": "Mehrere durch Komma trennen, z. B. Urlaub, Familie. Vorhandene Tags werden wiederverwendet.",
+      "submit": "Transaktion speichern",
+      "submitting": "Wird gespeichert …"
+    },
+    "errors": {
+      "amountInvalid": "Bitte geben Sie einen Betrag größer als 0 mit höchstens zwei Nachkommastellen ein, z. B. 12,50.",
+      "dateInvalid": "Bitte geben Sie ein gültiges Datum ein.",
+      "typeInvalid": "Bitte wählen Sie Ausgabe oder Einnahme.",
+      "counterpartyRequired": "Bitte geben Sie einen Empfänger bzw. Zahler an.",
+      "accountNotFound": "Dieses Konto ist nicht (mehr) verfügbar. Bitte wählen Sie ein anderes.",
+      "categoryNotFound": "Diese Kategorie ist nicht (mehr) verfügbar. Bitte wählen Sie eine andere.",
+      "categoryMismatch": "Diese Kategorie passt nicht zur Buchungsart. Einnahmen-Kategorien gelten nur für Einnahmen, Ausgaben-Kategorien nur für Ausgaben.",
+      "tagNotFound": "Ein ausgewählter Tag ist nicht (mehr) verfügbar. Bitte laden Sie die Seite neu.",
+      "tagTooLong": "Tags dürfen höchstens {max} Zeichen lang sein.",
+      "tooManyTags": "Bitte höchstens {newMax} neue und insgesamt {totalMax} Tags je Buchung.",
+      "generic": "Die Transaktion konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
     }
   }
 }
