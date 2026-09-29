@@ -16,9 +16,9 @@ import 'server-only';
 import { createServerClient } from '@supabase/ssr';
 import type { User } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { cache } from 'react';
 
+import { localizedPath, redirectLocalized } from '@/i18n/paths';
 import type { Database } from '@/types/database';
 import type { UserRole } from '@/types/domain';
 
@@ -90,7 +90,7 @@ export const getCurrentUserRole = cache(async (): Promise<UserRole | null> => {
 export async function requireUser(): Promise<User> {
   const user = await getSessionUser();
   if (!user) {
-    redirect('/login');
+    return redirectLocalized('/login');
   }
   return user;
 }
@@ -100,16 +100,19 @@ export async function requireUser(): Promise<User> {
  * (per Einladung angelegt) zuerst nach /set-password. Ist der Zustand nicht
  * ermittelbar, wird ebenfalls umgeleitet (fail closed) – /set-password zeigt
  * dann einen Hinweis statt des Formulars.
+ *
+ * @param nextPath Pfad ohne Sprachpräfix, z. B. /dashboard
  */
 async function ensurePasswordSet(nextPath: string): Promise<void> {
   if ((await currentUserHasPassword()) !== true) {
-    redirect(`/set-password?next=${encodeURIComponent(nextPath)}`);
+    await redirectLocalized('/set-password', await localizedPath(nextPath));
   }
 }
 
 /**
  * Erzwingt einen angemeldeten Nutzer mit eigenem Passwort. Für Layouts und
- * Server Actions der Mandantenbereiche (z. B. app/dashboard/layout.tsx).
+ * Server Actions der Mandantenbereiche (z. B. app/[locale]/dashboard/layout.tsx).
+ * nextPath ohne Sprachpräfix – er wird hier lokalisiert.
  */
 export async function requireOnboardedUser(nextPath = '/dashboard'): Promise<User> {
   const user = await requireUser();
@@ -122,7 +125,7 @@ export async function requireAdvisor(): Promise<User> {
   const user = await requireUser();
   const role = await getCurrentUserRole();
   if (role !== 'advisor') {
-    redirect('/dashboard');
+    await redirectLocalized('/dashboard');
   }
   await ensurePasswordSet('/advisor');
   return user;

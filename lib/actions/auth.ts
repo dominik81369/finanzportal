@@ -8,7 +8,7 @@
  * Der Server-Client aus lib/supabase/server.ts nutzt den PKCE-Flow
  * (Standard von @supabase/ssr): Bei signUp() wird der code_verifier als Cookie
  * im Browser abgelegt; der Bestätigungslink liefert ?code=… an
- * app/auth/callback, wo exchangeCodeForSession() ihn gegen eine Session tauscht.
+ * app/[locale]/auth/callback, wo exchangeCodeForSession() ihn gegen eine Session tauscht.
  *
  * Fehlertexte verraten bewusst nicht, ob eine E-Mail-Adresse registriert ist.
  */
@@ -16,11 +16,14 @@ import type { AuthError } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
+import { localizedPath, localizedPathWithNext } from '@/i18n/paths';
 import { createClient } from '@/lib/supabase/server';
 import { DEFAULT_REDIRECT_PATH, getAppOrigin, parseRedirectPath, safeRedirectPath } from '@/lib/url';
 import {
   NAME_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
   parseEmail,
   readString,
   readTrimmed,
@@ -39,35 +42,38 @@ export type AuthFormState = {
   values?: { email?: string; firstName?: string; lastName?: string };
 };
 
-function authErrorMessage(error: AuthError): string {
+async function authErrorMessage(error: AuthError): Promise<string> {
+  const t = await getTranslations('AuthErrors');
+  const tValidation = await getTranslations('Validation');
+
   switch (error.code) {
     case 'invalid_credentials':
-      return 'E-Mail-Adresse oder Passwort ist falsch.';
+      return t('invalidCredentials');
     case 'email_not_confirmed':
-      return 'Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse über den Link in unserer E-Mail.';
+      return t('emailNotConfirmed');
     case 'user_already_exists':
     case 'email_exists':
-      return 'Mit dieser E-Mail-Adresse ist keine Registrierung möglich. Falls Sie bereits ein Konto haben, melden Sie sich bitte an.';
+      return t('emailExists');
     case 'weak_password':
-      return 'Das Passwort ist zu schwach. Bitte wählen Sie ein längeres Passwort ohne gängige Wörter.';
+      return tValidation('passwordWeak');
     case 'email_address_invalid':
-      return 'Bitte geben Sie eine gültige E-Mail-Adresse ein.';
+      return tValidation('emailInvalid');
     case 'signup_disabled':
-      return 'Registrierungen sind derzeit nicht möglich.';
+      return t('signupDisabled');
     case 'user_banned':
-      return 'Dieses Konto ist gesperrt. Bitte wenden Sie sich an den Support.';
+      return t('userBanned');
     case 'over_request_rate_limit':
     case 'over_email_send_rate_limit':
-      return 'Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.';
+      return t('rateLimited');
   }
 
   if (error.status === 429) {
-    return 'Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.';
+    return t('rateLimited');
   }
 
   // Nur Code/Status loggen – keine personenbezogenen Daten.
   console.error('[auth] Unerwarteter Fehler', { code: error.code, status: error.status });
-  return 'Das hat leider nicht geklappt. Bitte versuchen Sie es später erneut.';
+  return t('generic');
 }
 
 export async function signIn(_prevState: AuthFormState, formData: FormData): Promise<AuthFormState> {
@@ -77,18 +83,15 @@ export async function signIn(_prevState: AuthFormState, formData: FormData): Pro
   const values = { email: rawEmail };
 
   if (!email || password.length === 0) {
-    return {
-      status: 'error',
-      message: 'Bitte geben Sie Ihre E-Mail-Adresse und Ihr Passwort ein.',
-      values,
-    };
+    const t = await getTranslations('AuthErrors');
+    return { status: 'error', message: t('missingCredentials'), values };
   }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return { status: 'error', message: authErrorMessage(error), values };
+    return { status: 'error', message: await authErrorMessage(error), values };
   }
 
   // Ohne explizites Ziel ins passende Cockpit – wie middleware.ts bei /login.
@@ -97,9 +100,12 @@ export async function signIn(_prevState: AuthFormState, formData: FormData): Pro
     .select('role')
     .eq('user_id', data.user.id)
     .maybeSingle();
-  const home = profile?.role === 'advisor' ? ADVISOR_HOME_PATH : DEFAULT_REDIRECT_PATH;
+  const home = await localizedPath(
+    profile?.role === 'advisor' ? ADVISOR_HOME_PATH : DEFAULT_REDIRECT_PATH,
+  );
 
   revalidatePath('/', 'layout');
+  // `next` ist bereits lokalisiert (siehe i18n/paths.ts).
   redirect(safeRedirectPath(formData.get('next'), home));
 }
 
@@ -110,35 +116,38 @@ export async function signUp(_prevState: AuthFormState, formData: FormData): Pro
   const password = readString(formData, 'password');
   const values = { email: rawEmail, firstName, lastName };
 
+  const tValidation = await getTranslations('Validation');
   const fieldErrors: NonNullable<AuthFormState['fieldErrors']> = {};
   if (firstName.length > NAME_MAX_LENGTH) {
-    fieldErrors.firstName = `Maximal ${NAME_MAX_LENGTH} Zeichen.`;
+    fieldErrors.firstName = tValidation('maxLength', { max: NAME_MAX_LENGTH });
   }
   if (lastName.length > NAME_MAX_LENGTH) {
-    fieldErrors.lastName = `Maximal ${NAME_MAX_LENGTH} Zeichen.`;
+    fieldErrors.lastName = tValidation('maxLength', { max: NAME_MAX_LENGTH });
   }
   const email = parseEmail(rawEmail);
   if (!email) {
-    fieldErrors.email = 'Bitte geben Sie eine gültige E-Mail-Adresse ein.';
+    fieldErrors.email = tValidation('emailInvalid');
   }
-  const passwordError = validateNewPassword(password);
-  if (passwordError) {
-    fieldErrors.password = passwordError;
+  const passwordIssue = validateNewPassword(password);
+  if (passwordIssue) {
+    fieldErrors.password = tValidation(passwordIssue, { min: PASSWORD_MIN_LENGTH });
   }
 
   if (!email || Object.keys(fieldErrors).length > 0) {
-    return { status: 'error', message: 'Bitte prüfen Sie Ihre Eingaben.', fieldErrors, values };
+    return { status: 'error', message: tValidation('checkInput'), fieldErrors, values };
   }
 
-  const next = safeRedirectPath(formData.get('next'));
+  const next = safeRedirectPath(formData.get('next'), await localizedPath(DEFAULT_REDIRECT_PATH));
   const origin = getAppOrigin(await headers());
+  // Der Bestätigungslink führt über den Callback der aktuellen Sprache.
+  const callbackPath = await localizedPath('/auth/callback');
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      emailRedirectTo: `${origin}${callbackPath}?next=${encodeURIComponent(next)}`,
       // private.handle_new_user() übernimmt Vor- und Nachname nach profiles.
       // Die Rolle wird dort bewusst NICHT aus den Metadaten gelesen.
       data: { first_name: firstName, last_name: lastName },
@@ -146,7 +155,7 @@ export async function signUp(_prevState: AuthFormState, formData: FormData): Pro
   });
 
   if (error) {
-    return { status: 'error', message: authErrorMessage(error), values };
+    return { status: 'error', message: await authErrorMessage(error), values };
   }
 
   // E-Mail-Bestätigung deaktiviert (lokale Entwicklung): Session besteht bereits.
@@ -157,11 +166,8 @@ export async function signUp(_prevState: AuthFormState, formData: FormData): Pro
 
   // Identische Antwort auch für bereits registrierte Adressen (Supabase liefert
   // dann einen verschleierten Nutzer ohne Session) – keine Konto-Enumeration.
-  return {
-    status: 'success',
-    message: `Fast geschafft! Wir haben Ihnen eine E-Mail an ${email} gesendet. Bitte öffnen Sie den Bestätigungslink in diesem Browser, um die Registrierung abzuschließen.`,
-    values: { email },
-  };
+  const t = await getTranslations('Signup');
+  return { status: 'success', message: t('success', { email }), values: { email } };
 }
 
 export async function signOut(formData: FormData): Promise<void> {
@@ -170,6 +176,5 @@ export async function signOut(formData: FormData): Promise<void> {
   await supabase.auth.signOut({ scope: 'local' });
 
   revalidatePath('/', 'layout');
-  const next = parseRedirectPath(formData.get('next'));
-  redirect(next ? `/login?next=${encodeURIComponent(next)}` : '/login');
+  redirect(await localizedPathWithNext('/login', parseRedirectPath(formData.get('next'))));
 }

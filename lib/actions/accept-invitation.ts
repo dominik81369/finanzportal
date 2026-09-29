@@ -14,7 +14,9 @@
 import type { PostgrestError } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
+import { localizedPath, localizedPathWithNext } from '@/i18n/paths';
 import { invitePath, isWellFormedInviteToken } from '@/lib/invite-token';
 import { createClient, currentUserHasPassword, getSessionUser } from '@/lib/supabase/server';
 import { DEFAULT_REDIRECT_PATH } from '@/lib/url';
@@ -24,25 +26,24 @@ export type AcceptInvitationState = {
   message?: string;
 };
 
-const INVALID_OR_EXPIRED =
-  'Diese Einladung ist ungültig oder abgelaufen. Bitte prüfen Sie, ob Sie mit der E-Mail-Adresse angemeldet sind, an die die Einladung ging – oder bitten Sie Ihren Berater, die Einladung erneut zu senden.';
+async function acceptErrorMessage(error: PostgrestError): Promise<string> {
+  const t = await getTranslations('Invite.errors');
 
-function acceptErrorMessage(error: PostgrestError): string {
   // Die RPC meldet fachliche Fehler über die Exception-Message.
   switch (error.message) {
     case 'invalid_or_expired_invitation':
-      return INVALID_OR_EXPIRED;
+      return t('invalidOrExpired');
     case 'email_not_confirmed':
-      return 'Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse über den Link in unserer E-Mail und versuchen Sie es dann erneut.';
+      return t('emailNotConfirmed');
   }
 
   // advisor_clients_active_pair_key: bereits aktive Verbindung zu diesem Berater
   if (error.code === '23505') {
-    return 'Sie sind mit diesem Berater bereits verbunden.';
+    return t('alreadyConnected');
   }
 
   console.error('[accept-invitation] RPC fehlgeschlagen', { code: error.code });
-  return 'Die Einladung konnte nicht angenommen werden. Bitte versuchen Sie es später erneut.';
+  return t('generic');
 }
 
 export async function acceptInvitation(
@@ -51,10 +52,11 @@ export async function acceptInvitation(
 ): Promise<AcceptInvitationState> {
   const token = formData.get('token');
   if (!isWellFormedInviteToken(token)) {
-    return { status: 'error', message: INVALID_OR_EXPIRED };
+    const t = await getTranslations('Invite.errors');
+    return { status: 'error', message: t('invalidOrExpired') };
   }
 
-  const loginPath = `/login?next=${encodeURIComponent(invitePath(token))}`;
+  const loginPath = await localizedPathWithNext('/login', await localizedPath(invitePath(token)));
   const user = await getSessionUser();
   if (!user) {
     redirect(loginPath);
@@ -67,7 +69,7 @@ export async function acceptInvitation(
     if (error.message === 'not_authenticated') {
       redirect(loginPath);
     }
-    return { status: 'error', message: acceptErrorMessage(error) };
+    return { status: 'error', message: await acceptErrorMessage(error) };
   }
 
   revalidatePath('/', 'layout');
@@ -76,9 +78,6 @@ export async function acceptInvitation(
   // festlegen. Bestehende Konten (Anmeldelink) direkt ins Dashboard. Ist der
   // Zustand unbekannt (null), prüft /set-password selbst erneut.
   const hasPassword = await currentUserHasPassword();
-  redirect(
-    hasPassword
-      ? DEFAULT_REDIRECT_PATH
-      : `/set-password?next=${encodeURIComponent(DEFAULT_REDIRECT_PATH)}`,
-  );
+  const dashboardPath = await localizedPath(DEFAULT_REDIRECT_PATH);
+  redirect(hasPassword ? dashboardPath : await localizedPathWithNext('/set-password', dashboardPath));
 }

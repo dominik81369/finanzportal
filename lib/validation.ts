@@ -40,13 +40,20 @@ export function parseEmail(value: unknown): string | null {
   return email;
 }
 
-/** Fehlermeldung für ein neues Passwort oder null, wenn es zulässig ist. */
-export function validateNewPassword(password: string): string | null {
+/** Schlüssel in messages/*.json → Validation. */
+export type PasswordIssue = 'passwordTooShort' | 'passwordTooLong';
+
+/**
+ * Problem mit einem neuen Passwort oder null, wenn es zulässig ist.
+ * Liefert einen Übersetzungsschlüssel (Namespace Validation, Parameter min),
+ * keinen fertigen Text.
+ */
+export function validateNewPassword(password: string): PasswordIssue | null {
   if (password.length < PASSWORD_MIN_LENGTH) {
-    return `Das Passwort muss mindestens ${PASSWORD_MIN_LENGTH} Zeichen lang sein.`;
+    return 'passwordTooShort';
   }
   if (new TextEncoder().encode(password).length > PASSWORD_MAX_BYTES) {
-    return 'Das Passwort ist zu lang (maximal 72 Byte).';
+    return 'passwordTooLong';
   }
   return null;
 }
