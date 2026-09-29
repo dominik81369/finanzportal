@@ -18,7 +18,11 @@ const LIST_LIMIT = 100;
 
 type TransactionsPageProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ saved?: string | string[] }>;
+  searchParams: Promise<{
+    saved?: string | string[];
+    updated?: string | string[];
+    deleted?: string | string[];
+  }>;
 };
 
 export async function generateMetadata({
@@ -31,7 +35,16 @@ export async function generateMetadata({
 
 export default async function TransactionsPage({ searchParams }: TransactionsPageProps) {
   const user = await requireOnboardedUser('/dashboard/transactions');
-  const saved = (await searchParams).saved === '1';
+  const query = await searchParams;
+  // Bestätigung nach Anlegen, Bearbeiten bzw. Löschen (Weiterleitung der Actions).
+  const notice =
+    query.saved === '1'
+      ? 'saved'
+      : query.updated === '1'
+        ? 'updated'
+        : query.deleted === '1'
+          ? 'deleted'
+          : null;
   const t = await getTranslations('Transactions.list');
   const tDashboard = await getTranslations('Dashboard');
   const format = await getFormatter();
@@ -41,7 +54,7 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
   const { data: transactions, error } = await supabase
     .from('transactions')
     .select(
-      `id, booking_date, amount, currency, counterparty_name, purpose,
+      `id, source, booking_date, amount, currency, counterparty_name, purpose,
        account:accounts!transactions_account_fkey ( name ),
        category:categories!transactions_category_fkey ( name, color ),
        transaction_tags ( tag:tags!transaction_tags_tag_fkey ( id, name ) )`,
@@ -65,9 +78,9 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
       </div>
       <p>{tDashboard('transactions.description')}</p>
 
-      {saved ? (
+      {notice ? (
         <p role="status" className="form-success">
-          {t('saved')}
+          {t(notice)}
         </p>
       ) : null}
 
@@ -91,49 +104,64 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
                 <th scope="col" className="amount">
                   {t('columns.amount')}
                 </th>
+                <th scope="col">
+                  <span className="sr-only">{t('actions')}</span>
+                </th>
               </tr>
             </thead>
             <tbody>
-              {transactions.map((tx) => (
-                <tr key={tx.id}>
-                  <td className="nowrap">
-                    {/* booking_date ist ein reines Datum: als UTC lesen und anzeigen. */}
-                    {format.dateTime(new Date(`${tx.booking_date}T00:00:00Z`), {
-                      dateStyle: 'medium',
-                      timeZone: 'UTC',
-                    })}
-                  </td>
-                  <td>
-                    {tx.counterparty_name}
-                    {tx.purpose ? <span className="cell-note">{tx.purpose}</span> : null}
-                  </td>
-                  <td>
-                    {tx.category ? (
-                      <span className="category">
-                        <span
-                          className="category-dot"
-                          aria-hidden="true"
-                          style={{ background: tx.category.color ?? 'var(--muted-foreground)' }}
-                        />
-                        {tx.category.name}
-                      </span>
-                    ) : (
-                      <span className="muted">{t('uncategorized')}</span>
-                    )}
-                  </td>
-                  <td>
-                    <TagList
-                      tags={tx.transaction_tags
-                        .flatMap(({ tag }) => (tag ? [tag] : []))
-                        .sort((a, b) => collator.compare(a.name, b.name))}
-                    />
-                  </td>
-                  <td>{tx.account?.name}</td>
-                  <td className={`amount ${tx.amount < 0 ? 'amount-negative' : 'amount-positive'}`}>
-                    {format.number(tx.amount, { style: 'currency', currency: tx.currency })}
-                  </td>
-                </tr>
-              ))}
+              {transactions.map((tx) => {
+                // booking_date ist ein reines Datum: als UTC lesen und anzeigen.
+                const date = format.dateTime(new Date(`${tx.booking_date}T00:00:00Z`), {
+                  dateStyle: 'medium',
+                  timeZone: 'UTC',
+                });
+                return (
+                  <tr key={tx.id}>
+                    <td className="nowrap">{date}</td>
+                    <td>
+                      {tx.counterparty_name}
+                      {tx.purpose ? <span className="cell-note">{tx.purpose}</span> : null}
+                    </td>
+                    <td>
+                      {tx.category ? (
+                        <span className="category">
+                          <span
+                            className="category-dot"
+                            aria-hidden="true"
+                            style={{ background: tx.category.color ?? 'var(--muted-foreground)' }}
+                          />
+                          {tx.category.name}
+                        </span>
+                      ) : (
+                        <span className="muted">{t('uncategorized')}</span>
+                      )}
+                    </td>
+                    <td>
+                      <TagList
+                        tags={tx.transaction_tags
+                          .flatMap(({ tag }) => (tag ? [tag] : []))
+                          .sort((a, b) => collator.compare(a.name, b.name))}
+                      />
+                    </td>
+                    <td>{tx.account?.name}</td>
+                    <td className={`amount ${tx.amount < 0 ? 'amount-negative' : 'amount-positive'}`}>
+                      {format.number(tx.amount, { style: 'currency', currency: tx.currency })}
+                    </td>
+                    <td className="row-actions">
+                      {/* Nur manuell erfasste Buchungen sind bearbeitbar. */}
+                      {tx.source === 'manual' ? (
+                        <Link
+                          href={`/dashboard/transactions/${tx.id}/edit`}
+                          aria-label={t('editLabel', { counterparty: tx.counterparty_name ?? '', date })}
+                        >
+                          {t('edit')}
+                        </Link>
+                      ) : null}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

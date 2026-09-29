@@ -182,7 +182,12 @@
         "account": "Konto",
         "amount": "Betrag"
       },
-      "uncategorized": "Ohne Kategorie"
+      "uncategorized": "Ohne Kategorie",
+      "updated": "Die Änderungen wurden gespeichert.",
+      "deleted": "Die Transaktion wurde gelöscht.",
+      "edit": "Bearbeiten",
+      "editLabel": "Buchung „{counterparty}“ vom {date} bearbeiten",
+      "actions": "Aktionen"
     },
     "form": {
       "metaTitle": "Transaktion erfassen",
@@ -212,6 +217,22 @@
       "submit": "Transaktion speichern",
       "submitting": "Wird gespeichert …"
     },
+    "edit": {
+      "metaTitle": "Transaktion bearbeiten",
+      "heading": "Transaktion bearbeiten",
+      "submit": "Änderungen speichern",
+      "submitting": "Wird gespeichert …",
+      "notEditable": "Diese Buchung wurde importiert bzw. von der Bank übernommen und kann hier nicht bearbeitet oder gelöscht werden.",
+      "delete": {
+        "heading": "Transaktion löschen",
+        "hint": "Das Löschen kann nicht rückgängig gemacht werden. Tags bleiben erhalten.",
+        "button": "Transaktion löschen",
+        "confirm": "Diese Transaktion wirklich endgültig löschen?",
+        "confirmButton": "Ja, endgültig löschen",
+        "cancel": "Abbrechen",
+        "deleting": "Wird gelöscht …"
+      }
+    },
     "errors": {
       "amountInvalid": "Bitte geben Sie einen Betrag größer als 0 mit höchstens zwei Nachkommastellen ein, z. B. 12,50.",
       "currencyInvalid": "Bitte wählen Sie eine der angebotenen Währungen.",
@@ -224,7 +245,9 @@
       "tagNotFound": "Ein ausgewählter Tag ist nicht (mehr) verfügbar. Bitte laden Sie die Seite neu.",
       "tagTooLong": "Tags dürfen höchstens {max} Zeichen lang sein.",
       "tooManyTags": "Bitte höchstens {newMax} neue und insgesamt {totalMax} Tags je Buchung.",
-      "generic": "Die Transaktion konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+      "generic": "Die Transaktion konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      "transactionNotFound": "Diese Transaktion gibt es nicht (mehr).",
+      "transactionNotEditable": "Diese Transaktion wurde importiert und kann nicht bearbeitet oder gelöscht werden."
     }
   }
 }

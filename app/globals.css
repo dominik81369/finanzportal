@@ -556,6 +556,70 @@
   white-space: nowrap;
 }
 
+.row-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.row-actions a {
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.danger-zone {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.danger-zone h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.confirm-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: color-mix(in oklch, var(--destructive) 6%, transparent);
+  border: 1px solid color-mix(in oklch, var(--destructive) 40%, transparent);
+  border-radius: var(--radius-md);
+}
+
+.confirm-box p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.confirm-box .actions .button {
+  margin-top: 0.75rem;
+}
+
+.button-danger {
+  color: var(--primary-foreground);
+  background: var(--destructive);
+  border-color: var(--destructive);
+}
+
+.button-danger-outline {
+  margin-top: 0.75rem;
+  color: var(--destructive);
+  background: transparent;
+  border-color: var(--destructive);
+}
+
 .cell-note {
   display: block;
   font-size: 0.85rem;
