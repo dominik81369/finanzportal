@@ -365,7 +365,9 @@
       "accounts": {
         "heading": "Accounts",
         "empty": "No accounts yet.",
-        "loadError": "The accounts could not be loaded right now. Please reload the page."
+        "loadError": "The accounts could not be loaded right now. Please reload the page.",
+        "balance": "Balance",
+        "foreign": "plus {amount} not included in the balance"
       },
       "transactions": {
         "heading": "Transactions",

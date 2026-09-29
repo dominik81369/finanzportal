@@ -891,6 +891,10 @@ export type Database = {
         Args: { p_id: string };
         Returns: undefined;
       };
+      account_foreign_currency_totals: {
+        Args: { p_user_id: string };
+        Returns: { account_id: string; currency: string; total: number }[];
+      };
     };
 
     Enums: {

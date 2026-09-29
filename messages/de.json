@@ -365,7 +365,9 @@
       "accounts": {
         "heading": "Konten",
         "empty": "Noch keine Konten vorhanden.",
-        "loadError": "Die Konten konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu."
+        "loadError": "Die Konten konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+        "balance": "Saldo",
+        "foreign": "zzgl. {amount} nicht im Saldo"
       },
       "transactions": {
         "heading": "Buchungen",

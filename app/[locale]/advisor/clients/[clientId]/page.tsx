@@ -2,7 +2,8 @@
  * app/[locale]/advisor/clients/[clientId]/page.tsx
  *
  * Leseansicht des Beraters auf die Finanzdaten eines verbundenen Mandanten:
- * Konten und Buchungen (mit denselben Filtern und Seiten wie die eigene
+ * Konten mit Saldo (Fremdwährungsbuchungen getrennt, siehe Migration
+ * 20261002160000) und Buchungen (mit denselben Filtern und Seiten wie die eigene
  * Liste des Mandanten). Keine Schreibaktionen – RLS erlaubt Beratern auf
  * Mandantendaten ohnehin nur SELECT.
  *
@@ -85,16 +86,27 @@ export default async function AdvisorClientPage({ params, searchParams }: Client
   const filtered = hasActiveFilters(filters);
   const page = parsePage(query);
 
-  const [accounts, { transactions, total, pages, firstRow }, options] = await Promise.all([
+  const [accounts, foreign, { transactions, total, pages, firstRow }, options] = await Promise.all([
     supabase
       .from('accounts')
-      .select('id, name, type, currency, institution_name')
+      .select('id, name, type, currency, institution_name, balance')
       .eq('user_id', clientId)
       .is('archived_at', null)
       .order('name'),
+    // Buchungen in Fremdwährung zählen nicht zum Saldo – getrennt ausweisen.
+    supabase.rpc('account_foreign_currency_totals', { p_user_id: clientId }),
     loadTransactionList({ userId: clientId, filters, page, listPath }),
     loadTransactionFormOptions(clientId),
   ]);
+
+  if (foreign.error) {
+    console.error('[advisor] Fremdwährungssummen nicht ladbar', { code: foreign.error.code });
+  }
+  const foreignByAccount = new Map<string, { currency: string; total: number }[]>();
+  for (const row of foreign.data ?? []) {
+    foreignByAccount.set(row.account_id, [...(foreignByAccount.get(row.account_id) ?? []), row]);
+  }
+  const money = (amount: number, currency: string) => format.number(amount, { style: 'currency', currency });
 
   if (accounts.error) {
     console.error('[advisor] Konten des Mandanten nicht ladbar', { code: accounts.error.code });
@@ -135,6 +147,17 @@ export default async function AdvisorClientPage({ params, searchParams }: Client
                       .filter(Boolean)
                       .join(' · ')}
                   </span>
+                </div>
+                <div className="account-balance">
+                  <span className="sr-only">{t('accounts.balance')}: </span>
+                  <strong className={account.balance < 0 ? 'amount-negative' : undefined}>
+                    {money(account.balance, account.currency)}
+                  </strong>
+                  {(foreignByAccount.get(account.id) ?? []).map((row) => (
+                    <span key={row.currency} className="cell-note">
+                      {t('accounts.foreign', { amount: money(row.total, row.currency) })}
+                    </span>
+                  ))}
                 </div>
               </li>
             ))}
