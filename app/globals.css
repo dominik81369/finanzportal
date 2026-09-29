@@ -140,3 +140,166 @@ body {
   border: none;
   cursor: pointer;
 }
+
+/* ---------------------------------------------------------------------
+   Dashboard
+   --------------------------------------------------------------------- */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 10;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  border-radius: 0.5rem;
+}
+
+.dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dashboard-brand {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.dashboard-account {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.dashboard-user {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.dashboard-body {
+  flex: 1;
+  display: flex;
+}
+
+.dashboard-nav {
+  position: relative;
+  flex: 0 0 13rem;
+  padding: 1rem 0.75rem;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+}
+
+.dashboard-nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dashboard-nav a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--color-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dashboard-nav a:hover {
+  background: var(--color-background);
+}
+
+.dashboard-nav a[aria-current='page'] {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  font-weight: 600;
+}
+
+.dashboard-content {
+  flex: 1;
+  min-width: 0;
+  padding: 2rem 1.5rem;
+}
+
+.dashboard-content:focus {
+  outline: none;
+}
+
+.dashboard-content h1 {
+  margin-top: 0;
+}
+
+.placeholder {
+  max-width: 48rem;
+}
+
+.placeholder-box {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: 0.75rem;
+}
+
+.placeholder-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.placeholder-box ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+@media (max-width: 48rem) {
+  .dashboard-body {
+    flex-direction: column;
+  }
+
+  .dashboard-nav {
+    flex: none;
+    padding: 0.5rem 0 0.5rem 1rem;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    overflow-x: auto;
+  }
+
+  /* Endabstand an der Liste statt an der Navigation: Nur so zählt er zur
+     scrollbaren Breite, und der letzte Eintrag klebt nicht am Rand. */
+  .dashboard-nav ul {
+    flex-direction: row;
+    width: max-content;
+    padding-right: 1rem;
+  }
+
+  .dashboard-header,
+  .dashboard-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
