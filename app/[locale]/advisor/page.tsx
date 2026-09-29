@@ -3,6 +3,8 @@
  *
  * Beraterbereich: Mandanten einladen, verbundene Mandanten und offene
  * Einladungen verwalten (erneut senden, zurückziehen, Zugriff beenden).
+ * Der Name eines verbundenen Mandanten führt zu seinen Finanzdaten
+ * (./clients/[clientId]).
  *
  * Die Abfrage filtert ausdrücklich auf advisor_id = eigener Nutzer; RLS
  * (advisor_clients_select_participant) würde einem Berater, der selbst
@@ -11,6 +13,7 @@
  */
 import { getFormatter, getTranslations } from 'next-intl/server';
 
+import { Link } from '@/i18n/navigation';
 import { revokeClientLink } from '@/lib/actions/advisor-links';
 import { INVITE_TTL_DAYS } from '@/lib/invite-token';
 import { createClient, requireAdvisor } from '@/lib/supabase/server';
@@ -37,7 +40,7 @@ export default async function AdvisorPage({ searchParams }: AdvisorPageProps) {
   const { data: links, error } = await supabase
     .from('advisor_clients')
     .select(
-      `id, status, invited_email, invited_at, invite_expires_at, accepted_at,
+      `id, user_id, status, invited_email, invited_at, invite_expires_at, accepted_at,
        client:profiles!advisor_clients_user_id_fkey ( first_name, last_name )`,
     )
     .eq('advisor_id', advisor.id)
@@ -101,7 +104,14 @@ export default async function AdvisorPage({ searchParams }: AdvisorPageProps) {
               return (
                 <li key={link.id} className="link-item">
                   <div className="link-item-text">
-                    <strong>{name}</strong>
+                    <strong>
+                      {/* Bei aktiven Verbindungen immer gesetzt (advisor_clients_status_consistency). */}
+                      {link.user_id ? (
+                        <Link href={`/advisor/clients/${link.user_id}`}>{name}</Link>
+                      ) : (
+                        name
+                      )}
+                    </strong>
                     <span className="cell-note">{link.invited_email}</span>
                     {link.accepted_at ? (
                       <span className="cell-note">

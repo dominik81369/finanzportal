@@ -17,6 +17,8 @@ import type { CategoryOption } from './transaction-form';
 type TransactionFiltersFormProps = {
   filters: TransactionFilters;
   active: boolean;
+  /** Pfad der Liste ohne Sprachpräfix (Ziel von „Filter zurücksetzen“). */
+  basePath: string;
   accounts: Pick<Account, 'id' | 'name'>[];
   categories: CategoryOption[];
   tags: Pick<Tag, 'id' | 'name'>[];
@@ -25,6 +27,7 @@ type TransactionFiltersFormProps = {
 export async function TransactionFiltersForm({
   filters,
   active,
+  basePath,
   accounts,
   categories,
   tags,
@@ -115,7 +118,7 @@ export async function TransactionFiltersForm({
           {t('apply')}
         </button>
         {active ? (
-          <Link className="button button-secondary" href="/dashboard/transactions">
+          <Link className="button button-secondary" href={basePath}>
             {t('reset')}
           </Link>
         ) : null}

@@ -357,6 +357,21 @@
       "withdrawConfirm": "Yes, withdraw",
       "withdrawing": "Withdrawing …",
       "withdrawn": "The invitation has been withdrawn."
+    },
+    "client": {
+      "metaTitle": "Client data",
+      "back": "← Back to advisor area",
+      "readOnly": "Read-only access: you see the data the client has recorded in the portal. Only the client can change it.",
+      "accounts": {
+        "heading": "Accounts",
+        "empty": "No accounts yet.",
+        "loadError": "The accounts could not be loaded right now. Please reload the page."
+      },
+      "transactions": {
+        "heading": "Transactions",
+        "empty": "The client has not recorded any transactions yet.",
+        "caption": "{name}'s transactions, newest first"
+      }
     }
   },
   "AdvisorLinks": {
@@ -364,5 +379,14 @@
       "notFound": "This connection does not exist (any more) or has already been ended. Please reload the page.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "AccountTypes": {
+    "checking": "Checking account",
+    "savings": "Savings account",
+    "credit_card": "Credit card",
+    "depot": "Brokerage account",
+    "loan": "Loan",
+    "cash": "Cash",
+    "other": "Other"
   }
 }

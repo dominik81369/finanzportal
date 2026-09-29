@@ -2,7 +2,8 @@
  * app/[locale]/dashboard/transactions/form-options.ts
  *
  * Auswahllisten des Buchungsformulars (Konten, Kategorien, Tags) für
- * Anlegen und Bearbeiten.
+ * Anlegen und Bearbeiten sowie für die Filter der Transaktionsliste
+ * (auch in der Leseansicht des Beraters, dann mit userId = Mandant).
  *
  * Alle Abfragen filtern ausdrücklich auf user_id = eigener Nutzer: RLS lässt
  * Berater zusätzlich die Daten ihrer Mandanten LESEN – ohne Filter stünden
