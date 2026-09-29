@@ -5,9 +5,10 @@
  * Suche, Filtern und Seiten (lib/transaction-filters.ts, Werte als
  * Query-Parameter). Erfassung unter ./new.
  *
- * Reihenfolge booking_date absteigend, id aufsteigend als Tiebreaker – genau
- * die Reihenfolge des Index transactions_user_id_booking_date_idx
- * (user_id, booking_date desc, id). Seiten per LIMIT/OFFSET (.range()).
+ * Reihenfolge: booking_date absteigend, bei gleichem Datum die neueste
+ * Erfassung oben (created_at absteigend), id als letzter Tiebreaker – genau
+ * die Reihenfolge des Index transactions_user_booking_created_idx
+ * (Migration 20261002130000). Seiten per LIMIT/OFFSET (.range()).
  *
  * Die Abfrage filtert ausdrücklich auf user_id = eigener Nutzer: RLS lässt
  * Berater zusätzlich die Buchungen ihrer Mandanten lesen.
@@ -125,6 +126,7 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
   const [{ data: transactions, count, error }, options] = await Promise.all([
     buildQuery()
       .order('booking_date', { ascending: false })
+      .order('created_at', { ascending: false })
       .order('id', { ascending: true })
       .range(from, to),
     loadTransactionFormOptions(user.id),
