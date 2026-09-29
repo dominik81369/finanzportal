@@ -11,7 +11,7 @@
 
 export type DashboardNavItem = {
   href: string;
-  labelKey: 'overview' | 'transactions' | 'budgets' | 'contracts' | 'netWorth';
+  labelKey: 'overview' | 'transactions' | 'budgets' | 'contracts' | 'netWorth' | 'advisors';
   /** Nur bei exakt diesem Pfad aktiv (sonst auch für Unterseiten). */
   exact?: boolean;
 };
@@ -22,6 +22,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
   { href: '/dashboard/budgets', labelKey: 'budgets' },
   { href: '/dashboard/contracts', labelKey: 'contracts' },
   { href: '/dashboard/net-worth', labelKey: 'netWorth' },
+  { href: '/dashboard/advisors', labelKey: 'advisors' },
 ];
 
 /** pathname ohne Sprachpräfix (usePathname aus i18n/navigation.ts). */

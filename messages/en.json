@@ -119,6 +119,7 @@
   "Dashboard": {
     "skipLink": "Skip to content",
     "signOut": "Sign out",
+    "toAdvisorArea": "Advisor area",
     "navLabel": "Sections",
     "placeholderLabel": "Coming soon",
     "nav": {
@@ -126,7 +127,8 @@
       "transactions": "Transactions",
       "budgets": "Budgets",
       "contracts": "Contracts",
-      "netWorth": "Net Worth"
+      "netWorth": "Net Worth",
+      "advisors": "Advisors"
     },
     "overview": {
       "title": "Overview",
@@ -165,6 +167,21 @@
         "allocation": "Assets by asset class and region",
         "history": "Development over time"
       }
+    },
+    "advisors": {
+      "title": "Advisors",
+      "description": "Advisors you have given read access to your financial data. You can revoke access at any time.",
+      "empty": "No advisor currently has access to your financial data.",
+      "loadError": "The connections could not be loaded right now. Please reload the page.",
+      "noName": "Advisor (no name in profile)",
+      "access": "Read access to accounts, transactions, categories, portfolios and real estate",
+      "since": "Connected since {date}",
+      "revoke": "Revoke access",
+      "revokeLabel": "Revoke access of {name}",
+      "revokeQuestion": "Really revoke access? The advisor will immediately no longer see your financial data. A new invitation is required to reconnect.",
+      "revokeConfirm": "Yes, revoke access",
+      "revoking": "Revoking …",
+      "revoked": "Access has been revoked."
     }
   },
   "Transactions": {
@@ -298,5 +315,54 @@
     "savings_investments": "Saving & investing",
     "loan_repayment": "Loan repayment",
     "transfer": "Transfer"
+  },
+  "Advisor": {
+    "metaTitle": "Advisor area",
+    "heading": "Advisor area",
+    "intro": "Invite clients and manage who has given you read access to their financial data.",
+    "toOwnFinances": "My finances",
+    "loadError": "Clients and invitations could not be loaded right now. Please reload the page.",
+    "cancel": "Cancel",
+    "invite": {
+      "heading": "Invite a client",
+      "email": "Client's email address",
+      "hint": "The client receives a link that is valid for {days} days. You only get read access with their explicit consent.",
+      "submit": "Send invitation",
+      "submitting": "Sending …"
+    },
+    "clients": {
+      "heading": "Connected clients",
+      "empty": "No clients connected yet.",
+      "noName": "Client (no name in profile)",
+      "since": "Connected since {date}",
+      "end": "End access",
+      "endLabel": "End access to {name}",
+      "endQuestion": "Really end access to this client? You will no longer see their data; a new invitation is required to reconnect.",
+      "endConfirm": "Yes, end access",
+      "ending": "Ending …",
+      "ended": "Access to the client has been ended."
+    },
+    "pending": {
+      "heading": "Open invitations",
+      "empty": "No open invitations.",
+      "invitedOn": "Invited on {date}",
+      "validUntil": "valid until {date}",
+      "expired": "expired",
+      "resend": "Resend",
+      "resendLabel": "Resend invitation to {email}",
+      "resending": "Sending …",
+      "withdraw": "Withdraw",
+      "withdrawLabel": "Withdraw invitation to {email}",
+      "withdrawQuestion": "Really withdraw the invitation? The link in the email becomes invalid immediately.",
+      "withdrawConfirm": "Yes, withdraw",
+      "withdrawing": "Withdrawing …",
+      "withdrawn": "The invitation has been withdrawn."
+    }
+  },
+  "AdvisorLinks": {
+    "errors": {
+      "notFound": "This connection does not exist (any more) or has already been ended. Please reload the page.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }
