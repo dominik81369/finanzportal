@@ -58,6 +58,19 @@ export function parseAmountInput(input: string, locale: AppLocale): number | nul
   return amount;
 }
 
+/**
+ * Betrag als Eingabetext in der Schreibweise der Sprache, ohne
+ * Tausendertrennzeichen (de: "1500,00", en: "1500.00") – zum Vorbelegen beim
+ * Bearbeiten; parseAmountInput() liest ihn wieder ein.
+ */
+export function formatAmountInput(amount: number, locale: AppLocale): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: false,
+  }).format(Math.abs(amount));
+}
+
 /** ISO-Datum (YYYY-MM-DD), das es im Kalender gibt, sonst null. */
 export function parseIsoDate(input: string): string | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input);

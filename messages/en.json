@@ -182,7 +182,12 @@
         "account": "Account",
         "amount": "Amount"
       },
-      "uncategorized": "Uncategorised"
+      "uncategorized": "Uncategorised",
+      "updated": "Your changes have been saved.",
+      "deleted": "The transaction has been deleted.",
+      "edit": "Edit",
+      "editLabel": "Edit booking \"{counterparty}\" of {date}",
+      "actions": "Actions"
     },
     "form": {
       "metaTitle": "Add transaction",
@@ -212,6 +217,22 @@
       "submit": "Save transaction",
       "submitting": "Saving …"
     },
+    "edit": {
+      "metaTitle": "Edit transaction",
+      "heading": "Edit transaction",
+      "submit": "Save changes",
+      "submitting": "Saving …",
+      "notEditable": "This booking was imported or synchronised from the bank and cannot be edited or deleted here.",
+      "delete": {
+        "heading": "Delete transaction",
+        "hint": "Deleting cannot be undone. Tags are kept.",
+        "button": "Delete transaction",
+        "confirm": "Really delete this transaction permanently?",
+        "confirmButton": "Yes, delete permanently",
+        "cancel": "Cancel",
+        "deleting": "Deleting …"
+      }
+    },
     "errors": {
       "amountInvalid": "Please enter an amount greater than 0 with at most two decimal places, e.g. 12.50.",
       "currencyInvalid": "Please choose one of the offered currencies.",
@@ -224,7 +245,9 @@
       "tagNotFound": "A selected tag is not available (any more). Please reload the page.",
       "tagTooLong": "Tags may be at most {max} characters long.",
       "tooManyTags": "Please use at most {newMax} new and {totalMax} tags in total per booking.",
-      "generic": "The transaction could not be saved. Please try again."
+      "generic": "The transaction could not be saved. Please try again.",
+      "transactionNotFound": "This transaction does not exist (any more).",
+      "transactionNotEditable": "This transaction was imported and cannot be edited or deleted."
     }
   }
 }

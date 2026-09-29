@@ -1,29 +1,40 @@
 'use client';
 
+/**
+ * Buchungsformular für Anlegen (./new) und Bearbeiten (./[id]/edit).
+ * Die Server Action kommt als Prop: createTransaction bzw.
+ * updateTransaction.bind(null, id).
+ */
+
 import { useLocale, useTranslations } from 'next-intl';
 import { startTransition, useActionState, useState, type FormEvent, type ReactNode } from 'react';
 
-import {
-  createTransaction,
-  type CreateTransactionState,
-  type TransactionField,
-  type TransactionType,
-} from '@/lib/actions/create-transaction';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
+import type {
+  TransactionField,
+  TransactionFormAction,
+  TransactionFormState,
+  TransactionFormValues,
+  TransactionType,
+} from '@/lib/transaction-form-types';
 import { COUNTERPARTY_MAX_LENGTH, PURPOSE_MAX_LENGTH } from '@/lib/transactions';
 import type { Account, Category, Tag } from '@/types/domain';
 
 export type CategoryOption = { id: string; kind: Category['kind']; label: string };
 
 type TransactionFormProps = {
+  mode: 'create' | 'edit';
+  action: TransactionFormAction;
   accounts: Pick<Account, 'id' | 'name' | 'currency'>[];
   categories: CategoryOption[];
   tags: Pick<Tag, 'id' | 'name'>[];
-  /** Vorbelegung des Datums (YYYY-MM-DD, deutsche Zeitzone). */
+  /** Vorbelegung des Datums beim Anlegen (YYYY-MM-DD, deutsche Zeitzone). */
   today: string;
+  /** Gespeicherte Werte beim Bearbeiten. */
+  initialValues?: TransactionFormValues;
 };
 
-const initialState: CreateTransactionState = { status: 'idle' };
+const initialState: TransactionFormState = { status: 'idle' };
 
 /** Welche Kategoriearten zur Buchungsart passen (wie create_manual_transaction()). */
 const KINDS_FOR_TYPE: Record<TransactionType, readonly Category['kind'][]> = {
@@ -31,11 +42,21 @@ const KINDS_FOR_TYPE: Record<TransactionType, readonly Category['kind'][]> = {
   income: ['income', 'transfer'],
 };
 
-export function TransactionForm({ accounts, categories, tags, today }: TransactionFormProps) {
+export function TransactionForm({
+  mode,
+  action,
+  accounts,
+  categories,
+  tags,
+  today,
+  initialValues,
+}: TransactionFormProps) {
   const t = useTranslations('Transactions.form');
+  const tEdit = useTranslations('Transactions.edit');
   const locale = useLocale();
-  const [state, formAction, isPending] = useActionState(createTransaction, initialState);
-  const values = state.values;
+  const [state, formAction, isPending] = useActionState(action, initialState);
+  // Nach einem Fehler die eingegebenen Werte, sonst die gespeicherten.
+  const values = state.values ?? initialValues;
   const fieldErrors = state.fieldErrors ?? {};
 
   // Kontrolliert, weil Art und Konto die Kategorie- bzw. Währungsauswahl
@@ -257,7 +278,13 @@ export function TransactionForm({ accounts, categories, tags, today }: Transacti
       {fieldError('tags', 'tags')}
 
       <button type="submit" disabled={isPending}>
-        {isPending ? t('submitting') : t('submit')}
+        {mode === 'edit'
+          ? isPending
+            ? tEdit('submitting')
+            : tEdit('submit')
+          : isPending
+            ? t('submitting')
+            : t('submit')}
       </button>
     </form>
   );
