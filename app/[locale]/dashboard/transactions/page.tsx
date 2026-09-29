@@ -13,6 +13,7 @@ import { getFormatter, getLocale, getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
 import { toAppLocale } from '@/i18n/routing';
+import { categoryDisplayName } from '@/lib/categories';
 import { createClient, requireOnboardedUser } from '@/lib/supabase/server';
 import {
   UNCATEGORIZED,
@@ -54,6 +55,7 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
           : null;
   const t = await getTranslations('Transactions.list');
   const tDashboard = await getTranslations('Dashboard');
+  const tCategories = await getTranslations('DefaultCategories');
   const format = await getFormatter();
   const collator = new Intl.Collator(await getLocale());
 
@@ -68,7 +70,7 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
     .select(
       `id, source, booking_date, amount, currency, counterparty_name, purpose,
        account:accounts!transactions_account_fkey ( name ),
-       category:categories!transactions_category_fkey ( name, color ),
+       category:categories!transactions_category_fkey ( name, default_key, color ),
        transaction_tags ( tag:tags!transaction_tags_tag_fkey ( id, name ) ),
        tag_filter:transaction_tags ( tag_id )`,
     )
@@ -191,7 +193,7 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
                             aria-hidden="true"
                             style={{ background: tx.category.color ?? 'var(--muted-foreground)' }}
                           />
-                          {tx.category.name}
+                          {categoryDisplayName(tx.category, tCategories)}
                         </span>
                       ) : (
                         <span className="muted">{t('uncategorized')}</span>

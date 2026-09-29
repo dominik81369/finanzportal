@@ -10,6 +10,9 @@
  */
 import 'server-only';
 
+import { getTranslations } from 'next-intl/server';
+
+import { categoryDisplayName } from '@/lib/categories';
 import { createClient } from '@/lib/supabase/server';
 
 import type { CategoryOption } from './transaction-form';
@@ -27,7 +30,7 @@ export async function loadTransactionFormOptions(userId: string) {
       .order('name'),
     supabase
       .from('categories')
-      .select('id, name, kind, parent_category_id, sort_order')
+      .select('id, name, default_key, kind, parent_category_id, sort_order')
       .eq('user_id', userId)
       .order('sort_order')
       .order('name'),
@@ -40,11 +43,16 @@ export async function loadTransactionFormOptions(userId: string) {
     return null;
   }
 
-  // Unterkategorien als "Oberkategorie › Unterkategorie" anzeigen.
-  const categoryNames = new Map(categories.data.map((c) => [c.id, c.name]));
+  // Standardkategorien in der Sprache der Seite; Unterkategorien als
+  // "Oberkategorie › Unterkategorie".
+  const tCategories = await getTranslations('DefaultCategories');
+  const categoryNames = new Map(
+    categories.data.map((c) => [c.id, categoryDisplayName(c, tCategories)]),
+  );
   const categoryOptions: CategoryOption[] = categories.data.map((c) => {
     const parent = c.parent_category_id ? categoryNames.get(c.parent_category_id) : undefined;
-    return { id: c.id, kind: c.kind, label: parent ? `${parent} › ${c.name}` : c.name };
+    const name = categoryNames.get(c.id) ?? c.name;
+    return { id: c.id, kind: c.kind, label: parent ? `${parent} › ${name}` : name };
   });
 
   return { accounts: accounts.data, categories: categoryOptions, tags: tags.data };

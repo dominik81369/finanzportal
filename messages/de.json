@@ -272,5 +272,25 @@
       "transactionNotFound": "Diese Transaktion gibt es nicht (mehr).",
       "transactionNotEditable": "Diese Transaktion wurde importiert und kann nicht bearbeitet oder gelöscht werden."
     }
+  },
+  "DefaultCategories": {
+    "salary": "Gehalt & Lohn",
+    "investment_income": "Kapitalerträge",
+    "rental_income": "Mieteinnahmen",
+    "other_income": "Sonstige Einnahmen",
+    "housing": "Wohnen",
+    "groceries": "Lebensmittel",
+    "mobility": "Mobilität",
+    "insurance": "Versicherungen",
+    "health": "Gesundheit",
+    "leisure_travel": "Freizeit & Reisen",
+    "subscriptions_media": "Abos & Medien",
+    "shopping": "Shopping",
+    "education": "Bildung",
+    "taxes": "Steuern & Abgaben",
+    "other_expenses": "Sonstige Ausgaben",
+    "savings_investments": "Sparen & Investieren",
+    "loan_repayment": "Kredittilgung",
+    "transfer": "Umbuchung"
   }
 }
