@@ -51,13 +51,13 @@ insert into public.tags (id, user_id, name) values
 -- ---------------------------------------------------------------------
 select function_privs_are(
   'public', 'create_manual_transaction',
-  array['date', 'numeric', 'text', 'text', 'uuid', 'uuid', 'uuid[]', 'text[]'],
+  array['date', 'numeric', 'text', 'text', 'uuid', 'uuid', 'uuid[]', 'text[]', 'text'],
   'anon', array[]::text[],
   'anon darf create_manual_transaction nicht ausführen'
 );
 select function_privs_are(
   'public', 'create_manual_transaction',
-  array['date', 'numeric', 'text', 'text', 'uuid', 'uuid', 'uuid[]', 'text[]'],
+  array['date', 'numeric', 'text', 'text', 'uuid', 'uuid', 'uuid[]', 'text[]', 'text'],
   'authenticated', array['EXECUTE'],
   'authenticated darf create_manual_transaction ausführen'
 );

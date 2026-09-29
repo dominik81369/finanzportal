@@ -192,7 +192,8 @@
       "expense": "Expense",
       "income": "Income",
       "amount": "Amount",
-      "amountHint": "In {currency}, e.g. 12.50",
+      "amountHint": "e.g. 12.50",
+      "currency": "Currency",
       "date": "Date",
       "counterparty": "Payee / payer",
       "purpose": "Reference (optional)",
@@ -213,6 +214,7 @@
     },
     "errors": {
       "amountInvalid": "Please enter an amount greater than 0 with at most two decimal places, e.g. 12.50.",
+      "currencyInvalid": "Please choose one of the offered currencies.",
       "dateInvalid": "Please enter a valid date.",
       "typeInvalid": "Please choose expense or income.",
       "counterpartyRequired": "Please enter a payee or payer.",

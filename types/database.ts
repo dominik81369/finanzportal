@@ -862,6 +862,7 @@ export type Database = {
           p_category_id?: string;
           p_tag_ids?: string[];
           p_new_tag_names?: string[];
+          p_currency?: string;
         };
         Returns: string;
       };
