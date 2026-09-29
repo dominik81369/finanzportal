@@ -173,7 +173,7 @@
       "saved": "Die Transaktion wurde gespeichert.",
       "empty": "Noch keine Transaktionen vorhanden. Erfassen Sie Ihre erste Buchung.",
       "loadError": "Die Transaktionen konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
-      "caption": "Ihre letzten Buchungen (höchstens {limit})",
+      "caption": "Ihre Buchungen, neueste zuerst",
       "columns": {
         "date": "Datum",
         "counterparty": "Empfänger / Zahler",
@@ -189,8 +189,7 @@
       "editLabel": "Buchung „{counterparty}“ vom {date} bearbeiten",
       "actions": "Aktionen",
       "noMatches": "Keine Transaktionen für diese Suche bzw. Filter.",
-      "resultCount": "{count, plural, one {# Transaktion gefunden} other {# Transaktionen gefunden}}",
-      "resultCountLimited": "Mehr als {limit} Treffer – angezeigt werden die neuesten {limit}. Grenzen Sie die Suche weiter ein."
+      "resultCount": "{count, plural, one {# Transaktion gefunden} other {# Transaktionen gefunden}}"
     },
     "filters": {
       "heading": "Transaktionen durchsuchen und filtern",
@@ -211,6 +210,13 @@
       "to": "Bis",
       "apply": "Filtern",
       "reset": "Zurücksetzen"
+    },
+    "pagination": {
+      "label": "Seitennavigation",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "pageOf": "Seite {page} von {pages}",
+      "range": "Einträge {from}–{to} von {total}"
     },
     "form": {
       "metaTitle": "Transaktion erfassen",
