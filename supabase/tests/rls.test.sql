@@ -74,7 +74,8 @@ update public.profiles
    set role = 'advisor'
  where user_id = tests.get_supabase_uid('carol');
 
-insert into public.accounts (id, user_id, name, type, balance) values
+-- Saldo = opening_balance + Buchungen (Migration 20261002140000).
+insert into public.accounts (id, user_id, name, type, opening_balance) values
   ('a1000000-0000-4000-8000-000000000001', tests.get_supabase_uid('alice'), 'Alice Girokonto', 'checking', 2500.00),
   ('b2000000-0000-4000-8000-000000000001', tests.get_supabase_uid('bob'),   'Bob Girokonto',   'checking', 1200.00);
 
@@ -141,7 +142,7 @@ select results_eq(
 );                                                                                          -- 5
 
 select lives_ok(
-  $$ insert into public.accounts (name, type, balance) values ('Alice Tagesgeld', 'savings', 10000.00) $$,
+  $$ insert into public.accounts (name, type, opening_balance) values ('Alice Tagesgeld', 'savings', 10000.00) $$,
   'Alice legt eigenes Konto an (user_id per Default auth.uid())'
 );                                                                                          -- 6
 
@@ -552,8 +553,8 @@ select tests.authenticate_as_service_role();
 
 select results_eq(
   $$ select balance from public.accounts where id = 'a1000000-0000-4000-8000-000000000001' $$,
-  $$ values (2500.00::numeric) $$,
-  'Alices Kontostand ist unverändert'
+  $$ values (2415.80::numeric) $$,
+  'Alices Kontostand ist unverändert (2500,00 Anfangsbestand − 84,20)'
 );                                                                                          -- 64
 select results_eq(
   $$ select amount from public.transactions where id = 'a1000000-0000-4000-8000-000000000002' $$,
