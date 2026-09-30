@@ -46,7 +46,12 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
         ? 'updated'
         : query.deleted === '1'
           ? 'deleted'
-          : null;
+          : query.categorized === '1'
+            ? 'categorized'
+            : null;
+  // Nach einer Kategorie-Korrektur: gelernter Händlername (siehe
+  // lib/actions/categorization-rules.ts).
+  const learned = typeof query.learned === 'string' ? query.learned.slice(0, 60) : null;
   const t = await getTranslations('Transactions.list');
   const tDashboard = await getTranslations('Dashboard');
 
@@ -63,15 +68,30 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
     <section aria-labelledby="page-title">
       <div className="page-header">
         <h1 id="page-title">{tDashboard('transactions.title')}</h1>
-        <Link className="button" href="/dashboard/transactions/new">
-          {t('add')}
-        </Link>
+        <div className="page-header-actions">
+          <Link className="button button-secondary" href="/dashboard/transactions/rules">
+            {t('rules')}
+          </Link>
+          <Link className="button button-secondary" href="/dashboard/transactions/import">
+            {t('import')}
+          </Link>
+          <Link className="button" href="/dashboard/transactions/new">
+            {t('add')}
+          </Link>
+        </div>
       </div>
       <p>{tDashboard('transactions.description')}</p>
 
       {notice ? (
         <p role="status" className="form-success">
           {t(notice)}
+          {notice === 'categorized' && learned ? (
+            <>
+              {' '}
+              {t('learned', { pattern: learned })}{' '}
+              <Link href="/dashboard/transactions/rules">{t('toRules')}</Link>
+            </>
+          ) : null}
         </p>
       ) : null}
 

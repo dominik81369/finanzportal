@@ -10,6 +10,7 @@
    (theme-zinc, theme-teal, style) – bei Änderungen per CLI neu erzeugen.
    --------------------------------------------------------------------- */
 :root {
+  --warning: oklch(0.555 0.163 48.998);
   --primary: oklch(0.511 0.096 186.391);
   --primary-foreground: oklch(0.984 0.014 180.72);
   --secondary: oklch(0.967 0.001 286.375);
@@ -45,6 +46,7 @@
 }
 
 .dark {
+  --warning: oklch(0.828 0.189 84.429);
   --primary: oklch(0.437 0.078 188.216);
   --primary-foreground: oklch(0.984 0.014 180.72);
   --secondary: oklch(0.274 0.006 286.033);
@@ -297,6 +299,24 @@
 .field-error {
   margin: 0;
   font-size: 0.9rem;
+}
+
+.form-warning {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  color: var(--foreground);
+  background: color-mix(in oklch, var(--warning) 12%, transparent);
+  border-left: 3px solid var(--warning);
+  border-radius: var(--radius-md);
+}
+
+.form-warning p,
+.form-warning ul {
+  margin: 0;
+}
+
+.form-warning ul {
+  padding-left: 1.25rem;
 }
 
 .form-success {
@@ -1023,4 +1043,87 @@
   gap: 0.15rem;
   text-align: right;
   white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------
+   Import und Regeln
+   --------------------------------------------------------------------- */
+/* Mehrere Felder nebeneinander (umbrechend). */
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem 1rem;
+}
+.page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.import-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 56rem;
+}
+
+.import-preview,
+.import-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.import-preview h2,
+.import-result h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.import-mapping {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.75rem 1rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.import-mapping legend {
+  padding: 0 0.25rem;
+  font-weight: 600;
+}
+
+.import-preview > .button,
+.import-result .actions {
+  align-self: flex-start;
+}
+
+.transaction-summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0 0 1rem;
+}
+
+.transaction-summary dt {
+  color: var(--muted-foreground);
+}
+
+.transaction-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.rule-position {
+  display: inline-block;
+  min-width: 1.75rem;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.rule-list .link-item-actions form {
+  margin: 0;
 }
