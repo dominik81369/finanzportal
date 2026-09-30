@@ -796,6 +796,7 @@ export type Database = {
           amount_max: number | null;
           priority: number;
           is_active: boolean;
+          origin: string;
           created_at: string;
           updated_at: string;
         };
@@ -813,6 +814,7 @@ export type Database = {
           amount_max?: number | null;
           priority?: number;
           is_active?: boolean;
+          origin?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -830,6 +832,7 @@ export type Database = {
           amount_max?: number | null;
           priority?: number;
           is_active?: boolean;
+          origin?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -913,6 +916,28 @@ export type Database = {
       set_category_budget_groups: {
         Args: { p_assignments: Json };
         Returns: number;
+      };
+      create_categorization_rule: {
+        Args: { p_pattern: string; p_category_id: string };
+        Returns: string;
+      };
+      reorder_categorization_rules: {
+        Args: { p_ids: string[] };
+        Returns: undefined;
+      };
+      import_transactions: {
+        Args: {
+          p_account_id: string | null;
+          p_rows: Json;
+          p_dry_run?: boolean;
+          p_new_account_name?: string | null;
+          p_new_account_currency?: string | null;
+        };
+        Returns: Json;
+      };
+      set_transaction_category: {
+        Args: { p_id: string; p_category_id: string | null };
+        Returns: Json;
       };
     };
 

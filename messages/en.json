@@ -206,7 +206,14 @@
       "editLabel": "Edit booking \"{counterparty}\" of {date}",
       "actions": "Actions",
       "noMatches": "No transactions for this search or these filters.",
-      "resultCount": "{count, plural, one {# transaction found} other {# transactions found}}"
+      "resultCount": "{count, plural, one {# transaction found} other {# transactions found}}",
+      "rules": "Rules",
+      "import": "Import",
+      "categorized": "The category has been saved.",
+      "learned": "New rule learned: transactions containing “{pattern}” will be assigned automatically from now on.",
+      "toRules": "View rules",
+      "categorize": "Category",
+      "categorizeLabel": "Change category of “{counterparty}” on {date}"
     },
     "filters": {
       "heading": "Search and filter transactions",
@@ -440,5 +447,146 @@
     "loan": "Loan",
     "cash": "Cash",
     "other": "Other"
+  },
+  "Import": {
+    "metaTitle": "Import bank statement",
+    "back": "Back to transactions",
+    "heading": "Import bank statement",
+    "intro": "Upload your bank's CSV or Excel export. Encoding, delimiter and columns are detected automatically; transactions already imported are skipped.",
+    "file": "File (CSV or Excel)",
+    "fileHint": "CSV, TXT or XLSX, up to {max} MB. The file is read in your browser; only the transactions are sent.",
+    "account": "Import into account",
+    "newAccount": "Create new account …",
+    "newAccountName": "Name of the new account",
+    "newAccountPlaceholder": "e.g. DKB checking",
+    "currency": "Currency",
+    "analyze": "Check file",
+    "analyzing": "Reading …",
+    "preview": {
+      "heading": "Preview",
+      "caption": "First {shown} of {total} transactions",
+      "noRows": "No transactions were found in the file.",
+      "rowErrors": "{count, plural, one {# row could not be read and will be skipped:} other {# rows could not be read and will be skipped:}}",
+      "invalidDate": "Row {line}: date “{value}” not recognised",
+      "invalidAmount": "Row {line}: amount “{value}” not recognised",
+      "moreErrors": "… and {count} more.",
+      "skippedZero": "{count, plural, one {# transaction with amount 0 will not be imported.} other {# transactions with amount 0 will not be imported.}}",
+      "checking": "Comparing with existing transactions …",
+      "summary": "{new, plural, =0 {No new transactions} one {# new transaction} other {# new transactions}}, {duplicates, plural, =0 {none already present} one {# already present (skipped)} other {# already present (skipped)}}, {categorized, plural, =0 {none categorised by rules} other {# categorised by rules}}."
+    },
+    "detected": {
+      "excel": "Excel file (first sheet)",
+      "encoding": "Encoding {encoding}",
+      "delimiter": "delimiter {delimiter}",
+      "header": "header in row {line}"
+    },
+    "delimiters": {
+      "semicolon": "semicolon",
+      "comma": "comma",
+      "tab": "tab"
+    },
+    "mapping": {
+      "legend": "Column mapping",
+      "headerLine": "Header row (row number)",
+      "none": "— not present —",
+      "column": "Column {number}: {label}",
+      "unnamed": "no heading",
+      "noHeader": "The header row could not be found automatically. Please enter the row number of the column headings and map the columns.",
+      "unsure": "The columns could not be recognised unambiguously. Please check the mapping.",
+      "missing": "Please still map: {fields}."
+    },
+    "fields": {
+      "date": "Booking date",
+      "amount": "Amount",
+      "purpose": "Reference",
+      "counterparty": "Payee / payer",
+      "valueDate": "Value date",
+      "balance": "Balance",
+      "currency": "Currency"
+    },
+    "import": "{count, plural, =0 {No new transactions} one {Import # transaction} other {Import # transactions}}",
+    "importing": "Importing …",
+    "result": {
+      "heading": "Import complete",
+      "summary": "{new, plural, =0 {No transactions imported} one {# transaction imported} other {# transactions imported}}, {duplicates, plural, =0 {no duplicates} one {# duplicate skipped} other {# duplicates skipped}}, {categorized, plural, =0 {none categorised automatically} other {# categorised automatically}}.",
+      "closingOk": "The balance in the portal ({balance}) matches the closing balance in the file.",
+      "closingMismatch": "Warning: according to the file the closing balance is {closing}, the portal shows {balance}. Check the account's opening balance or whether transactions are missing.",
+      "toList": "Go to transactions",
+      "again": "Import another file"
+    },
+    "balance": {
+      "ok": "Balance check: opening balance {opening} + transactions = closing balance {closing} ✓",
+      "mismatch": "Warning: the transactions ({sum}) do not match the balances in the file ({opening} → {closing}); difference {difference}. Rows may be missing or the export may be incomplete.",
+      "closingOnly": "The file states a closing balance of {closing}. It will be compared with the balance in the portal after the import."
+    },
+    "errors": {
+      "noFile": "Please choose a file.",
+      "fileTooLarge": "The file is larger than {max} MB.",
+      "legacyExcel": "The old Excel format (.xls) is not supported. Please save the file as .xlsx or export CSV.",
+      "unreadable": "The file could not be read. Please check that it is a CSV or Excel export.",
+      "noRows": "There are no transactions to import.",
+      "tooManyRows": "At most {max} transactions can be imported at once.",
+      "invalidData": "The transaction data is invalid. Please load the file again.",
+      "accountName": "Please enter a name for the new account (1–120 characters).",
+      "invalidRow": "Transaction no. {row} is invalid. Nothing was imported.",
+      "accountNotFound": "The account no longer exists. Please reload the page.",
+      "accountNotImportable": "You cannot import into synced bank accounts.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "Rules": {
+    "metaTitle": "Categorisation rules",
+    "back": "Back to transactions",
+    "heading": "Categorisation rules",
+    "intro": "Rules automatically assign a category to imported transactions when the payee or reference contains the pattern. Case and long digit sequences (card or transaction numbers) are ignored. The first matching rule wins; more specific patterns such as “amazon prime” automatically come before general ones such as “amazon”. When you change the category of an imported transaction, a rule is learned from it.",
+    "newHeading": "New rule",
+    "listHeading": "Rules in matching order",
+    "loadError": "The rules could not be loaded right now. Please reload the page.",
+    "empty": "No rules yet. Create one or change the category of an imported transaction.",
+    "learned": "learned",
+    "manual": "manual",
+    "inactive": "inactive",
+    "matchTypes": {
+      "contains": "contains",
+      "equals": "equals",
+      "starts_with": "starts with",
+      "regex": "regular expression"
+    },
+    "moveUpLabel": "Move rule “{pattern}” up",
+    "moveDownLabel": "Move rule “{pattern}” down",
+    "deleteLabel": "Delete rule “{pattern}”",
+    "delete": "Delete",
+    "pattern": "Pattern",
+    "patternPlaceholder": "e.g. rewe",
+    "patternHint": "Part of the payee or reference, at least 2 characters.",
+    "category": "Category",
+    "choose": "Please choose",
+    "save": "Create rule",
+    "saving": "Saving …",
+    "created": "The rule has been created.",
+    "errors": {
+      "invalidPattern": "Please enter a pattern of 2 to 200 characters (long digit sequences do not count).",
+      "categoryMissing": "Please choose a category.",
+      "ruleExists": "A rule for this pattern already exists.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "TransactionCategory": {
+    "metaTitle": "Change category",
+    "back": "Back to transactions",
+    "heading": "Change category",
+    "date": "Date",
+    "amount": "Amount",
+    "counterparty": "Payee / payer",
+    "purpose": "Reference",
+    "learnHint": "A rule for this merchant is learned from your choice; future transactions will then be assigned automatically.",
+    "category": "Category",
+    "uncategorized": "Uncategorised",
+    "save": "Save",
+    "saving": "Saving …",
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "notFound": "The transaction or category no longer exists."
+    }
   }
 }

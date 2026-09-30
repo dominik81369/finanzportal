@@ -1,7 +1,8 @@
 /**
  * Tabelle einer Seite der Transaktionsliste (siehe ./transaction-list.ts).
- * editable: Bearbeiten-Links für manuell erfasste Buchungen – nur in der
- * eigenen Liste, nie in der Leseansicht des Beraters.
+ * editable: Bearbeiten-Links (manuell erfasste Buchungen) bzw. „Kategorie“
+ * (importierte/synchronisierte) – nur in der eigenen Liste, nie in der
+ * Leseansicht des Beraters.
  */
 import { getFormatter, getLocale, getTranslations } from 'next-intl/server';
 
@@ -84,7 +85,8 @@ export async function TransactionTable({ transactions, caption, editable }: Tran
                 </td>
                 {editable ? (
                   <td className="row-actions">
-                    {/* Nur manuell erfasste Buchungen sind bearbeitbar. */}
+                    {/* Manuell erfasste Buchungen sind voll bearbeitbar, importierte
+                        und synchronisierte nur in der Kategorie (mit Lernen). */}
                     {tx.source === 'manual' ? (
                       <Link
                         href={`/dashboard/transactions/${tx.id}/edit`}
@@ -92,7 +94,14 @@ export async function TransactionTable({ transactions, caption, editable }: Tran
                       >
                         {t('edit')}
                       </Link>
-                    ) : null}
+                    ) : (
+                      <Link
+                        href={`/dashboard/transactions/${tx.id}/category`}
+                        aria-label={t('categorizeLabel', { counterparty: tx.counterparty_name ?? tx.purpose ?? '', date })}
+                      >
+                        {t('categorize')}
+                      </Link>
+                    )}
                   </td>
                 ) : null}
               </tr>
