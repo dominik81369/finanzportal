@@ -213,7 +213,14 @@
       "learned": "New rule learned: transactions containing “{pattern}” will be assigned automatically from now on.",
       "toRules": "View rules",
       "categorize": "Category",
-      "categorizeLabel": "Change category of “{counterparty}” on {date}"
+      "categorizeLabel": "Change category of “{counterparty}” on {date}",
+      "auto": "automatic",
+      "autoTitle": "Assigned automatically by a rule",
+      "autoOwnRule": "Assigned automatically by your rule “{pattern}”",
+      "autoStandardRule": "Assigned automatically by the standard rule “{pattern}”",
+      "similarFound": "{count, plural, one {Found # similar uncategorised transaction. Assign it too?} other {Found # similar uncategorised transactions. Assign them too?}}",
+      "similarApply": "{count, plural, one {Assign similar transaction} other {Assign # similar transactions}}",
+      "similarApplied": "{count, plural, =0 {No further transactions assigned.} one {# more transaction was assigned.} other {# more transactions were assigned.}}"
     },
     "filters": {
       "heading": "Search and filter transactions",
@@ -228,6 +235,12 @@
       "category": "Category",
       "allCategories": "All categories",
       "uncategorized": "Uncategorised",
+      "assigned": "Assignment",
+      "allAssignments": "All",
+      "assignments": {
+        "manual": "Manual",
+        "auto": "Automatic"
+      },
       "tag": "Tag",
       "allTags": "All tags",
       "from": "From",
@@ -318,6 +331,7 @@
     "shopping": "Shopping",
     "education": "Education",
     "taxes": "Taxes & fees",
+    "capital_gains_tax": "Capital gains tax",
     "other_expenses": "Other expenses",
     "savings_investments": "Saving & investing",
     "loan_repayment": "Loan repayment",
@@ -502,7 +516,10 @@
       "counterparty": "Payee / payer",
       "valueDate": "Value date",
       "balance": "Balance",
-      "currency": "Currency"
+      "currency": "Currency",
+      "transactionType": "Transaction type",
+      "counterpartyIban": "Counterparty IBAN",
+      "description": "Description"
     },
     "import": "{count, plural, =0 {No new transactions} one {Import # transaction} other {Import # transactions}}",
     "importing": "Importing …",
@@ -538,16 +555,40 @@
     "metaTitle": "Categorisation rules",
     "back": "Back to transactions",
     "heading": "Categorisation rules",
-    "intro": "Rules automatically assign a category to imported transactions when the payee or reference contains the pattern. Case and long digit sequences (card or transaction numbers) are ignored. The first matching rule wins; more specific patterns such as “amazon prime” automatically come before general ones such as “amazon”. When you change the category of an imported transaction, a rule is learned from it.",
+    "intro": "Categories are assigned in layers: your manual assignments are always kept, and your own rules take precedence over standard rules. Case, umlauts and long digit sequences (card or transaction numbers) are ignored. If several rules match, the first one wins; more specific patterns such as “amazon prime” automatically come before general ones such as “amazon”. Changing the category of an imported transaction teaches a rule. Your bank’s categories are not used.",
+    "autoHeading": "Automatic categorisation",
+    "autoIntro": "Standard rules recognise common merchants and transaction types (e.g. REWE, Netflix, Deutsche Bahn, interest payments). Rules apply to every import; apply them here to existing transactions without a category. Automatically assigned categories are marked in the list.",
+    "stats": {
+      "auto": "Automatic",
+      "manual": "Manual",
+      "uncategorized": "Uncategorised",
+      "value": "{count} ({percent}%)",
+      "autoDetail": "own rules: {rule}, standard rules: {standard}"
+    },
+    "loadStandard": "Load standard rules",
+    "applyAll": "Apply to all uncategorised transactions",
+    "resetAuto": "Reset automatic assignments",
+    "resetHint": "Resetting only removes categories assigned by rules; your manual assignments are kept.",
+    "viewAuto": "View automatically assigned transactions",
+    "standardHeading": "Standard rules",
+    "standardEmpty": "No standard rules loaded yet.",
+    "standardSummary": "{count, plural, one {Show # standard rule} other {Show # standard rules}}",
+    "notices": {
+      "loaded": "{count, plural, =0 {The standard rules are already fully loaded.} one {# standard rule was loaded.} other {# standard rules were loaded.}}",
+      "applied": "{count, plural, =0 {No further transactions assigned.} one {# transaction was assigned automatically.} other {# transactions were assigned automatically.}}",
+      "reset": "{count, plural, =0 {There were no automatic assignments.} one {# automatic assignment was removed.} other {# automatic assignments were removed.}}"
+    },
     "newHeading": "New rule",
-    "listHeading": "Rules in matching order",
+    "listHeading": "Your rules in matching order",
     "loadError": "The rules could not be loaded right now. Please reload the page.",
-    "empty": "No rules yet. Create one or change the category of an imported transaction.",
+    "empty": "No rules of your own yet. Create one or change the category of an imported transaction.",
     "learned": "learned",
     "manual": "manual",
+    "standard": "standard",
     "inactive": "inactive",
     "matchTypes": {
       "contains": "contains",
+      "word": "whole word",
       "equals": "equals",
       "starts_with": "starts with",
       "regex": "regular expression"
@@ -558,7 +599,24 @@
     "delete": "Delete",
     "pattern": "Pattern",
     "patternPlaceholder": "e.g. rewe",
-    "patternHint": "Part of the payee or reference, at least 2 characters.",
+    "patternHint": "Text (at least 2 characters) or the counterparty’s IBAN. “Whole word” matches “aldi” in “ALDI SÜD” but not in “Waldi”.",
+    "field": "Field",
+    "matchType": "Match",
+    "direction": "Direction",
+    "fields": {
+      "counterparty_or_purpose": "Payee, reference or description",
+      "counterparty": "Payee / payer",
+      "purpose": "Reference",
+      "description": "Description",
+      "transaction_type": "Transaction type",
+      "counterparty_iban": "Counterparty IBAN",
+      "any_text": "All text fields incl. transaction type"
+    },
+    "directions": {
+      "both": "Incoming and outgoing",
+      "in": "incoming only",
+      "out": "outgoing only"
+    },
     "category": "Category",
     "choose": "Please choose",
     "save": "Create rule",
@@ -567,7 +625,7 @@
     "errors": {
       "invalidPattern": "Please enter a pattern of 2 to 200 characters (long digit sequences do not count).",
       "categoryMissing": "Please choose a category.",
-      "ruleExists": "A rule for this pattern already exists.",
+      "ruleExists": "An identical rule for this pattern already exists.",
       "generic": "Something went wrong. Please try again."
     }
   },
@@ -579,6 +637,20 @@
     "amount": "Amount",
     "counterparty": "Payee / payer",
     "purpose": "Reference",
+    "description": "Description",
+    "transactionType": "Transaction type",
+    "counterpartyIban": "Counterparty IBAN",
+    "why": {
+      "heading": "Why this category?",
+      "none": "This transaction has no category yet.",
+      "manual": "You assigned or confirmed this category yourself. Rules will no longer change it.",
+      "rule": "Assigned automatically by your rule “{pattern}” ({field}).",
+      "learned": "Assigned automatically by the learned rule “{pattern}” ({field}).",
+      "standard": "Assigned automatically by the standard rule “{pattern}” ({field}).",
+      "ruleDeleted": "Assigned automatically by a rule that has since been deleted.",
+      "toRules": "View rules",
+      "confirmHint": "Saving confirms the category; it then counts as manual and rules will no longer change it."
+    },
     "learnHint": "A rule for this merchant is learned from your choice; future transactions will then be assigned automatically.",
     "category": "Category",
     "uncategorized": "Uncategorised",

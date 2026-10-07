@@ -4,7 +4,8 @@
  * Kategorie einer Buchung ändern – vor allem für importierte und
  * synchronisierte Buchungen, die sonst nicht bearbeitbar sind. Die
  * Datenbank lernt daraus eine Regel für den Händler
- * (public.set_transaction_category).
+ * (public.set_transaction_category). „Warum diese Kategorie?“ nennt die
+ * Regel bzw. die manuelle Zuordnung (transactions.categorization_rule_id).
  */
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -33,13 +34,18 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
     notFound();
   }
   const t = await getTranslations('TransactionCategory');
+  const tRules = await getTranslations('Rules');
   const format = await getFormatter();
 
   const supabase = await createClient();
   const [{ data: tx, error }, options] = await Promise.all([
     supabase
       .from('transactions')
-      .select('id, source, booking_date, amount, currency, counterparty_name, purpose, category_id')
+      .select(
+        `id, source, booking_date, amount, currency, counterparty_name, purpose, category_id,
+         transaction_type, counterparty_iban, description, categorization_source,
+         rule:categorization_rules!transactions_categorization_rule_fkey ( pattern, origin, match_field )`,
+      )
       .eq('id', id)
       .eq('user_id', user.id)
       .maybeSingle(),
@@ -83,7 +89,46 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
                 <dd>{tx.purpose}</dd>
               </>
             ) : null}
+            {tx.description ? (
+              <>
+                <dt>{t('description')}</dt>
+                <dd>{tx.description}</dd>
+              </>
+            ) : null}
+            {tx.transaction_type ? (
+              <>
+                <dt>{t('transactionType')}</dt>
+                <dd>{tx.transaction_type}</dd>
+              </>
+            ) : null}
+            {tx.counterparty_iban ? (
+              <>
+                <dt>{t('counterpartyIban')}</dt>
+                <dd className="nowrap">{tx.counterparty_iban}</dd>
+              </>
+            ) : null}
           </dl>
+
+          <section className="why-category" aria-labelledby="why-heading">
+            <h2 id="why-heading">{t('why.heading')}</h2>
+            <p>
+              {tx.category_id === null
+                ? t('why.none')
+                : tx.categorization_source !== 'rule'
+                  ? t('why.manual')
+                  : tx.rule
+                    ? t(`why.${tx.rule.origin === 'standard' ? 'standard' : tx.rule.origin === 'learned' ? 'learned' : 'rule'}`, {
+                        pattern: tx.rule.pattern,
+                        field: tRules(`fields.${tx.rule.match_field}`),
+                      })
+                    : t('why.ruleDeleted')}{' '}
+              {tx.categorization_source === 'rule' ? (
+                <Link href="/dashboard/transactions/rules">{t('why.toRules')}</Link>
+              ) : null}
+            </p>
+            {tx.categorization_source === 'rule' ? <p className="hint">{t('why.confirmHint')}</p> : null}
+          </section>
+
           {tx.source !== 'manual' ? <p className="hint">{t('learnHint')}</p> : null}
           <CategoryForm transactionId={tx.id} categories={options.categories} current={tx.category_id} />
         </>

@@ -258,7 +258,11 @@ export type Database = {
           currency: string;
           counterparty_name: string | null;
           purpose: string | null;
+          transaction_type: string | null;
+          counterparty_iban: string | null;
+          description: string | null;
           categorization_source: Database['public']['Enums']['categorization_source'] | null;
+          categorization_rule_id: string | null;
           external_id: string | null;
           import_hash: string | null;
           notes: string | null;
@@ -279,7 +283,11 @@ export type Database = {
           currency?: string;
           counterparty_name?: string | null;
           purpose?: string | null;
+          transaction_type?: string | null;
+          counterparty_iban?: string | null;
+          description?: string | null;
           categorization_source?: Database['public']['Enums']['categorization_source'] | null;
+          categorization_rule_id?: string | null;
           external_id?: string | null;
           import_hash?: string | null;
           notes?: string | null;
@@ -300,7 +308,11 @@ export type Database = {
           currency?: string;
           counterparty_name?: string | null;
           purpose?: string | null;
+          transaction_type?: string | null;
+          counterparty_iban?: string | null;
+          description?: string | null;
           categorization_source?: Database['public']['Enums']['categorization_source'] | null;
+          categorization_rule_id?: string | null;
           external_id?: string | null;
           import_hash?: string | null;
           notes?: string | null;
@@ -330,6 +342,13 @@ export type Database = {
             columns: ['recurring_contract_id', 'user_id'];
             isOneToOne: false;
             referencedRelation: 'recurring_contracts';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'transactions_categorization_rule_fkey';
+            columns: ['categorization_rule_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'categorization_rules';
             referencedColumns: ['id', 'user_id'];
           },
         ];
@@ -918,8 +937,30 @@ export type Database = {
         Returns: number;
       };
       create_categorization_rule: {
-        Args: { p_pattern: string; p_category_id: string };
+        Args: {
+          p_pattern: string;
+          p_category_id: string;
+          p_match_field?: Database['public']['Enums']['rule_match_field'];
+          p_match_type?: Database['public']['Enums']['rule_match_type'];
+          p_direction?: 'in' | 'out' | null;
+        };
         Returns: string;
+      };
+      load_standard_rules: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
+      apply_categorization_rules: {
+        Args: { p_rule_id?: string | null; p_dry_run?: boolean };
+        Returns: number;
+      };
+      reset_machine_categorization: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
+      categorization_stats: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
       };
       reorder_categorization_rules: {
         Args: { p_ids: string[] };
@@ -965,8 +1006,15 @@ export type Database = {
       contract_rhythm: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly';
       contract_status: 'suggested' | 'active' | 'cancellation_pending' | 'cancelled' | 'dismissed';
       contract_detection: 'manual' | 'auto';
-      rule_match_field: 'counterparty' | 'purpose' | 'counterparty_or_purpose';
-      rule_match_type: 'contains' | 'equals' | 'starts_with' | 'regex';
+      rule_match_field:
+        | 'counterparty'
+        | 'purpose'
+        | 'counterparty_or_purpose'
+        | 'transaction_type'
+        | 'counterparty_iban'
+        | 'description'
+        | 'any_text';
+      rule_match_type: 'contains' | 'equals' | 'starts_with' | 'regex' | 'word';
     };
 
     CompositeTypes: {
@@ -1020,8 +1068,16 @@ export const Constants = {
       contract_rhythm: ['weekly', 'monthly', 'quarterly', 'semiannual', 'yearly'],
       contract_status: ['suggested', 'active', 'cancellation_pending', 'cancelled', 'dismissed'],
       contract_detection: ['manual', 'auto'],
-      rule_match_field: ['counterparty', 'purpose', 'counterparty_or_purpose'],
-      rule_match_type: ['contains', 'equals', 'starts_with', 'regex'],
+      rule_match_field: [
+        'counterparty',
+        'purpose',
+        'counterparty_or_purpose',
+        'transaction_type',
+        'counterparty_iban',
+        'description',
+        'any_text',
+      ],
+      rule_match_type: ['contains', 'equals', 'starts_with', 'regex', 'word'],
     },
   },
 } as const;

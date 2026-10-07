@@ -46,7 +46,7 @@ select is(private.extract_merchant('REWE SAGT DANKE 12345678 Karte 1234', null),
   'Händlername: Text vor der ersten längeren Zahlenfolge');
 select is(private.extract_merchant('SEPA-Lastschrift AMAZON PRIME*AB12 Amzn.com/bill', null), 'amazon prime',
   'Händlername: ohne Buchungsart-Präfix, endet vor dem Code mit Ziffern');
-select is(private.extract_merchant('123456789', 'Stadtwerke München GmbH'), 'stadtwerke münchen gmbh',
+select is(private.extract_merchant('123456789', 'Stadtwerke München GmbH'), 'stadtwerke muenchen gmbh',
   'Händlername: Fallback auf den Empfänger');
 select is(private.extract_merchant('1234 5678', null), null, 'Händlername: nichts Brauchbares → NULL');
 
@@ -219,7 +219,7 @@ grant select on tx to authenticated, service_role;
 
 select is(
   public.set_transaction_category((select rewe from tx), (select groceries from cat)) - 'rule_id',
-  '{"changed": true, "learned_pattern": "rewe sagt danke"}'::jsonb,
+  '{"changed": true, "similar": 1, "learned_pattern": "rewe sagt danke"}'::jsonb,
   'Kategorie gesetzt → Regel „rewe sagt danke“ gelernt'
 );
 select results_eq(
@@ -291,7 +291,7 @@ select tests.authenticate_as_service_role();
 select ok(
   not has_function_privilege('anon', 'public.import_transactions(uuid, jsonb, boolean, text, text)', 'execute')
   and not has_function_privilege('anon', 'public.set_transaction_category(uuid, uuid)', 'execute')
-  and not has_function_privilege('anon', 'public.create_categorization_rule(text, uuid)', 'execute')
+  and not has_function_privilege('anon', 'public.create_categorization_rule(text, uuid, public.rule_match_field, public.rule_match_type, text)', 'execute')
   and not has_function_privilege('anon', 'public.reorder_categorization_rules(uuid[])', 'execute'),
   'anon darf keine der neuen Funktionen ausführen'
 );

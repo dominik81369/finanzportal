@@ -49,7 +49,10 @@ function isImportRow(value: unknown): value is ImportRow {
     optionalString('value_date') &&
     optionalString('currency') &&
     optionalString('counterparty') &&
-    optionalString('purpose')
+    optionalString('purpose') &&
+    optionalString('transaction_type') &&
+    optionalString('counterparty_iban') &&
+    optionalString('description')
   );
 }
 

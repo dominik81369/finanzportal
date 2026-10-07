@@ -53,6 +53,19 @@ const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const NEW_ACCOUNT = 'new';
 const SAMPLE_ROWS = 8;
 
+// Felder in der manuellen Zuordnung (Währung kommt aus dem Konto).
+const MAPPED_FIELDS: readonly ImportField[] = [
+  'date',
+  'amount',
+  'purpose',
+  'counterparty',
+  'valueDate',
+  'balance',
+  'transactionType',
+  'counterpartyIban',
+  'description',
+];
+
 const emptyMapping = (): ColumnMapping =>
   Object.fromEntries(IMPORT_FIELDS.map((field) => [field, null])) as ColumnMapping;
 
@@ -329,7 +342,7 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
               />
             </div>
             {headerIndex !== null
-              ? (['date', 'amount', 'purpose', 'counterparty', 'valueDate', 'balance'] as ImportField[]).map((field) => (
+              ? MAPPED_FIELDS.map((field) => (
                   <div className="filter-field" key={field}>
                     <label htmlFor={`import-map-${field}`}>
                       {t(`fields.${field}`)}

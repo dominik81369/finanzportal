@@ -26,7 +26,18 @@ export const MAX_IMPORT_ROWS = 5000;
 /** Eine Zelle: Text (CSV), Zahl oder Datum (Excel), leer. */
 export type Cell = string | number | Date | boolean | null;
 
-export const IMPORT_FIELDS = ['date', 'amount', 'purpose', 'counterparty', 'valueDate', 'currency', 'balance'] as const;
+export const IMPORT_FIELDS = [
+  'date',
+  'amount',
+  'purpose',
+  'counterparty',
+  'valueDate',
+  'currency',
+  'balance',
+  'transactionType',
+  'counterpartyIban',
+  'description',
+] as const;
 export type ImportField = (typeof IMPORT_FIELDS)[number];
 export const REQUIRED_FIELDS: readonly ImportField[] = ['date', 'amount', 'purpose'];
 
@@ -59,6 +70,29 @@ export const COLUMN_ALIASES: Record<ImportField, readonly string[]> = {
   ],
   currency: ['waehrung', 'currency'],
   balance: ['saldo', 'kontostand'],
+  // „Buchungstext“ ist bei Dateien mit eigenem Verwendungszweck die
+  // Buchungsart (Sparkasse), sonst der Zweck selbst (purpose greift zuerst).
+  transactionType: [
+    'umsatztyp',
+    'buchungsart',
+    'transaktionstyp',
+    'umsatzart',
+    'vorgang',
+    'buchungstext',
+    'typ',
+  ],
+  counterpartyIban: [
+    'iban',
+    'iban zahlungsbeteiligter',
+    'kontonummer/iban',
+    'iban auftraggeber/empfaenger',
+    'iban empfaenger',
+    'iban auftraggeber',
+    'gegenkonto iban',
+    'empfaenger iban',
+  ],
+  // Nur zusätzlich zum Verwendungszweck – allein ist „Beschreibung“ der Zweck.
+  description: ['beschreibung'],
 };
 
 /**
@@ -141,7 +175,18 @@ export function detectColumns(header: Cell[]): ColumnDetection {
   const used = new Set<number>();
   const ambiguous: ImportField[] = [];
 
-  const order: ImportField[] = ['date', 'amount', 'purpose', 'counterparty', 'valueDate', 'currency', 'balance'];
+  const order: ImportField[] = [
+    'date',
+    'amount',
+    'purpose',
+    'counterparty',
+    'transactionType',
+    'counterpartyIban',
+    'valueDate',
+    'currency',
+    'balance',
+    'description',
+  ];
   for (const field of order) {
     let bestRank: number | null = null;
     let candidates: number[] = [];
@@ -186,6 +231,9 @@ export type ImportRow = {
   currency: string | null;
   counterparty: string | null;
   purpose: string | null;
+  transaction_type: string | null;
+  counterparty_iban: string | null;
+  description: string | null;
 };
 
 export type RowError = {
@@ -237,6 +285,17 @@ function isEmptyRow(row: Cell[]): boolean {
 function clip(text: string, max: number): string | null {
   const value = text.replace(/\s+/g, ' ').trim();
   return value === '' ? null : value.slice(0, max);
+}
+
+export const TRANSACTION_TYPE_MAX_LENGTH = 100;
+
+/**
+ * IBAN in Großbuchstaben ohne Leerzeichen; keine gültige Form (manche Banken
+ * liefern dort Kontonummern) → null. Die Prüfsumme prüfen wir nicht.
+ */
+export function normalizeIban(text: string): string | null {
+  const iban = text.replace(/\s+/g, '').toUpperCase();
+  return /^[A-Z]{2}[0-9]{2}[0-9A-Z]{11,30}$/.test(iban) ? iban : null;
 }
 
 const BALANCE_LABEL = /(konto)?stand|saldo/i;
@@ -341,6 +400,9 @@ export function buildRows(rows: Cell[][], headerIndex: number, mapping: ColumnMa
       currency: /^[A-Z]{3}$/.test(currency) ? currency : null,
       counterparty: clip(cellText(get(row, 'counterparty')), COUNTERPARTY_MAX_LENGTH),
       purpose: clip(cellText(get(row, 'purpose')), PURPOSE_MAX_LENGTH),
+      transaction_type: clip(cellText(get(row, 'transactionType')), TRANSACTION_TYPE_MAX_LENGTH),
+      counterparty_iban: normalizeIban(cellText(get(row, 'counterpartyIban'))),
+      description: clip(cellText(get(row, 'description')), PURPOSE_MAX_LENGTH),
     });
   });
 

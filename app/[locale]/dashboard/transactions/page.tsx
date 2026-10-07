@@ -11,8 +11,10 @@ import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
 import { toAppLocale } from '@/i18n/routing';
+import { applyRuleToSimilar } from '@/lib/actions/categorization-rules';
 import { requireOnboardedUser } from '@/lib/supabase/server';
 import { hasActiveFilters, parsePage, parseTransactionFilters } from '@/lib/transaction-filters';
+import { isUuid } from '@/lib/transactions';
 
 import { loadTransactionFormOptions } from './form-options';
 import { Pagination } from './pagination';
@@ -52,6 +54,11 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
   // Nach einer Kategorie-Korrektur: gelernter Händlername (siehe
   // lib/actions/categorization-rules.ts).
   const learned = typeof query.learned === 'string' ? query.learned.slice(0, 60) : null;
+  // „N ähnliche Buchungen gefunden, auch zuordnen?“ (Regel-ID und Anzahl aus
+  // set_transaction_category) bzw. Ergebnis danach.
+  const similar = typeof query.similar === 'string' && /^\d{1,6}$/.test(query.similar) ? Number(query.similar) : 0;
+  const similarRule = typeof query.rule === 'string' && isUuid(query.rule) ? query.rule : null;
+  const applied = typeof query.applied === 'string' && /^\d{1,6}$/.test(query.applied) ? Number(query.applied) : null;
   const t = await getTranslations('Transactions.list');
   const tDashboard = await getTranslations('Dashboard');
 
@@ -92,6 +99,22 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
               <Link href="/dashboard/transactions/rules">{t('toRules')}</Link>
             </>
           ) : null}
+        </p>
+      ) : null}
+
+      {notice === 'categorized' && similar > 0 && similarRule ? (
+        <div className="notice similar-notice" role="status">
+          <p>{t('similarFound', { count: similar })}</p>
+          <form action={applyRuleToSimilar.bind(null, similarRule)}>
+            <button type="submit" className="button button-small">
+              {t('similarApply', { count: similar })}
+            </button>
+          </form>
+        </div>
+      ) : null}
+      {applied !== null ? (
+        <p role="status" className="form-success">
+          {t('similarApplied', { count: applied })}
         </p>
       ) : null}
 

@@ -24,7 +24,12 @@ export type TransactionFilters = {
   /** YYYY-MM-DD, jeweils einschließlich. */
   from: string | null;
   to: string | null;
+  /** Herkunft der Kategorie: manuell gesetzt oder automatisch per Regel. */
+  assigned: Assignment | null;
 };
+
+export const ASSIGNMENTS = ['manual', 'auto'] as const;
+export type Assignment = (typeof ASSIGNMENTS)[number];
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -38,6 +43,7 @@ export function parseTransactionFilters(params: SearchParams): TransactionFilter
   const account = single(params.account);
   const category = single(params.category);
   const tag = single(params.tag);
+  const assigned = single(params.assigned);
   let from = parseIsoDate(single(params.from));
   let to = parseIsoDate(single(params.to));
 
@@ -54,6 +60,7 @@ export function parseTransactionFilters(params: SearchParams): TransactionFilter
     tagId: isUuid(tag) ? tag : null,
     from,
     to,
+    assigned: (ASSIGNMENTS as readonly string[]).includes(assigned) ? (assigned as Assignment) : null,
   };
 }
 
@@ -65,7 +72,8 @@ export function hasActiveFilters(filters: TransactionFilters): boolean {
     filters.categoryId !== null ||
     filters.tagId !== null ||
     filters.from !== null ||
-    filters.to !== null
+    filters.to !== null ||
+    filters.assigned !== null
   );
 }
 
@@ -127,6 +135,7 @@ export function listQueryString(filters: TransactionFilters, page: number): stri
   if (filters.tagId) params.set('tag', filters.tagId);
   if (filters.from) params.set('from', filters.from);
   if (filters.to) params.set('to', filters.to);
+  if (filters.assigned) params.set('assigned', filters.assigned);
   if (page > 1) params.set('page', String(page));
   const query = params.toString();
   return query ? `?${query}` : '';
