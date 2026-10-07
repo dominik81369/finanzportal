@@ -13,7 +13,7 @@
 
 begin;
 
-select plan(49);
+select plan(56);
 
 select tests.create_supabase_user('cl_alice', 'cl-alice@example.test');
 select tests.create_supabase_user('cl_bob',   'cl-bob@example.test');
@@ -271,6 +271,66 @@ select is(
   (select (category_id is not null)::text || '/' || coalesce(categorization_rule_id::text, '-')
      from public.transactions where user_id = auth.uid() and amount = -700),
   'true/-', 'Gelöschte Regel: Kategorie bleibt, Regel-ID wird NULL'
+);
+
+-- ---------------------------------------------------------------------
+-- 8. Erneuter Import ergänzt alte Buchungen (Import vor diesen Spalten)
+-- ---------------------------------------------------------------------
+create temp table c24 as select $j$[
+  {"booking_date": "2026-08-01", "amount": 5.55, "counterparty": "C24 Bank", "purpose": "Tagesgeld August",
+   "transaction_type": "Zinszahlung"},
+  {"booking_date": "2026-08-02", "amount": -20, "counterparty": "Kiosk am Eck", "purpose": "Zeitschrift",
+   "counterparty_iban": "DE02 1203 0000 0000 2020 51", "description": "Kartenzahlung Filiale"},
+  {"booking_date": "2026-08-03", "amount": -7, "counterparty": "Kiosk am Eck", "purpose": "Getränke"}
+]$j$::jsonb as rows;
+grant select on c24 to authenticated, service_role;
+-- So wie vor #21 gespeichert: ohne Typ, IBAN, Beschreibung, ohne Kategorie.
+select public.import_transactions('2c000000-0000-4000-8000-000000000001',
+  (select jsonb_agg(e - 'transaction_type' - 'counterparty_iban' - 'description') from jsonb_array_elements((select rows from c24)) e));
+-- Eine davon hat der Nutzer schon manuell zugeordnet (Schicht 1).
+select public.set_transaction_category(
+  (select id from public.transactions where user_id = auth.uid() and purpose = 'Zeitschrift'), (select leisure from cat));
+
+select is(
+  public.import_transactions('2c000000-0000-4000-8000-000000000001', (select rows from c24), true)
+    - 'account_id' - 'balance' - 'currency' - 'dry_run',
+  '{"total": 3, "new": 0, "duplicates": 3, "enriched": 2, "categorized": 1}'::jsonb,
+  'Vorschau erneuter Import: 3 Duplikate, 2 werden ergänzt, 1 danach per Regel kategorisiert'
+);
+select is(
+  (select count(*)::int from public.transactions where user_id = auth.uid() and purpose = 'Tagesgeld August'
+     and transaction_type is not null), 0,
+  'Vorschau schreibt nichts'
+);
+select is(
+  public.import_transactions('2c000000-0000-4000-8000-000000000001', (select rows from c24)) ->> 'enriched',
+  '2', 'Erneuter Import ergänzt 2 vorhandene Buchungen'
+);
+select results_eq(
+  $$ select t.transaction_type, t.counterparty_iban, t.description, c.default_key, t.categorization_source::text
+       from public.transactions t left join public.categories c on c.id = t.category_id
+      where t.user_id = auth.uid() and t.booking_date between '2026-08-01' and '2026-08-03' order by t.booking_date $$,
+  $$ values ('Zinszahlung'::text, null::text, null::text, 'investment_income'::text, 'rule'::text),
+            (null, 'DE02120300000000202051', 'Kartenzahlung Filiale', 'leisure_travel', 'manual'),
+            (null, null, null, null, null) $$,
+  'Typ/IBAN/Beschreibung ergänzt; Zinszahlung jetzt per Standardregel; manuelle Kategorie bleibt'
+);
+select is(
+  (select count(*)::int from public.transactions where user_id = auth.uid() and booking_date between '2026-08-01' and '2026-08-03'), 3,
+  'Keine doppelten Buchungen'
+);
+select is(
+  public.import_transactions('2c000000-0000-4000-8000-000000000001', (select rows from c24)) ->> 'enriched',
+  '0', 'Dritter Import: nichts mehr zu ergänzen'
+);
+-- Vorhandene Werte werden nie überschrieben.
+select public.import_transactions('2c000000-0000-4000-8000-000000000001', $j$[
+  {"booking_date": "2026-08-01", "amount": 5.55, "counterparty": "C24 Bank", "purpose": "Tagesgeld August",
+   "transaction_type": "Anderer Typ", "description": "neu"}
+]$j$::jsonb);
+select is(
+  (select transaction_type || '|' || description from public.transactions where user_id = auth.uid() and purpose = 'Tagesgeld August'),
+  'Zinszahlung|neu', 'Vorhandener Typ bleibt, nur leere Felder werden gefüllt'
 );
 
 -- Andere Nutzer: kein Zugriff.

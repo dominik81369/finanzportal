@@ -126,7 +126,7 @@ grant select on batch to authenticated, service_role;
 select is(
   public.import_transactions('1c000000-0000-4000-8000-000000000001', (select rows from batch), true)
     - 'account_id' - 'balance',
-  '{"currency": "EUR", "total": 5, "new": 5, "duplicates": 0, "categorized": 1, "dry_run": true}'::jsonb,
+  '{"currency": "EUR", "total": 5, "new": 5, "enriched": 0, "duplicates": 0, "categorized": 1, "dry_run": true}'::jsonb,
   'Vorschau (dry run): 5 neu, 1 per Regel kategorisiert'
 );
 select is((select count(*)::int from public.transactions), 0, 'Vorschau schreibt nichts');
@@ -134,7 +134,7 @@ select is((select count(*)::int from public.transactions), 0, 'Vorschau schreibt
 select is(
   public.import_transactions('1c000000-0000-4000-8000-000000000001', (select rows from batch))
     - 'account_id' - 'dry_run',
-  '{"currency": "EUR", "total": 5, "new": 5, "duplicates": 0, "categorized": 1, "balance": 2942.11}'::jsonb,
+  '{"currency": "EUR", "total": 5, "new": 5, "enriched": 0, "duplicates": 0, "categorized": 1, "balance": 2942.11}'::jsonb,
   'Import: 5 Buchungen, Saldo 2.942,11 (Kontostand-Trigger)'
 );
 select results_eq(
@@ -159,7 +159,7 @@ select is(
   public.import_transactions('1c000000-0000-4000-8000-000000000001',
     '[{"booking_date": "2026-09-02", "amount": "-42.50", "purpose": "rewe sagt danke 12345678 karte 1234"},
       {"booking_date": "2026-09-05", "amount": "-1.00", "purpose": "Neu"}]'::jsonb) - 'account_id' - 'balance' - 'dry_run',
-  '{"currency": "EUR", "total": 2, "new": 1, "duplicates": 1, "categorized": 0}'::jsonb,
+  '{"currency": "EUR", "total": 2, "new": 1, "enriched": 0, "duplicates": 1, "categorized": 0}'::jsonb,
   'Überlappende Datei: Groß-/Kleinschreibung im Zweck ändert den Hash nicht, nur die neue Zeile kommt dazu'
 );
 select throws_ok(

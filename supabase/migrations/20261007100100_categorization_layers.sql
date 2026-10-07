@@ -25,6 +25,9 @@
 --  - apply_categorization_rules(): rückwirkend auf unkategorisierte
 --    Buchungen (alle Regeln oder eine bestimmte, auch als Zählung).
 --  - reset_machine_categorization(), categorization_stats().
+--  - Erneuter Import ergänzt bei vorhandenen Buchungen (Duplikaten) fehlenden
+--    Transaktionstyp, IBAN und Beschreibung (z. B. Importe vor dieser
+--    Migration) und wendet dann Regeln an, falls sie keine Kategorie haben.
 --  - Neue Standardkategorie „Kapitalertragsteuer“ (Ausgabe, Needs) und
 --    Nachtrag für bestehende Nutzer, inkl. „Kapitalerträge“ falls fehlend.
 -- =====================================================================
@@ -902,6 +905,7 @@ declare
   v_new         integer;
   v_duplicates  integer;
   v_categorized integer;
+  v_enriched    integer;
   v_balance     numeric;
   v_name        text := btrim(p_new_account_name);
 begin
@@ -952,7 +956,8 @@ begin
   create temporary table import_batch (
     booking_date date, value_date date, amount numeric(14,2), currency public.currency_code,
     counterparty text, purpose text, transaction_type text, counterparty_iban text, description text,
-    import_hash text, category_id uuid, rule_id uuid, duplicate boolean
+    import_hash text, category_id uuid, rule_id uuid, duplicate boolean,
+    existing_id uuid, enrich boolean, existing_uncategorized boolean
   ) on commit drop;
 
   insert into pg_temp.import_batch
@@ -962,29 +967,38 @@ begin
            row_number() over (
              partition by r.booking_date, r.amount, btrim(regexp_replace(lower(coalesce(r.purpose, '')), '\s+', ' ', 'g'))
              order by r.ord)),
-         null, null, false
+         null, null, false, null, false, false
     from private.import_rows(p_rows, v_currency) r;
 
   update pg_temp.import_batch b
-     set duplicate = exists (
-       select 1 from public.transactions t
-        where t.account_id = v_account_id and t.import_hash = b.import_hash
-     )
-   where v_account_id is not null;
+     set duplicate = true,
+         existing_id = t.id,
+         -- Anreichern: vorhandene Buchung (z. B. vor diesen Spalten importiert)
+         -- erhält fehlende Felder; vorhandene Werte bleiben unverändert.
+         enrich = (t.transaction_type is null and b.transaction_type is not null)
+               or (t.counterparty_iban is null and b.counterparty_iban is not null)
+               or (t.description is null and b.description is not null),
+         existing_uncategorized = t.category_id is null
+    from public.transactions t
+   where v_account_id is not null
+     and t.account_id = v_account_id
+     and t.import_hash = b.import_hash;
 
-  -- Schichten 2 und 3: eigene Regeln vor Standardregeln.
+  -- Schichten 2 und 3: eigene Regeln vor Standardregeln – für neue Zeilen
+  -- und für angereicherte Buchungen ohne Kategorie (Schicht 1 bleibt).
   update pg_temp.import_batch b
      set category_id = m.category_id, rule_id = m.rule_id
     from pg_temp.import_batch s
     cross join lateral private.match_rule(v_uid, v_account_id, s.amount, s.counterparty, s.purpose,
                                           s.description, s.transaction_type, s.counterparty_iban) m
    where s.ctid = b.ctid
-     and not b.duplicate;
+     and (not b.duplicate or (b.enrich and b.existing_uncategorized));
 
   select count(*) filter (where not b.duplicate),
          count(*) filter (where b.duplicate),
-         count(*) filter (where not b.duplicate and b.category_id is not null)
-    into v_new, v_duplicates, v_categorized
+         count(*) filter (where b.category_id is not null),
+         count(*) filter (where b.enrich)
+    into v_new, v_duplicates, v_categorized, v_enriched
     from pg_temp.import_batch b;
 
   if not p_dry_run then
@@ -1002,6 +1016,23 @@ begin
      where not b.duplicate
     on conflict (account_id, import_hash) where import_hash is not null do nothing;
     get diagnostics v_new = row_count;
+
+    update public.transactions t
+       set transaction_type       = coalesce(t.transaction_type, b.transaction_type),
+           counterparty_iban      = coalesce(t.counterparty_iban, b.counterparty_iban),
+           description            = coalesce(t.description, b.description),
+           category_id            = coalesce(t.category_id, b.category_id),
+           categorization_source  = case when t.category_id is null and b.category_id is not null
+                                         then 'rule'::public.categorization_source
+                                         else t.categorization_source end,
+           categorization_rule_id = case when t.category_id is null and b.category_id is not null
+                                         then b.rule_id
+                                         else t.categorization_rule_id end
+      from pg_temp.import_batch b
+     where b.enrich
+       and t.id = b.existing_id
+       and t.user_id = v_uid;
+    get diagnostics v_enriched = row_count;
   end if;
 
   select a.balance into v_balance from public.accounts a where a.id = v_account_id;
@@ -1013,6 +1044,7 @@ begin
     'new',         v_new,
     'duplicates',  v_duplicates,
     'categorized', v_categorized,
+    'enriched',    v_enriched,
     'balance',     v_balance,
     'dry_run',     p_dry_run
   );
@@ -1022,7 +1054,8 @@ $$;
 comment on function public.import_transactions(uuid, jsonb, boolean, text, text) is
   'Importiert normalisierte Zeilen [{booking_date, value_date?, amount, currency?, counterparty?, purpose?, '
   'transaction_type?, counterparty_iban?, description?}] in ein eigenes manuelles/CSV-Konto (oder legt eines '
-  'an); überspringt Duplikate (import_hash), wendet eigene und Standardregeln an (mit Regel-ID). p_dry_run: '
+  'an); überspringt Duplikate (import_hash), ergänzt bei ihnen fehlenden Typ/IBAN/Beschreibung (enriched; ohne '
+  'Kategorie danach auch Regeln), wendet eigene und Standardregeln an (mit Regel-ID). p_dry_run: '
   'nur zählen. Fehler (22023): invalid_rows, no_rows, too_many_rows, invalid_row (DETAIL = Position), '
   'account_not_importable, invalid_account_name, invalid_currency; account_not_found (P0002).';
 

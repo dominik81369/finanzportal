@@ -440,6 +440,7 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
                       duplicates: preview.duplicates,
                       categorized: preview.categorized,
                     })}
+                    {preview.enriched > 0 ? ` ${t('preview.enriched', { count: preview.enriched })}` : null}
                   </p>
                 ) : null}
               </div>
@@ -458,9 +459,15 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
                 type="button"
                 className="button"
                 onClick={handleImport}
-                disabled={!previewRequestData || !preview || preview.new === 0 || previewing || importing}
+                disabled={
+                  !previewRequestData || !preview || (preview.new === 0 && preview.enriched === 0) || previewing || importing
+                }
               >
-                {importing ? t('importing') : t('import', { count: preview?.new ?? 0 })}
+                {importing
+                  ? t('importing')
+                  : preview && preview.new === 0 && preview.enriched > 0
+                    ? t('importEnrich', { count: preview.enriched })
+                    : t('import', { count: preview?.new ?? 0 })}
               </button>
             </>
           ) : null}
@@ -473,6 +480,7 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
           <h2 id="import-result-heading">{t('result.heading')}</h2>
           <p role="status" className="form-success" id="import-result">
             {t('result.summary', { new: result.new, duplicates: result.duplicates, categorized: result.categorized })}
+            {result.enriched > 0 ? ` ${t('result.enriched', { count: result.enriched })}` : null}
           </p>
           {built?.balanceCheck.status === 'mismatch' ? <BalanceCheckNote check={built.balanceCheck} money={money} /> : null}
           {closingCheck ? (

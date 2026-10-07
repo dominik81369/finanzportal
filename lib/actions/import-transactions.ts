@@ -31,6 +31,8 @@ export type ImportSummary = {
   new: number;
   duplicates: number;
   categorized: number;
+  /** Vorhandene Buchungen, denen Typ/IBAN/Beschreibung ergänzt wird bzw. wurde. */
+  enriched: number;
   balance: number | null;
 };
 
@@ -130,6 +132,7 @@ async function callImport(request: ImportRequest, dryRun: boolean): Promise<Impo
       new: Number(result.new),
       duplicates: Number(result.duplicates),
       categorized: Number(result.categorized),
+      enriched: Number(result.enriched ?? 0),
       balance: result.balance === null || result.balance === undefined ? null : Number(result.balance),
     },
   };

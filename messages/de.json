@@ -486,7 +486,8 @@
       "moreErrors": "… und {count} weitere.",
       "skippedZero": "{count, plural, one {# Buchung mit Betrag 0 wird nicht importiert.} other {# Buchungen mit Betrag 0 werden nicht importiert.}}",
       "checking": "Abgleich mit vorhandenen Buchungen …",
-      "summary": "{new, plural, =0 {Keine neuen Buchungen} one {# neue Buchung} other {# neue Buchungen}}, {duplicates, plural, =0 {keine bereits vorhanden} one {# bereits vorhanden (wird übersprungen)} other {# bereits vorhanden (werden übersprungen)}}, {categorized, plural, =0 {keine per Regel kategorisiert} one {# per Regel kategorisiert} other {# per Regel kategorisiert}}."
+      "summary": "{new, plural, =0 {Keine neuen Buchungen} one {# neue Buchung} other {# neue Buchungen}}, {duplicates, plural, =0 {keine bereits vorhanden} one {# bereits vorhanden (wird übersprungen)} other {# bereits vorhanden (werden übersprungen)}}, {categorized, plural, =0 {keine per Regel kategorisiert} one {# per Regel kategorisiert} other {# per Regel kategorisiert}}.",
+      "enriched": "{count, plural, one {Bei # vorhandenen Buchung werden fehlender Transaktionstyp, IBAN bzw. Beschreibung ergänzt.} other {Bei # vorhandenen Buchungen werden fehlender Transaktionstyp, IBAN bzw. Beschreibung ergänzt.}}"
     },
     "detected": {
       "excel": "Excel-Datei (erstes Tabellenblatt)",
@@ -522,6 +523,7 @@
       "description": "Beschreibung"
     },
     "import": "{count, plural, =0 {Keine neuen Buchungen} one {# Buchung importieren} other {# Buchungen importieren}}",
+    "importEnrich": "{count, plural, one {# vorhandene Buchung ergänzen} other {# vorhandene Buchungen ergänzen}}",
     "importing": "Wird importiert …",
     "result": {
       "heading": "Import abgeschlossen",
@@ -529,7 +531,8 @@
       "closingOk": "Der Kontostand im Portal ({balance}) stimmt mit dem Endsaldo der Datei überein.",
       "closingMismatch": "Achtung: Laut Datei beträgt der Endsaldo {closing}, im Portal ergibt sich {balance}. Prüfen Sie den Anfangsbestand des Kontos oder ob Buchungen fehlen.",
       "toList": "Zu den Transaktionen",
-      "again": "Weitere Datei importieren"
+      "again": "Weitere Datei importieren",
+      "enriched": "{count, plural, one {# vorhandene Buchung wurde ergänzt.} other {# vorhandene Buchungen wurden ergänzt.}}"
     },
     "balance": {
       "ok": "Saldenabgleich: Anfangssaldo {opening} + Buchungen = Endsaldo {closing} ✓",
