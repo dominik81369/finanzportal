@@ -19,6 +19,17 @@ import { isUuid } from '@/lib/transactions';
 import { loadTransactionFormOptions } from '../../form-options';
 import { CategoryForm } from './category-form';
 
+/** Textschlüssel für „Warum diese Kategorie?“ je Herkunft der Regel. */
+function whyKey(origin: string): 'standard' | 'learned' | 'ownAccount' | 'rule' {
+  return origin === 'standard'
+    ? 'standard'
+    : origin === 'learned'
+      ? 'learned'
+      : origin === 'own_account'
+        ? 'ownAccount'
+        : 'rule';
+}
+
 type CategoryPageProps = { params: Promise<{ locale: string; id: string }> };
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
@@ -117,7 +128,7 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
                 : tx.categorization_source !== 'rule'
                   ? t('why.manual')
                   : tx.rule
-                    ? t(`why.${tx.rule.origin === 'standard' ? 'standard' : tx.rule.origin === 'learned' ? 'learned' : 'rule'}`, {
+                    ? t(`why.${whyKey(tx.rule.origin)}`, {
                         pattern: tx.rule.pattern,
                         field: tRules(`fields.${tx.rule.match_field}`),
                       })

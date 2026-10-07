@@ -72,13 +72,15 @@ select is(private.extract_merchant('Ihr Einkauf', 'PayPal'), null, 'PayPal ohne 
 -- ---------------------------------------------------------------------
 -- 3. Standardregeln laden (11–14)
 -- ---------------------------------------------------------------------
-select cmp_ok(public.load_standard_rules(), '>', 150, 'Standardregeln geladen');
-select is(public.load_standard_rules(), 0, 'Erneutes Laden ist idempotent');
+select cmp_ok((public.load_standard_rules() ->> 'added')::int, '>', 150, 'Standardregeln geladen');
+select is(public.load_standard_rules(), '{"added": 0, "removed": 0, "reset": 0, "applied": 0}'::jsonb,
+  'Erneutes Laden ist idempotent');
 select is(
-  (select count(*)::int from public.categorization_rules
-    where user_id = auth.uid() and origin = 'standard' and priority = 100),
+  (select count(*)::int from public.categorization_rules r
+     join private.standard_rule_templates() t on t.pattern = r.pattern and t.match_field = r.match_field
+    where r.user_id = auth.uid() and r.origin = 'standard' and r.priority = t.priority and r.match_type = 'word'),
   (select count(*)::int from public.categorization_rules where user_id = auth.uid() and origin = 'standard'),
-  'Standardregeln: Herkunft standard, Priorität 100'
+  'Standardregeln: Herkunft standard, ganzes Wort, Priorität aus dem Regelset'
 );
 select is(
   (select count(*)::int from public.categorization_rules where user_id <> auth.uid()), 0,
@@ -97,8 +99,8 @@ insert into m values
   ('aldi',      -12,    null, 'Kartenzahlung ALDI SÜD 1234', null, null, null),
   ('zins_typ',  12.34,  null, null, null, 'Zinszahlung', null),
   ('kest',      -3.10,  null, 'Steuerabrechnung Zinsgutschrift', null, null, null),
-  ('miete_out', -950,   'Hausverwaltung', 'Miete Oktober', null, null, null),
-  ('miete_in',  950,    'Mieter Huber', 'Miete Oktober', null, null, null),
+  ('mvg',       -58,    'Stadtwerke München GmbH', 'MVG Deutschlandticket Oktober', null, null, null),
+  ('swm',       -80,    'Stadtwerke München GmbH', 'Abschlag Strom', null, null, null),
   ('prime',     -8.99,  'AMAZON EU', 'Amazon Prime Mitgliedschaft', null, null, null),
   ('desc',      -15.99, null, null, 'Netflix Monatsabo', null, null),
   ('nothing',   -5,     'Kiosk', 'Zeitung', null, null, null);
@@ -118,8 +120,8 @@ select is(pg_temp.match_key('waldi'),     null,                  'Wort-Treffer: 
 select is(pg_temp.match_key('aldi'),      'groceries',           'ALDI SÜD im Verwendungszweck → Lebensmittel');
 select is(pg_temp.match_key('zins_typ'),  'investment_income',   'Transaktionstyp „Zinszahlung“ → Kapitalerträge');
 select is(pg_temp.match_key('kest'),      'capital_gains_tax',   'Steuerabrechnung Zinsgutschrift (Abbuchung) → Kapitalertragsteuer');
-select is(pg_temp.match_key('miete_out'), 'housing',             'Miete als Ausgabe → Wohnen');
-select is(pg_temp.match_key('miete_in'),  'rental_income',       'Miete als Eingang → Mieteinnahmen');
+select is(pg_temp.match_key('mvg'),       'mobility',            'MVG geht vor „Stadtwerke“ (Priorität 90 vor 110)');
+select is(pg_temp.match_key('swm'),       'housing',             'Stadtwerke ohne Nahverkehrsbezug → Wohnen');
 select is(pg_temp.match_key('prime'),     'subscriptions_media', 'Längeres Standardmuster gewinnt (amazon prime vor amazon)');
 select is(pg_temp.match_key('desc'),      'subscriptions_media', 'Beschreibung wird durchsucht');
 select is(pg_temp.match_key('nothing'),   null,                  'Kein Treffer → keine Kategorie');
@@ -223,7 +225,7 @@ select is(public.apply_categorization_rules(), 0, 'Erneut anwenden: nichts mehr 
 select is(
   public.set_transaction_category((select id from public.transactions where user_id = auth.uid() and amount = -33),
                                   (select groceries from cat)) - 'rule_id',
-  '{"changed": true, "similar": 0, "learned_pattern": "baeckerei lang"}'::jsonb,
+  '{"changed": true, "similar": 0, "similar_auto": 0, "learned_pattern": "baeckerei lang"}'::jsonb,
   'Manuelle Zuordnung lernt Regel und meldet ähnliche Buchungen'
 );
 
@@ -259,9 +261,10 @@ select lives_ok(
   'Umsortieren betrifft nur eigene Regeln'
 );
 select is(
-  (select count(*)::int from public.categorization_rules
-    where user_id = auth.uid() and origin = 'standard' and priority <> 100), 0,
-  'Standardregeln behalten Priorität 100'
+  (select count(*)::int from public.categorization_rules r
+     join private.standard_rule_templates() t on t.pattern = r.pattern and t.match_field = r.match_field
+    where r.user_id = auth.uid() and r.origin = 'standard' and r.priority <> t.priority), 0,
+  'Standardregeln behalten ihre Priorität aus dem Regelset'
 );
 
 -- Regel löschen: Kategorie bleibt, Regel-ID wird geleert.

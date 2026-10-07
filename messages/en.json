@@ -220,7 +220,11 @@
       "autoStandardRule": "Assigned automatically by the standard rule “{pattern}”",
       "similarFound": "{count, plural, one {Found # similar uncategorised transaction. Assign it too?} other {Found # similar uncategorised transactions. Assign them too?}}",
       "similarApply": "{count, plural, one {Assign similar transaction} other {Assign # similar transactions}}",
-      "similarApplied": "{count, plural, =0 {No further transactions assigned.} one {# more transaction was assigned.} other {# more transactions were assigned.}}"
+      "similarApplied": "{count, plural, =0 {No further transactions assigned.} one {# more transaction was assigned.} other {# more transactions were assigned.}}",
+      "similarFoundAuto": "{count, plural, one {# similar transaction is assigned differently by a rule. Overwrite it with your correction? Manual assignments stay unchanged.} other {# similar transactions are assigned differently by rules. Overwrite them with your correction? Manual assignments stay unchanged.}}",
+      "similarFoundBoth": "Found {open, plural, one {# similar uncategorised transaction} other {# similar uncategorised transactions}}; {auto, plural, one {# more is assigned differently by a rule} other {# more are assigned differently by rules}}. Assign them too? Manual assignments stay unchanged.",
+      "similarApplyAll": "{count, plural, one {Also overwrite automatic ones (#)} other {Also overwrite automatic ones (#)}}",
+      "autoOwnAccount": "Recognised automatically as your own account (“{pattern}”)"
     },
     "filters": {
       "heading": "Search and filter transactions",
@@ -577,9 +581,33 @@
     "standardEmpty": "No standard rules loaded yet.",
     "standardSummary": "{count, plural, one {Show # standard rule} other {Show # standard rules}}",
     "notices": {
-      "loaded": "{count, plural, =0 {The standard rules are already fully loaded.} one {# standard rule was loaded.} other {# standard rules were loaded.}}",
+      "loaded": "{count, plural, =0 {The standard rules are up to date.} one {# standard rule added.} other {# standard rules added.}}",
       "applied": "{count, plural, =0 {No further transactions assigned.} one {# transaction was assigned automatically.} other {# transactions were assigned automatically.}}",
-      "reset": "{count, plural, =0 {There were no automatic assignments.} one {# automatic assignment was removed.} other {# automatic assignments were removed.}}"
+      "reset": "{count, plural, =0 {There were no automatic assignments.} one {# automatic assignment was removed.} other {# automatic assignments were removed.}}",
+      "removed": "{count, plural, one {# outdated standard rule removed and its automatic assignments reset.} other {# outdated standard rules removed and their automatic assignments reset.}}"
+    },
+    "ownAccounts": {
+      "heading": "Own accounts",
+      "intro": "Payments to your own accounts are transfers. Enter your name (first and last name) or the IBAN of one of your accounts: matching transactions are assigned to Transfer automatically – including name variants such as “MUSTERMANN, DOMINIK MAXIMILIAN”. Your own rules and manual assignments take precedence.",
+      "badge": "own account",
+      "kinds": {
+        "name": "Name",
+        "iban": "IBAN"
+      },
+      "kind": "Recognise by",
+      "value": "Name or IBAN",
+      "valuePlaceholder": "e.g. Dominik Mustermann",
+      "hint": "For names, all words must appear in the payee (in any order), so enter at least first and last name.",
+      "save": "Add own account",
+      "saving": "Saving …",
+      "added": "{count, plural, =0 {Added; no transaction matches yet.} one {Added; # transaction assigned to Transfer.} other {Added; # transactions assigned to Transfer.}}",
+      "errors": {
+        "invalidName": "Please enter first and last name (at least two words).",
+        "invalidIban": "Please enter a valid IBAN.",
+        "exists": "This own account has already been added.",
+        "noTransferCategory": "The “Transfer” category is missing. Please create it again.",
+        "generic": "Something went wrong. Please try again."
+      }
     },
     "newHeading": "New rule",
     "listHeading": "Your rules in matching order",
@@ -594,7 +622,8 @@
       "word": "whole word",
       "equals": "equals",
       "starts_with": "starts with",
-      "regex": "regular expression"
+      "regex": "regular expression",
+      "all_words": "all words"
     },
     "moveUpLabel": "Move rule “{pattern}” up",
     "moveDownLabel": "Move rule “{pattern}” down",
@@ -652,7 +681,8 @@
       "standard": "Assigned automatically by the standard rule “{pattern}” ({field}).",
       "ruleDeleted": "Assigned automatically by a rule that has since been deleted.",
       "toRules": "View rules",
-      "confirmHint": "Saving confirms the category; it then counts as manual and rules will no longer change it."
+      "confirmHint": "Saving confirms the category; it then counts as manual and rules will no longer change it.",
+      "ownAccount": "Recognised automatically as a transfer: own account “{pattern}” ({field})."
     },
     "learnHint": "A rule for this merchant is learned from your choice; future transactions will then be assigned automatically.",
     "category": "Category",

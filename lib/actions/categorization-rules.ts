@@ -151,7 +151,12 @@ export async function setTransactionCategory(
     return { status: 'error', message: error.code === 'P0002' ? t('notFound') : t('generic') };
   }
 
-  const result = data as { learned_pattern?: string | null; rule_id?: string | null; similar?: number } | null;
+  const result = data as {
+    learned_pattern?: string | null;
+    rule_id?: string | null;
+    similar?: number;
+    similar_auto?: number;
+  } | null;
   const learned = result?.learned_pattern ?? null;
   revalidatePath('/[locale]/dashboard/transactions', 'page');
   revalidatePath(`/[locale]${RULES_PATH}`, 'page');
@@ -159,9 +164,13 @@ export async function setTransactionCategory(
   if (learned) {
     query.set('learned', learned);
   }
-  // „N ähnliche Buchungen gefunden, auch zuordnen?“
-  if (result?.rule_id && result.similar && result.similar > 0) {
-    query.set('similar', String(result.similar));
+  // „N ähnliche Buchungen gefunden, auch zuordnen?“ – ohne Kategorie bzw.
+  // automatisch anders zugeordnet (manuelle zählen nie mit).
+  const similar = result?.similar ?? 0;
+  const similarAuto = result?.similar_auto ?? 0;
+  if (result?.rule_id && (similar > 0 || similarAuto > 0)) {
+    query.set('similar', String(similar));
+    query.set('similarAuto', String(similarAuto));
     query.set('rule', result.rule_id);
   }
   redirect(`${await localizedPath('/dashboard/transactions')}?${query.toString()}`);
@@ -179,7 +188,10 @@ async function redirectWith(path: string, params: Record<string, string>): Promi
   redirect(`${await localizedPath(path)}?${new URLSearchParams(params).toString()}`);
 }
 
-/** Schicht 3: Standard-Regelset übernehmen (idempotent). */
+/**
+ * Schicht 3: Standard-Regelset abgleichen (fehlende ergänzen, veraltete
+ * entfernen) und auf Buchungen ohne Kategorie anwenden.
+ */
 export async function loadStandardRules(): Promise<void> {
   await requireOnboardedUser(RULES_PATH);
   const supabase = await createClient();
@@ -188,8 +200,13 @@ export async function loadStandardRules(): Promise<void> {
     console.error('[rules] Standardregeln laden fehlgeschlagen', { code: error.code });
     await redirectWith(RULES_PATH, { error: '1' });
   }
+  const result = (data ?? {}) as { added?: number; removed?: number; applied?: number };
   revalidateCategorization();
-  await redirectWith(RULES_PATH, { loaded: String(data ?? 0) });
+  await redirectWith(RULES_PATH, {
+    loaded: String(result.added ?? 0),
+    removed: String(result.removed ?? 0),
+    applied: String(result.applied ?? 0),
+  });
 }
 
 /** Alle Regeln auf alle Buchungen ohne Kategorie anwenden. */
@@ -218,18 +235,70 @@ export async function resetMachineCategorization(): Promise<void> {
   await redirectWith(RULES_PATH, { reset: String(data ?? 0) });
 }
 
-/** „N ähnliche Buchungen gefunden, auch zuordnen?“ – nur diese Regel anwenden. */
-export async function applyRuleToSimilar(ruleId: string): Promise<void> {
+/**
+ * „N ähnliche Buchungen gefunden, auch zuordnen?“ – nur diese Regel anwenden;
+ * overwrite: auch automatisch anders zugeordnete Buchungen (nie manuelle).
+ */
+export async function applyRuleToSimilar(ruleId: string, overwrite: boolean): Promise<void> {
   await requireOnboardedUser(TRANSACTIONS_PATH);
   if (!isUuid(ruleId)) {
     await redirectWith(TRANSACTIONS_PATH, {});
   }
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc('apply_categorization_rules', { p_rule_id: ruleId });
+  const { data, error } = await supabase.rpc('apply_categorization_rules', {
+    p_rule_id: ruleId,
+    p_overwrite_auto: overwrite === true,
+  });
   if (error) {
     console.error('[rules] Ähnliche zuordnen fehlgeschlagen', { code: error.code });
     await redirectWith(TRANSACTIONS_PATH, {});
   }
   revalidateCategorization();
   await redirectWith(TRANSACTIONS_PATH, { applied: String(data ?? 0) });
+}
+
+export type OwnAccountFormState = {
+  status: 'idle' | 'success' | 'error';
+  message?: string;
+  values?: { kind: string; value: string };
+  nonce?: number;
+};
+
+/**
+ * Eigenes Konto erkennen (Schicht vor den Standardregeln): Name (Vor- und
+ * Nachname, alle Wörter im Empfänger) oder IBAN → Umbuchung. Die Regel wird
+ * sofort angewendet.
+ */
+export async function addOwnAccount(_prevState: OwnAccountFormState, formData: FormData): Promise<OwnAccountFormState> {
+  await requireOnboardedUser(RULES_PATH);
+  const t = await getTranslations('Rules.ownAccounts');
+  const kind = String(formData.get('kind') ?? '');
+  const value = String(formData.get('value') ?? '').trim();
+  const values = { kind, value };
+  if ((kind !== 'name' && kind !== 'iban') || value.length === 0 || value.length > 200) {
+    return { status: 'error', message: t(kind === 'iban' ? 'errors.invalidIban' : 'errors.invalidName'), values };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('add_own_account_identifier', { p_kind: kind, p_value: value });
+  if (error) {
+    const key =
+      error.message === 'invalid_name'
+        ? 'errors.invalidName'
+        : error.message === 'invalid_iban'
+          ? 'errors.invalidIban'
+          : error.message === 'rule_exists'
+            ? 'errors.exists'
+            : error.message === 'category_not_found'
+              ? 'errors.noTransferCategory'
+              : 'errors.generic';
+    if (key === 'errors.generic') {
+      console.error('[rules] Eigenes Konto anlegen fehlgeschlagen', { code: error.code });
+    }
+    return { status: 'error', message: t(key), values };
+  }
+
+  revalidateCategorization();
+  const applied = Number((data as { applied?: number } | null)?.applied ?? 0);
+  return { status: 'success', message: t('added', { count: applied }), nonce: Date.now() };
 }
