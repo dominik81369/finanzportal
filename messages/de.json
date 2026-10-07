@@ -213,7 +213,14 @@
       "learned": "Neue Regel gelernt: Buchungen mit „{pattern}“ werden künftig automatisch so zugeordnet.",
       "toRules": "Regeln ansehen",
       "categorize": "Kategorie",
-      "categorizeLabel": "Kategorie der Buchung „{counterparty}“ vom {date} ändern"
+      "categorizeLabel": "Kategorie der Buchung „{counterparty}“ vom {date} ändern",
+      "auto": "automatisch",
+      "autoTitle": "Automatisch per Regel zugeordnet",
+      "autoOwnRule": "Automatisch zugeordnet durch Ihre Regel „{pattern}“",
+      "autoStandardRule": "Automatisch zugeordnet durch die Standardregel „{pattern}“",
+      "similarFound": "{count, plural, one {# ähnliche Buchung ohne Kategorie gefunden. Auch zuordnen?} other {# ähnliche Buchungen ohne Kategorie gefunden. Auch zuordnen?}}",
+      "similarApply": "{count, plural, one {Ähnliche Buchung zuordnen} other {# ähnliche Buchungen zuordnen}}",
+      "similarApplied": "{count, plural, =0 {Keine weiteren Buchungen zugeordnet.} one {# weitere Buchung wurde zugeordnet.} other {# weitere Buchungen wurden zugeordnet.}}"
     },
     "filters": {
       "heading": "Transaktionen durchsuchen und filtern",
@@ -228,6 +235,12 @@
       "category": "Kategorie",
       "allCategories": "Alle Kategorien",
       "uncategorized": "Ohne Kategorie",
+      "assigned": "Zuordnung",
+      "allAssignments": "Alle",
+      "assignments": {
+        "manual": "Manuell",
+        "auto": "Automatisch"
+      },
       "tag": "Tag",
       "allTags": "Alle Tags",
       "from": "Von",
@@ -318,6 +331,7 @@
     "shopping": "Shopping",
     "education": "Bildung",
     "taxes": "Steuern & Abgaben",
+    "capital_gains_tax": "Kapitalertragsteuer",
     "other_expenses": "Sonstige Ausgaben",
     "savings_investments": "Sparen & Investieren",
     "loan_repayment": "Kredittilgung",
@@ -472,7 +486,8 @@
       "moreErrors": "… und {count} weitere.",
       "skippedZero": "{count, plural, one {# Buchung mit Betrag 0 wird nicht importiert.} other {# Buchungen mit Betrag 0 werden nicht importiert.}}",
       "checking": "Abgleich mit vorhandenen Buchungen …",
-      "summary": "{new, plural, =0 {Keine neuen Buchungen} one {# neue Buchung} other {# neue Buchungen}}, {duplicates, plural, =0 {keine bereits vorhanden} one {# bereits vorhanden (wird übersprungen)} other {# bereits vorhanden (werden übersprungen)}}, {categorized, plural, =0 {keine per Regel kategorisiert} one {# per Regel kategorisiert} other {# per Regel kategorisiert}}."
+      "summary": "{new, plural, =0 {Keine neuen Buchungen} one {# neue Buchung} other {# neue Buchungen}}, {duplicates, plural, =0 {keine bereits vorhanden} one {# bereits vorhanden (wird übersprungen)} other {# bereits vorhanden (werden übersprungen)}}, {categorized, plural, =0 {keine per Regel kategorisiert} one {# per Regel kategorisiert} other {# per Regel kategorisiert}}.",
+      "enriched": "{count, plural, one {Bei # vorhandenen Buchung werden fehlender Transaktionstyp, IBAN bzw. Beschreibung ergänzt.} other {Bei # vorhandenen Buchungen werden fehlender Transaktionstyp, IBAN bzw. Beschreibung ergänzt.}}"
     },
     "detected": {
       "excel": "Excel-Datei (erstes Tabellenblatt)",
@@ -502,9 +517,13 @@
       "counterparty": "Empfänger / Zahler",
       "valueDate": "Wertstellung",
       "balance": "Saldo",
-      "currency": "Währung"
+      "currency": "Währung",
+      "transactionType": "Transaktionstyp",
+      "counterpartyIban": "IBAN Gegenkonto",
+      "description": "Beschreibung"
     },
     "import": "{count, plural, =0 {Keine neuen Buchungen} one {# Buchung importieren} other {# Buchungen importieren}}",
+    "importEnrich": "{count, plural, one {# vorhandene Buchung ergänzen} other {# vorhandene Buchungen ergänzen}}",
     "importing": "Wird importiert …",
     "result": {
       "heading": "Import abgeschlossen",
@@ -512,7 +531,8 @@
       "closingOk": "Der Kontostand im Portal ({balance}) stimmt mit dem Endsaldo der Datei überein.",
       "closingMismatch": "Achtung: Laut Datei beträgt der Endsaldo {closing}, im Portal ergibt sich {balance}. Prüfen Sie den Anfangsbestand des Kontos oder ob Buchungen fehlen.",
       "toList": "Zu den Transaktionen",
-      "again": "Weitere Datei importieren"
+      "again": "Weitere Datei importieren",
+      "enriched": "{count, plural, one {# vorhandene Buchung wurde ergänzt.} other {# vorhandene Buchungen wurden ergänzt.}}"
     },
     "balance": {
       "ok": "Saldenabgleich: Anfangssaldo {opening} + Buchungen = Endsaldo {closing} ✓",
@@ -538,16 +558,40 @@
     "metaTitle": "Kategorisierungsregeln",
     "back": "Zurück zu den Transaktionen",
     "heading": "Kategorisierungsregeln",
-    "intro": "Regeln ordnen importierten Buchungen automatisch eine Kategorie zu, wenn Empfänger oder Verwendungszweck das Muster enthalten. Groß-/Kleinschreibung und lange Zahlenfolgen (Karten- oder Transaktionsnummern) spielen keine Rolle. Die erste passende Regel gewinnt; spezifischere Muster wie „amazon prime“ stehen automatisch vor allgemeinen wie „amazon“. Wenn Sie die Kategorie einer importierten Buchung ändern, wird daraus eine Regel gelernt.",
+    "intro": "Kategorien werden in Schichten vergeben: Ihre manuellen Zuordnungen bleiben immer erhalten, eigene Regeln gehen vor Standardregeln. Groß-/Kleinschreibung, Umlaute und lange Zahlenfolgen (Karten- oder Transaktionsnummern) spielen keine Rolle. Bei mehreren Treffern gewinnt die erste Regel; spezifischere Muster wie „amazon prime“ stehen automatisch vor allgemeinen wie „amazon“. Wenn Sie die Kategorie einer importierten Buchung ändern, wird daraus eine Regel gelernt. Die Kategorien Ihrer Bank werden nicht übernommen.",
+    "autoHeading": "Automatische Kategorisierung",
+    "autoIntro": "Standardregeln erkennen verbreitete Händler und Buchungsarten (z. B. REWE, Netflix, Deutsche Bahn, Zinszahlung). Regeln wirken bei jedem Import; auf bereits vorhandene Buchungen ohne Kategorie wenden Sie sie hier an. Automatisch vergebene Kategorien sind in der Liste markiert.",
+    "stats": {
+      "auto": "Automatisch",
+      "manual": "Manuell",
+      "uncategorized": "Ohne Kategorie",
+      "value": "{count} ({percent} %)",
+      "autoDetail": "eigene Regeln: {rule}, Standardregeln: {standard}"
+    },
+    "loadStandard": "Standardregeln laden",
+    "applyAll": "Auf alle unkategorisierten Buchungen anwenden",
+    "resetAuto": "Automatische Zuordnungen zurücksetzen",
+    "resetHint": "Zurücksetzen entfernt nur per Regel vergebene Kategorien; Ihre manuellen Zuordnungen bleiben.",
+    "viewAuto": "Automatisch zugeordnete Buchungen ansehen",
+    "standardHeading": "Standardregeln",
+    "standardEmpty": "Noch keine Standardregeln geladen.",
+    "standardSummary": "{count, plural, one {# Standardregel anzeigen} other {# Standardregeln anzeigen}}",
+    "notices": {
+      "loaded": "{count, plural, =0 {Die Standardregeln sind bereits vollständig geladen.} one {# Standardregel wurde geladen.} other {# Standardregeln wurden geladen.}}",
+      "applied": "{count, plural, =0 {Keine weiteren Buchungen zugeordnet.} one {# Buchung wurde automatisch zugeordnet.} other {# Buchungen wurden automatisch zugeordnet.}}",
+      "reset": "{count, plural, =0 {Es gab keine automatischen Zuordnungen.} one {# automatische Zuordnung wurde entfernt.} other {# automatische Zuordnungen wurden entfernt.}}"
+    },
     "newHeading": "Neue Regel",
-    "listHeading": "Regeln in Prüfreihenfolge",
+    "listHeading": "Eigene Regeln in Prüfreihenfolge",
     "loadError": "Die Regeln konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
-    "empty": "Noch keine Regeln. Legen Sie eine an oder ändern Sie die Kategorie einer importierten Buchung.",
+    "empty": "Noch keine eigenen Regeln. Legen Sie eine an oder ändern Sie die Kategorie einer importierten Buchung.",
     "learned": "gelernt",
     "manual": "manuell",
+    "standard": "Standard",
     "inactive": "inaktiv",
     "matchTypes": {
       "contains": "enthält",
+      "word": "ganzes Wort",
       "equals": "ist gleich",
       "starts_with": "beginnt mit",
       "regex": "regulärer Ausdruck"
@@ -558,7 +602,24 @@
     "delete": "Löschen",
     "pattern": "Muster",
     "patternPlaceholder": "z. B. rewe",
-    "patternHint": "Teil des Empfängers oder Verwendungszwecks, mindestens 2 Zeichen.",
+    "patternHint": "Text (mindestens 2 Zeichen) bzw. IBAN des Gegenkontos. „Ganzes Wort“ trifft „aldi“ in „ALDI SÜD“, aber nicht in „Waldi“.",
+    "field": "Feld",
+    "matchType": "Vergleich",
+    "direction": "Richtung",
+    "fields": {
+      "counterparty_or_purpose": "Empfänger, Zweck oder Beschreibung",
+      "counterparty": "Empfänger / Zahler",
+      "purpose": "Verwendungszweck",
+      "description": "Beschreibung",
+      "transaction_type": "Transaktionstyp",
+      "counterparty_iban": "IBAN Gegenkonto",
+      "any_text": "Alle Textfelder inkl. Transaktionstyp"
+    },
+    "directions": {
+      "both": "Ein- und Ausgänge",
+      "in": "nur Eingänge",
+      "out": "nur Ausgaben"
+    },
     "category": "Kategorie",
     "choose": "Bitte wählen",
     "save": "Regel anlegen",
@@ -567,7 +628,7 @@
     "errors": {
       "invalidPattern": "Bitte geben Sie ein Muster mit 2 bis 200 Zeichen an (lange Zahlenfolgen zählen nicht).",
       "categoryMissing": "Bitte wählen Sie eine Kategorie.",
-      "ruleExists": "Für dieses Muster gibt es bereits eine Regel.",
+      "ruleExists": "Für dieses Muster gibt es bereits eine gleiche Regel.",
       "generic": "Das hat leider nicht geklappt. Bitte versuchen Sie es erneut."
     }
   },
@@ -579,6 +640,20 @@
     "amount": "Betrag",
     "counterparty": "Empfänger / Zahler",
     "purpose": "Verwendungszweck",
+    "description": "Beschreibung",
+    "transactionType": "Transaktionstyp",
+    "counterpartyIban": "IBAN Gegenkonto",
+    "why": {
+      "heading": "Warum diese Kategorie?",
+      "none": "Diese Buchung hat noch keine Kategorie.",
+      "manual": "Sie haben die Kategorie selbst zugeordnet bzw. bestätigt. Regeln ändern sie nicht mehr.",
+      "rule": "Automatisch zugeordnet durch Ihre Regel „{pattern}“ ({field}).",
+      "learned": "Automatisch zugeordnet durch die gelernte Regel „{pattern}“ ({field}).",
+      "standard": "Automatisch zugeordnet durch die Standardregel „{pattern}“ ({field}).",
+      "ruleDeleted": "Automatisch per Regel zugeordnet; die Regel wurde inzwischen gelöscht.",
+      "toRules": "Regeln ansehen",
+      "confirmHint": "Mit „Speichern“ bestätigen Sie die Kategorie; sie gilt dann als manuell und wird von Regeln nicht mehr geändert."
+    },
     "learnHint": "Aus Ihrer Auswahl wird eine Regel für diesen Händler gelernt; künftige Buchungen werden dann automatisch so zugeordnet.",
     "category": "Kategorie",
     "uncategorized": "Ohne Kategorie",

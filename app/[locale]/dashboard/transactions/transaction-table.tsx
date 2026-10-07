@@ -2,7 +2,8 @@
  * Tabelle einer Seite der Transaktionsliste (siehe ./transaction-list.ts).
  * editable: Bearbeiten-Links (manuell erfasste Buchungen) bzw. „Kategorie“
  * (importierte/synchronisierte) – nur in der eigenen Liste, nie in der
- * Leseansicht des Beraters.
+ * Leseansicht des Beraters. Per Regel vergebene Kategorien tragen die
+ * Markierung „automatisch“ (Tooltip: welche Regel).
  */
 import { getFormatter, getLocale, getTranslations } from 'next-intl/server';
 
@@ -67,6 +68,21 @@ export async function TransactionTable({ transactions, caption, editable }: Tran
                         style={{ background: tx.category.color ?? 'var(--muted-foreground)' }}
                       />
                       {categoryDisplayName(tx.category, tCategories)}
+                      {/* Schicht 2/3: per Regel vergeben – unterscheidbar von manuell. */}
+                      {tx.categorization_source === 'rule' ? (
+                        <span
+                          className="badge badge-auto"
+                          title={
+                            tx.rule
+                              ? t(tx.rule.origin === 'standard' ? 'autoStandardRule' : 'autoOwnRule', {
+                                  pattern: tx.rule.pattern,
+                                })
+                              : t('autoTitle')
+                          }
+                        >
+                          {t('auto')}
+                        </span>
+                      ) : null}
                     </span>
                   ) : (
                     <span className="muted">{t('uncategorized')}</span>

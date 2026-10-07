@@ -46,7 +46,7 @@ select is(private.extract_merchant('REWE SAGT DANKE 12345678 Karte 1234', null),
   'Händlername: Text vor der ersten längeren Zahlenfolge');
 select is(private.extract_merchant('SEPA-Lastschrift AMAZON PRIME*AB12 Amzn.com/bill', null), 'amazon prime',
   'Händlername: ohne Buchungsart-Präfix, endet vor dem Code mit Ziffern');
-select is(private.extract_merchant('123456789', 'Stadtwerke München GmbH'), 'stadtwerke münchen gmbh',
+select is(private.extract_merchant('123456789', 'Stadtwerke München GmbH'), 'stadtwerke muenchen gmbh',
   'Händlername: Fallback auf den Empfänger');
 select is(private.extract_merchant('1234 5678', null), null, 'Händlername: nichts Brauchbares → NULL');
 
@@ -126,7 +126,7 @@ grant select on batch to authenticated, service_role;
 select is(
   public.import_transactions('1c000000-0000-4000-8000-000000000001', (select rows from batch), true)
     - 'account_id' - 'balance',
-  '{"currency": "EUR", "total": 5, "new": 5, "duplicates": 0, "categorized": 1, "dry_run": true}'::jsonb,
+  '{"currency": "EUR", "total": 5, "new": 5, "enriched": 0, "duplicates": 0, "categorized": 1, "dry_run": true}'::jsonb,
   'Vorschau (dry run): 5 neu, 1 per Regel kategorisiert'
 );
 select is((select count(*)::int from public.transactions), 0, 'Vorschau schreibt nichts');
@@ -134,7 +134,7 @@ select is((select count(*)::int from public.transactions), 0, 'Vorschau schreibt
 select is(
   public.import_transactions('1c000000-0000-4000-8000-000000000001', (select rows from batch))
     - 'account_id' - 'dry_run',
-  '{"currency": "EUR", "total": 5, "new": 5, "duplicates": 0, "categorized": 1, "balance": 2942.11}'::jsonb,
+  '{"currency": "EUR", "total": 5, "new": 5, "enriched": 0, "duplicates": 0, "categorized": 1, "balance": 2942.11}'::jsonb,
   'Import: 5 Buchungen, Saldo 2.942,11 (Kontostand-Trigger)'
 );
 select results_eq(
@@ -159,7 +159,7 @@ select is(
   public.import_transactions('1c000000-0000-4000-8000-000000000001',
     '[{"booking_date": "2026-09-02", "amount": "-42.50", "purpose": "rewe sagt danke 12345678 karte 1234"},
       {"booking_date": "2026-09-05", "amount": "-1.00", "purpose": "Neu"}]'::jsonb) - 'account_id' - 'balance' - 'dry_run',
-  '{"currency": "EUR", "total": 2, "new": 1, "duplicates": 1, "categorized": 0}'::jsonb,
+  '{"currency": "EUR", "total": 2, "new": 1, "enriched": 0, "duplicates": 1, "categorized": 0}'::jsonb,
   'Überlappende Datei: Groß-/Kleinschreibung im Zweck ändert den Hash nicht, nur die neue Zeile kommt dazu'
 );
 select throws_ok(
@@ -219,7 +219,7 @@ grant select on tx to authenticated, service_role;
 
 select is(
   public.set_transaction_category((select rewe from tx), (select groceries from cat)) - 'rule_id',
-  '{"changed": true, "learned_pattern": "rewe sagt danke"}'::jsonb,
+  '{"changed": true, "similar": 1, "learned_pattern": "rewe sagt danke"}'::jsonb,
   'Kategorie gesetzt → Regel „rewe sagt danke“ gelernt'
 );
 select results_eq(
@@ -291,7 +291,7 @@ select tests.authenticate_as_service_role();
 select ok(
   not has_function_privilege('anon', 'public.import_transactions(uuid, jsonb, boolean, text, text)', 'execute')
   and not has_function_privilege('anon', 'public.set_transaction_category(uuid, uuid)', 'execute')
-  and not has_function_privilege('anon', 'public.create_categorization_rule(text, uuid)', 'execute')
+  and not has_function_privilege('anon', 'public.create_categorization_rule(text, uuid, public.rule_match_field, public.rule_match_type, text)', 'execute')
   and not has_function_privilege('anon', 'public.reorder_categorization_rules(uuid[])', 'execute'),
   'anon darf keine der neuen Funktionen ausführen'
 );

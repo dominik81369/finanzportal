@@ -1127,3 +1127,106 @@
 .rule-list .link-item-actions form {
   margin: 0;
 }
+
+.rule-list .link-item-actions .button {
+  margin-top: 0;
+}
+
+/* Automatische Kategorisierung (Regeln, Markierung, „Warum diese Kategorie?“) */
+.badge-auto {
+  margin-left: 0.4rem;
+  color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  font-weight: 500;
+  cursor: help;
+}
+
+.categorization-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.categorization-stats > div {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.categorization-stats dt {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.categorization-stats dd {
+  margin: 0.25rem 0 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.categorization-stats dd .cell-note {
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.button-row form {
+  margin: 0;
+}
+
+.button-row .button {
+  margin-top: 0;
+}
+
+.rule-details summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.rule-details[open] summary {
+  margin-bottom: 0.75rem;
+}
+
+.why-category {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.why-category h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.why-category p {
+  margin: 0;
+}
+
+.why-category .hint {
+  margin-top: 0.5rem;
+}
+
+.similar-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid color-mix(in oklch, var(--primary) 35%, transparent);
+  border-radius: var(--radius-md);
+}
+
+.similar-notice p,
+.similar-notice form {
+  margin: 0;
+}

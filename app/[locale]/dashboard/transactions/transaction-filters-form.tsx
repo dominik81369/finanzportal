@@ -9,7 +9,7 @@
 import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
-import { SEARCH_MAX_LENGTH, UNCATEGORIZED, type TransactionFilters } from '@/lib/transaction-filters';
+import { ASSIGNMENTS, SEARCH_MAX_LENGTH, UNCATEGORIZED, type TransactionFilters } from '@/lib/transaction-filters';
 import type { Account, Tag } from '@/types/domain';
 
 import type { CategoryOption } from './transaction-form';
@@ -87,6 +87,18 @@ export async function TransactionFiltersForm({
                 </option>
               ))}
             </optgroup>
+          ))}
+        </select>
+      </div>
+
+      <div className="filter-field">
+        <label htmlFor="filter-assigned">{t('assigned')}</label>
+        <select id="filter-assigned" name="assigned" defaultValue={filters.assigned ?? ''}>
+          <option value="">{t('allAssignments')}</option>
+          {ASSIGNMENTS.map((assignment) => (
+            <option key={assignment} value={assignment}>
+              {t(`assignments.${assignment}`)}
+            </option>
           ))}
         </select>
       </div>

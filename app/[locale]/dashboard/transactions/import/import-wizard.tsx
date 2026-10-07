@@ -53,6 +53,19 @@ const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const NEW_ACCOUNT = 'new';
 const SAMPLE_ROWS = 8;
 
+// Felder in der manuellen Zuordnung (Währung kommt aus dem Konto).
+const MAPPED_FIELDS: readonly ImportField[] = [
+  'date',
+  'amount',
+  'purpose',
+  'counterparty',
+  'valueDate',
+  'balance',
+  'transactionType',
+  'counterpartyIban',
+  'description',
+];
+
 const emptyMapping = (): ColumnMapping =>
   Object.fromEntries(IMPORT_FIELDS.map((field) => [field, null])) as ColumnMapping;
 
@@ -329,7 +342,7 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
               />
             </div>
             {headerIndex !== null
-              ? (['date', 'amount', 'purpose', 'counterparty', 'valueDate', 'balance'] as ImportField[]).map((field) => (
+              ? MAPPED_FIELDS.map((field) => (
                   <div className="filter-field" key={field}>
                     <label htmlFor={`import-map-${field}`}>
                       {t(`fields.${field}`)}
@@ -427,6 +440,7 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
                       duplicates: preview.duplicates,
                       categorized: preview.categorized,
                     })}
+                    {preview.enriched > 0 ? ` ${t('preview.enriched', { count: preview.enriched })}` : null}
                   </p>
                 ) : null}
               </div>
@@ -445,9 +459,15 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
                 type="button"
                 className="button"
                 onClick={handleImport}
-                disabled={!previewRequestData || !preview || preview.new === 0 || previewing || importing}
+                disabled={
+                  !previewRequestData || !preview || (preview.new === 0 && preview.enriched === 0) || previewing || importing
+                }
               >
-                {importing ? t('importing') : t('import', { count: preview?.new ?? 0 })}
+                {importing
+                  ? t('importing')
+                  : preview && preview.new === 0 && preview.enriched > 0
+                    ? t('importEnrich', { count: preview.enriched })
+                    : t('import', { count: preview?.new ?? 0 })}
               </button>
             </>
           ) : null}
@@ -460,6 +480,7 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
           <h2 id="import-result-heading">{t('result.heading')}</h2>
           <p role="status" className="form-success" id="import-result">
             {t('result.summary', { new: result.new, duplicates: result.duplicates, categorized: result.categorized })}
+            {result.enriched > 0 ? ` ${t('result.enriched', { count: result.enriched })}` : null}
           </p>
           {built?.balanceCheck.status === 'mismatch' ? <BalanceCheckNote check={built.balanceCheck} money={money} /> : null}
           {closingCheck ? (

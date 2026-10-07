@@ -1,13 +1,15 @@
 'use client';
 
 /**
- * Neue Regel: Muster (Teil von Empfänger oder Verwendungszweck) → Kategorie.
+ * Neue Regel: Muster in einem Feld (Empfänger, Verwendungszweck, Transaktions-
+ * typ, IBAN …) mit Vergleichsart und optionaler Richtung → Kategorie.
  * Nach Erfolg wird das Formular geleert; die Liste lädt die Action neu.
  */
 import { useTranslations } from 'next-intl';
 import { startTransition, useActionState, type FormEvent } from 'react';
 
 import { createRule, type RuleFormState } from '@/lib/actions/categorization-rules';
+import { RULE_DIRECTIONS, RULE_FIELDS, RULE_MATCH_TYPES } from '@/lib/import/rules';
 
 import { CategorySelect } from '../category-select';
 import type { CategoryOption } from '../transaction-form';
@@ -66,6 +68,38 @@ export function RuleForm({ categories }: { categories: CategoryOption[] }) {
             emptyLabel={t('choose')}
             required
           />
+        </div>
+      </div>
+      <div className="field-row">
+        <div className="filter-field">
+          <label htmlFor="rule-field">{t('field')}</label>
+          <select id="rule-field" name="field" defaultValue={state.values?.field ?? 'counterparty_or_purpose'}>
+            {RULE_FIELDS.map((field) => (
+              <option key={field} value={field}>
+                {t(`fields.${field}`)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-field">
+          <label htmlFor="rule-match-type">{t('matchType')}</label>
+          <select id="rule-match-type" name="matchType" defaultValue={state.values?.matchType ?? 'contains'}>
+            {RULE_MATCH_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {t(`matchTypes.${type}`)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-field">
+          <label htmlFor="rule-direction">{t('direction')}</label>
+          <select id="rule-direction" name="direction" defaultValue={state.values?.direction ?? ''}>
+            {RULE_DIRECTIONS.map((direction) => (
+              <option key={direction || 'both'} value={direction}>
+                {t(`directions.${direction || 'both'}`)}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       <p id="rule-pattern-hint" className="hint">

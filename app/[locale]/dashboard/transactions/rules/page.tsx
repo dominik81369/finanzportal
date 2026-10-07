@@ -1,54 +1,133 @@
 /**
  * app/[locale]/dashboard/transactions/rules/page.tsx
  *
- * Kategorisierungsregeln: „Empfänger oder Verwendungszweck enthält … →
- * Kategorie“. Angezeigt in der Reihenfolge, in der sie geprüft werden
- * (lib/import/rules.ts, wie private.match_category_rule); der erste Treffer
- * gewinnt. Neue Regeln legt der Nutzer hier an oder sie entstehen aus
- * Kategorie-Korrekturen (origin = learned).
+ * Kategorisierung in Schichten (supabase/migrations/20261007100100_…):
+ *   1. manuelle Zuordnungen bleiben immer,
+ *   2. eigene Regeln (angelegt oder aus Korrekturen gelernt),
+ *   3. Standardregeln (REWE, Netflix, Zinszahlung … – per Knopf geladen).
+ * Oben Kennzahlen und Massenaktionen (anwenden, zurücksetzen), darunter die
+ * eigenen Regeln in Prüfreihenfolge (lib/import/rules.ts) und eingeklappt
+ * die Standardregeln.
  */
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
 import { toAppLocale } from '@/i18n/routing';
-import { deleteRule, moveRule } from '@/lib/actions/categorization-rules';
+import {
+  applyRules,
+  deleteRule,
+  loadStandardRules,
+  moveRule,
+  resetMachineCategorization,
+} from '@/lib/actions/categorization-rules';
 import { categoryDisplayName } from '@/lib/categories';
-import { sortRules } from '@/lib/import/rules';
+import { ruleDirection, sortRules } from '@/lib/import/rules';
 import { requireOnboardedUser, createClient } from '@/lib/supabase/server';
 
 import { loadTransactionFormOptions } from '../form-options';
 import { RuleForm } from './rule-form';
 
-type RulesPageProps = { params: Promise<{ locale: string }> };
+type RulesPageProps = {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-export async function generateMetadata({ params }: RulesPageProps): Promise<Metadata> {
+type Stats = { total: number; manual: number; rule: number; standard: number; uncategorized: number };
+
+export async function generateMetadata({ params }: Pick<RulesPageProps, 'params'>): Promise<Metadata> {
   const locale = toAppLocale((await params).locale);
   const t = await getTranslations({ locale, namespace: 'Rules' });
   return { title: t('metaTitle') };
 }
 
-export default async function RulesPage() {
+/** Zahl aus einem Query-Parameter der Massenaktionen; sonst null. */
+function countParam(value: string | string[] | undefined): number | null {
+  return typeof value === 'string' && /^\d{1,6}$/.test(value) ? Number(value) : null;
+}
+
+function percent(part: number, total: number): number {
+  return total === 0 ? 0 : Math.round((part / total) * 100);
+}
+
+export default async function RulesPage({ searchParams }: RulesPageProps) {
   const user = await requireOnboardedUser('/dashboard/transactions/rules');
+  const query = await searchParams;
   const t = await getTranslations('Rules');
   const tCategories = await getTranslations('DefaultCategories');
 
   const supabase = await createClient();
-  const [rules, options] = await Promise.all([
+  const [rules, options, statsResult] = await Promise.all([
     supabase
       .from('categorization_rules')
       .select(
-        `id, pattern, priority, created_at, origin, match_type, is_active,
+        `id, pattern, priority, created_at, origin, match_type, match_field, amount_min, amount_max, is_active,
          category:categories!categorization_rules_category_fkey ( name, default_key, color )`,
       )
       .eq('user_id', user.id),
     loadTransactionFormOptions(user.id),
+    supabase.rpc('categorization_stats'),
   ]);
   if (rules.error) {
     console.error('[rules] Laden fehlgeschlagen', { code: rules.error.code });
   }
-  const sorted = sortRules(rules.data ?? []);
+  if (statsResult.error) {
+    console.error('[rules] Kennzahlen fehlgeschlagen', { code: statsResult.error.code });
+  }
+  const all = rules.data ?? [];
+  const own = sortRules(all.filter((rule) => rule.origin !== 'standard'));
+  // Standardregeln greifen untereinander nach Musterlänge; angezeigt nach
+  // Kategorie und Muster, damit man sie leichter findet.
+  const collator = new Intl.Collator(await getLocale());
+  const standard = all
+    .filter((rule) => rule.origin === 'standard')
+    .map((rule) => ({ rule, category: rule.category ? categoryDisplayName(rule.category, tCategories) : '' }))
+    .sort((a, b) => collator.compare(a.category, b.category) || collator.compare(a.rule.pattern, b.rule.pattern))
+    .map(({ rule }) => rule);
   const categoryOptions = options?.categories ?? [];
+  const stats = (statsResult.data as Stats | null) ?? null;
+
+  const loaded = countParam(query.loaded);
+  const applied = countParam(query.applied);
+  const reset = countParam(query.reset);
+  const failed = query.error === '1';
+
+  const describe = (rule: (typeof all)[number]) => {
+    const parts: string[] = [];
+    if (rule.match_field !== 'counterparty_or_purpose') {
+      parts.push(t(`fields.${rule.match_field}`));
+    }
+    if (rule.match_type !== 'contains') {
+      parts.push(t(`matchTypes.${rule.match_type}`));
+    }
+    const direction = ruleDirection(rule);
+    if (direction !== '') {
+      parts.push(t(`directions.${direction}`));
+    }
+    if (!rule.is_active) {
+      parts.push(t('inactive'));
+    }
+    return parts.map((part) => ` · ${part}`).join('');
+  };
+
+  const ruleTitle = (rule: (typeof all)[number], position?: number) => (
+    <strong>
+      {position !== undefined ? <span className="rule-position">{position}.</span> : null} „{rule.pattern}“ →{' '}
+      {rule.category ? categoryDisplayName(rule.category, tCategories) : '–'}
+    </strong>
+  );
+
+  const deleteForm = (rule: (typeof all)[number]) => (
+    <form action={deleteRule.bind(null, rule.id)}>
+      <button
+        type="submit"
+        className="button button-danger-outline button-small"
+        aria-label={t('deleteLabel', { pattern: rule.pattern })}
+      >
+        {t('delete')}
+      </button>
+    </form>
+  );
 
   return (
     <section aria-labelledby="page-title" className="rules-page">
@@ -57,6 +136,76 @@ export default async function RulesPage() {
       </p>
       <h1 id="page-title">{t('heading')}</h1>
       <p>{t('intro')}</p>
+
+      {failed ? (
+        <p role="alert" className="form-error">
+          {t('errors.generic')}
+        </p>
+      ) : loaded !== null ? (
+        <p role="status" className="form-success">
+          {t('notices.loaded', { count: loaded })}
+        </p>
+      ) : applied !== null ? (
+        <p role="status" className="form-success">
+          {t('notices.applied', { count: applied })}
+        </p>
+      ) : reset !== null ? (
+        <p role="status" className="form-success">
+          {t('notices.reset', { count: reset })}
+        </p>
+      ) : null}
+
+      <section className="advisor-section" aria-labelledby="rule-auto-heading">
+        <h2 id="rule-auto-heading">{t('autoHeading')}</h2>
+        <p>{t('autoIntro')}</p>
+        {stats && stats.total > 0 ? (
+          <dl className="categorization-stats">
+            <div>
+              <dt>{t('stats.auto')}</dt>
+              <dd>
+                {t('stats.value', {
+                  count: stats.rule + stats.standard,
+                  percent: percent(stats.rule + stats.standard, stats.total),
+                })}
+                <span className="cell-note">
+                  {t('stats.autoDetail', { rule: stats.rule, standard: stats.standard })}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt>{t('stats.manual')}</dt>
+              <dd>{t('stats.value', { count: stats.manual, percent: percent(stats.manual, stats.total) })}</dd>
+            </div>
+            <div>
+              <dt>{t('stats.uncategorized')}</dt>
+              <dd>
+                {t('stats.value', { count: stats.uncategorized, percent: percent(stats.uncategorized, stats.total) })}
+              </dd>
+            </div>
+          </dl>
+        ) : null}
+        <div className="button-row">
+          <form action={loadStandardRules}>
+            <button type="submit" className="button button-secondary">
+              {t('loadStandard')}
+            </button>
+          </form>
+          <form action={applyRules}>
+            <button type="submit" className="button">
+              {t('applyAll')}
+            </button>
+          </form>
+          <form action={resetMachineCategorization}>
+            <button type="submit" className="button button-danger-outline">
+              {t('resetAuto')}
+            </button>
+          </form>
+        </div>
+        <p className="hint">
+          {t('resetHint')}{' '}
+          <Link href={{ pathname: '/dashboard/transactions', query: { assigned: 'auto' } }}>{t('viewAuto')}</Link>
+        </p>
+      </section>
 
       <section className="advisor-section" aria-labelledby="rule-new-heading">
         <h2 id="rule-new-heading">{t('newHeading')}</h2>
@@ -69,25 +218,21 @@ export default async function RulesPage() {
           <p role="alert" className="form-error">
             {t('loadError')}
           </p>
-        ) : sorted.length === 0 ? (
+        ) : own.length === 0 ? (
           <p className="empty-state">{t('empty')}</p>
         ) : (
           <ol className="link-list rule-list">
-            {sorted.map((rule, index) => (
+            {own.map((rule, index) => (
               <li key={rule.id} className="link-item">
                 <div className="link-item-text">
-                  <strong>
-                    <span className="rule-position">{index + 1}.</span> „{rule.pattern}“ →{' '}
-                    {rule.category ? categoryDisplayName(rule.category, tCategories) : '–'}
-                  </strong>
+                  {ruleTitle(rule, index + 1)}
                   <span className="cell-note">
                     {rule.origin === 'learned' ? (
                       <span className="badge">{t('learned')}</span>
                     ) : (
                       <span className="badge badge-muted">{t('manual')}</span>
                     )}
-                    {rule.match_type !== 'contains' ? ` · ${t(`matchTypes.${rule.match_type}`)}` : null}
-                    {rule.is_active ? null : ` · ${t('inactive')}`}
+                    {describe(rule)}
                   </span>
                 </div>
                 <div className="link-item-actions">
@@ -105,25 +250,42 @@ export default async function RulesPage() {
                     <button
                       type="submit"
                       className="button button-secondary button-small"
-                      disabled={index === sorted.length - 1}
+                      disabled={index === own.length - 1}
                       aria-label={t('moveDownLabel', { pattern: rule.pattern })}
                     >
                       ↓
                     </button>
                   </form>
-                  <form action={deleteRule.bind(null, rule.id)}>
-                    <button
-                      type="submit"
-                      className="button button-danger-outline button-small"
-                      aria-label={t('deleteLabel', { pattern: rule.pattern })}
-                    >
-                      {t('delete')}
-                    </button>
-                  </form>
+                  {deleteForm(rule)}
                 </div>
               </li>
             ))}
           </ol>
+        )}
+      </section>
+
+      <section className="advisor-section" aria-labelledby="rule-standard-heading">
+        <h2 id="rule-standard-heading">{t('standardHeading')}</h2>
+        {standard.length === 0 ? (
+          <p className="empty-state">{t('standardEmpty')}</p>
+        ) : (
+          <details className="rule-details">
+            <summary>{t('standardSummary', { count: standard.length })}</summary>
+            <ul className="link-list rule-list">
+              {standard.map((rule) => (
+                <li key={rule.id} className="link-item">
+                  <div className="link-item-text">
+                    {ruleTitle(rule)}
+                    <span className="cell-note">
+                      <span className="badge badge-muted">{t('standard')}</span>
+                      {describe(rule)}
+                    </span>
+                  </div>
+                  <div className="link-item-actions">{deleteForm(rule)}</div>
+                </li>
+              ))}
+            </ul>
+          </details>
         )}
       </section>
     </section>
