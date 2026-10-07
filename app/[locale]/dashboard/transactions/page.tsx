@@ -20,6 +20,7 @@ import { loadTransactionFormOptions } from './form-options';
 import { Pagination } from './pagination';
 import { TransactionFiltersForm } from './transaction-filters-form';
 import { loadTransactionList } from './transaction-list';
+import { QualityStats } from './quality-stats';
 import { TransactionTable } from './transaction-table';
 
 const LIST_PATH = '/dashboard/transactions';
@@ -80,6 +81,9 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
       <div className="page-header">
         <h1 id="page-title">{tDashboard('transactions.title')}</h1>
         <div className="page-header-actions">
+          <Link className="button button-secondary" href="/dashboard/transactions/groups">
+            {t('groups')}
+          </Link>
           <Link className="button button-secondary" href="/dashboard/transactions/rules">
             {t('rules')}
           </Link>
@@ -92,6 +96,7 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
         </div>
       </div>
       <p>{tDashboard('transactions.description')}</p>
+      <QualityStats />
 
       {notice ? (
         <p role="status" className="form-success">

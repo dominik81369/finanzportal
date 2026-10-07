@@ -21,12 +21,16 @@ import {
   loadStandardRules,
   moveRule,
   resetMachineCategorization,
+  setOwnAccountCategory,
+  setRuleActive,
 } from '@/lib/actions/categorization-rules';
 import { categoryDisplayName } from '@/lib/categories';
 import { ruleDirection, sortRules } from '@/lib/import/rules';
 import { requireOnboardedUser, createClient } from '@/lib/supabase/server';
 
+import { CategorySelect } from '../category-select';
 import { loadTransactionFormOptions } from '../form-options';
+import { QualityStats } from '../quality-stats';
 import { OwnAccountForm } from './own-account-form';
 import { RuleForm } from './rule-form';
 
@@ -35,7 +39,7 @@ type RulesPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-type Stats = { total: number; manual: number; rule: number; standard: number; uncategorized: number };
+type Stats = { total: number; manual: number; rule: number; standard: number; learned: number; uncategorized: number };
 
 export async function generateMetadata({ params }: Pick<RulesPageProps, 'params'>): Promise<Metadata> {
   const locale = toAppLocale((await params).locale);
@@ -59,18 +63,24 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
   const tCategories = await getTranslations('DefaultCategories');
 
   const supabase = await createClient();
-  const [rules, options, statsResult, profile] = await Promise.all([
+  const [rules, options, statsResult, profile, quality] = await Promise.all([
     supabase
       .from('categorization_rules')
       .select(
         `id, pattern, priority, created_at, origin, match_type, match_field, amount_min, amount_max, is_active,
-         category:categories!categorization_rules_category_fkey ( name, default_key, color )`,
+         category_id, category:categories!categorization_rules_category_fkey ( name, default_key, color )`,
       )
       .eq('user_id', user.id),
     loadTransactionFormOptions(user.id),
     supabase.rpc('categorization_stats'),
     supabase.from('profiles').select('first_name, last_name').eq('user_id', user.id).maybeSingle(),
+    supabase.rpc('rule_quality', {}),
   ]);
+  if (quality.error) {
+    console.error('[rules] Regelqualität fehlgeschlagen', { code: quality.error.code });
+  }
+  // Regeln mit vielen Korrekturen (ab 5 Treffern, über 30 % korrigiert).
+  const flagged = (quality.data ?? []).filter((row) => row.flagged && row.rule_id !== null);
   if (rules.error) {
     console.error('[rules] Laden fehlgeschlagen', { code: rules.error.code });
   }
@@ -105,6 +115,7 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
   const removed = countParam(query.removed) ?? 0;
   const applied = countParam(query.applied);
   const reset = countParam(query.reset);
+  const ownUpdated = countParam(query.ownUpdated);
   const failed = query.error === '1';
 
   const describe = (rule: (typeof all)[number]) => {
@@ -165,6 +176,10 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
         <p role="status" className="form-success">
           {t('notices.applied', { count: applied })}
         </p>
+      ) : ownUpdated !== null ? (
+        <p role="status" className="form-success">
+          {t('notices.ownUpdated', { count: ownUpdated })}
+        </p>
       ) : reset !== null ? (
         <p role="status" className="form-success">
           {t('notices.reset', { count: reset })}
@@ -180,11 +195,11 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
               <dt>{t('stats.auto')}</dt>
               <dd>
                 {t('stats.value', {
-                  count: stats.rule + stats.standard,
-                  percent: percent(stats.rule + stats.standard, stats.total),
+                  count: stats.rule + stats.standard + stats.learned,
+                  percent: percent(stats.rule + stats.standard + stats.learned, stats.total),
                 })}
                 <span className="cell-note">
-                  {t('stats.autoDetail', { rule: stats.rule, standard: stats.standard })}
+                  {t('stats.autoDetail', { rule: stats.rule, standard: stats.standard, learned: stats.learned })}
                 </span>
               </dd>
             </div>
@@ -234,15 +249,36 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
                   {ruleTitle(rule)}
                   <span className="cell-note">
                     <span className="badge badge-muted">{t('ownAccounts.badge')}</span>
-                    {` · ${t(rule.match_field === 'counterparty_iban' ? 'ownAccounts.kinds.iban' : 'ownAccounts.kinds.name')}`}
+                    {` · ${t(rule.match_field === 'counterparty_iban' ? 'ownAccounts.kinds.iban' : 'ownAccounts.kinds.nameSuggestion')}`}
                   </span>
                 </div>
-                <div className="link-item-actions">{deleteForm(rule)}</div>
+                <div className="link-item-actions">
+                  {/* Zielkategorie je IBAN (Namen sind nur Vorschläge für „Umbuchung“). */}
+                  {rule.match_field === 'counterparty_iban' ? (
+                    <form action={setOwnAccountCategory.bind(null, rule.id)} className="inline-form">
+                      <label htmlFor={`own-category-${rule.id}`} className="sr-only">
+                        {t('ownAccounts.categoryFor', { pattern: rule.pattern })}
+                      </label>
+                      <CategorySelect
+                        id={`own-category-${rule.id}`}
+                        name="category"
+                        categories={categoryOptions}
+                        defaultValue={rule.category_id}
+                        emptyLabel={t('choose')}
+                        required
+                      />
+                      <button type="submit" className="button button-secondary button-small">
+                        {t('ownAccounts.change')}
+                      </button>
+                    </form>
+                  ) : null}
+                  {deleteForm(rule)}
+                </div>
               </li>
             ))}
           </ul>
         ) : null}
-        <OwnAccountForm suggestedName={suggestedName} />
+        <OwnAccountForm suggestedName={suggestedName} categories={categoryOptions} />
       </section>
 
       <section className="advisor-section" aria-labelledby="rule-new-heading">
@@ -324,6 +360,43 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
               ))}
             </ul>
           </details>
+        )}
+      </section>
+
+      <section className="advisor-section" aria-labelledby="rule-quality-heading">
+        <h2 id="rule-quality-heading">{t('quality.heading')}</h2>
+        <QualityStats />
+        <p>{t('quality.intro')}</p>
+        {flagged.length === 0 ? (
+          <p className="empty-state">{t('quality.none')}</p>
+        ) : (
+          <ul className="link-list rule-list flagged-rule-list">
+            {flagged.map((row) => (
+              <li key={row.rule_id} className="link-item">
+                <div className="link-item-text">
+                  <strong>„{row.pattern}“</strong>
+                  <span className="cell-note">
+                    {t('quality.rate', {
+                      corrected: row.corrected,
+                      hits: row.hits,
+                      percent: percent(row.corrected, row.hits),
+                    })}
+                    {row.is_active ? null : ` · ${t('inactive')}`}
+                  </span>
+                </div>
+                <div className="link-item-actions">
+                  <form action={setRuleActive.bind(null, row.rule_id as string, !row.is_active)}>
+                    <button
+                      type="submit"
+                      className={`button button-small ${row.is_active ? 'button-danger-outline' : 'button-secondary'}`}
+                    >
+                      {row.is_active ? t('quality.deactivate') : t('quality.activate')}
+                    </button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
     </section>

@@ -137,12 +137,13 @@ select throws_ok($$ select public.add_own_account_identifier('iban', 'DE00 1') $
 select throws_ok($$ select public.add_own_account_identifier('konto', 'x') $$,
   '22023', 'invalid_kind', 'Unbekannte Art → invalid_kind');
 
-select is(public.add_own_account_identifier('name', 'Dominik Mustermann') ->> 'applied', '3',
-  'Name: 3 Buchungen als Umbuchung (auch automatisch anders zugeordnete)');
+select is(public.add_own_account_identifier('name', 'Dominik Mustermann') - 'rule_id',
+  '{"applied": 0, "suggested": 2}'::jsonb,
+  'Name: nichts automatisch, 2 Buchungen ohne Kategorie als Vorschlag');
 select results_eq(
   $$ select pg_temp.state(p) from unnest(array['Sparen', 'Einkauf REWE zurück', 'Rewe Einkauf', 'Konzertkarte']) p $$,
-  $$ values ('transfer:rule'::text), ('transfer:rule'), ('transfer:rule'), ('mobility:manual') $$,
-  'Namensvarianten (Reihenfolge, Zusatzname) erkannt; Vorname allein nicht; manuelle bleibt'
+  $$ values ('-:-'::text), ('-:-'), ('groceries:rule'), ('mobility:manual') $$,
+  'Namens-Treffer ordnen nicht zu (nur Vorschlag); bestehende Zuordnungen bleiben'
 );
 select is(
   (select match_type::text || '|' || match_field::text || '|' || origin from public.categorization_rules

@@ -243,7 +243,7 @@ select is(
 
 select is(
   public.categorization_stats(),
-  '{"total": 8, "manual": 3, "rule": 1, "standard": 3, "uncategorized": 1}'::jsonb,
+  '{"total": 8, "manual": 3, "rule": 1, "standard": 3, "learned": 0, "uncategorized": 1}'::jsonb,
   'Kennzahlen: manuell / eigene Regel / Standard / offen'
 );
 

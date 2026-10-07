@@ -47,7 +47,7 @@ export async function loadTransactionList({ userId, filters, page, listPath }: L
       // tag_filter: eigener Alias nur für den Tag-Filter, damit transaction_tags
       // weiterhin ALLE Tags der Buchung liefert.
       .select(
-        `id, source, booking_date, amount, currency, counterparty_name, purpose, categorization_source,
+        `id, source, booking_date, amount, currency, counterparty_name, purpose, categorization_source, recurrence,
          account:accounts!transactions_account_fkey ( name ),
          rule:categorization_rules!transactions_categorization_rule_fkey ( pattern, origin ),
          category:categories!transactions_category_fkey ( name, default_key, color ),
@@ -79,12 +79,13 @@ export async function loadTransactionList({ userId, filters, page, listPath }: L
       // (PostgREST: Null-Filter auf der Einbettung wirkt wie ein Inner Join).
       request = request.eq('tag_filter.tag_id', filters.tagId).not('tag_filter', 'is', null);
     }
+    // Automatisch: per Regel oder gelernt (Gegenpartei-Gedächtnis).
     if (filters.assigned === 'auto') {
-      request = request.eq('categorization_source', 'rule');
+      request = request.in('categorization_source', ['rule', 'learned']);
     } else if (filters.assigned === 'manual') {
       request = request
         .not('category_id', 'is', null)
-        .or('categorization_source.is.null,categorization_source.neq.rule');
+        .or('categorization_source.is.null,categorization_source.not.in.(rule,learned)');
     }
     if (filters.from) {
       request = request.gte('booking_date', filters.from);

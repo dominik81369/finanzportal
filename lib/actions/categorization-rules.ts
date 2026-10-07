@@ -19,6 +19,7 @@ import { isUuid } from '@/lib/transactions';
 
 const RULES_PATH = '/dashboard/transactions/rules';
 const TRANSACTIONS_PATH = '/dashboard/transactions';
+const GROUPS_PATH = '/dashboard/transactions/groups';
 
 export type RuleFormState = {
   status: 'idle' | 'success' | 'error';
@@ -180,6 +181,7 @@ export async function setTransactionCategory(
 function revalidateCategorization() {
   revalidatePath(`/[locale]${TRANSACTIONS_PATH}`, 'page');
   revalidatePath(`/[locale]${RULES_PATH}`, 'page');
+  revalidatePath(`/[locale]${GROUPS_PATH}`, 'page');
   revalidatePath('/[locale]/dashboard', 'page');
   revalidatePath('/[locale]/dashboard/budgets', 'page');
 }
@@ -260,7 +262,7 @@ export async function applyRuleToSimilar(ruleId: string, overwrite: boolean): Pr
 export type OwnAccountFormState = {
   status: 'idle' | 'success' | 'error';
   message?: string;
-  values?: { kind: string; value: string };
+  values?: { kind: string; value: string; categoryId: string };
   nonce?: number;
 };
 
@@ -274,13 +276,25 @@ export async function addOwnAccount(_prevState: OwnAccountFormState, formData: F
   const t = await getTranslations('Rules.ownAccounts');
   const kind = String(formData.get('kind') ?? '');
   const value = String(formData.get('value') ?? '').trim();
-  const values = { kind, value };
-  if ((kind !== 'name' && kind !== 'iban') || value.length === 0 || value.length > 200) {
+  const rawCategory = String(formData.get('category') ?? '');
+  const categoryId = rawCategory === '' ? null : rawCategory;
+  const values = { kind, value, categoryId: rawCategory };
+  if (
+    (kind !== 'name' && kind !== 'iban') ||
+    value.length === 0 ||
+    value.length > 200 ||
+    (categoryId !== null && !isUuid(categoryId))
+  ) {
     return { status: 'error', message: t(kind === 'iban' ? 'errors.invalidIban' : 'errors.invalidName'), values };
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc('add_own_account_identifier', { p_kind: kind, p_value: value });
+  // Zielkategorie nur für IBANs (Namen sind Vorschläge für „Umbuchung“).
+  const { data, error } = await supabase.rpc('add_own_account_identifier', {
+    p_kind: kind,
+    p_value: value,
+    p_category_id: kind === 'iban' ? categoryId : null,
+  });
   if (error) {
     const key =
       error.message === 'invalid_name'
@@ -299,6 +313,64 @@ export async function addOwnAccount(_prevState: OwnAccountFormState, formData: F
   }
 
   revalidateCategorization();
-  const applied = Number((data as { applied?: number } | null)?.applied ?? 0);
-  return { status: 'success', message: t('added', { count: applied }), nonce: Date.now() };
+  const result = (data ?? {}) as { applied?: number; suggested?: number };
+  const message =
+    kind === 'name'
+      ? t('addedName', { count: Number(result.suggested ?? 0) })
+      : t('added', { count: Number(result.applied ?? 0) });
+  return { status: 'success', message, nonce: Date.now() };
+}
+
+/** Zielkategorie eines eigenen Kontos (IBAN) ändern und neu anwenden. */
+export async function setOwnAccountCategory(ruleId: string, formData: FormData): Promise<void> {
+  await requireOnboardedUser(RULES_PATH);
+  const categoryId = String(formData.get('category') ?? '');
+  if (!isUuid(ruleId) || !isUuid(categoryId)) {
+    await redirectWith(RULES_PATH, { error: '1' });
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('set_own_account_category', {
+    p_rule_id: ruleId,
+    p_category_id: categoryId,
+  });
+  if (error) {
+    console.error('[rules] Zielkategorie ändern fehlgeschlagen', { code: error.code });
+    await redirectWith(RULES_PATH, { error: '1' });
+  }
+  revalidateCategorization();
+  await redirectWith(RULES_PATH, { ownUpdated: String(data ?? 0) });
+}
+
+/** Regel mit vielen Korrekturen deaktivieren bzw. wieder aktivieren. */
+export async function setRuleActive(ruleId: string, active: boolean): Promise<void> {
+  await requireOnboardedUser(RULES_PATH);
+  if (!isUuid(ruleId)) {
+    return;
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('set_rule_active', { p_rule_id: ruleId, p_active: active === true });
+  if (error) {
+    console.error('[rules] Regel (de)aktivieren fehlgeschlagen', { code: error.code });
+  }
+  revalidatePath(`/[locale]${RULES_PATH}`, 'page');
+}
+
+/**
+ * Gruppenansicht: alle Buchungen ohne Kategorie einer Gegenpartei manuell
+ * zuordnen. Die Zuordnung füttert das Gegenpartei-Gedächtnis.
+ */
+export async function categorizeGroup(groupKey: string, formData: FormData): Promise<void> {
+  await requireOnboardedUser(GROUPS_PATH);
+  const categoryId = String(formData.get('category') ?? '');
+  if (groupKey.length === 0 || groupKey.length > 300 || !isUuid(categoryId)) {
+    await redirectWith(GROUPS_PATH, { error: 'category' });
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('categorize_group', { p_key: groupKey, p_category_id: categoryId });
+  if (error) {
+    console.error('[groups] Gruppe zuordnen fehlgeschlagen', { code: error.code });
+    await redirectWith(GROUPS_PATH, { error: '1' });
+  }
+  revalidateCategorization();
+  await redirectWith(GROUPS_PATH, { assigned: String(data ?? 0) });
 }

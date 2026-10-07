@@ -1230,3 +1230,104 @@
 .similar-notice form {
   margin: 0;
 }
+
+/* Wiederkehrende Buchungen, Kennzahlen, Gruppenansicht */
+.badge-recurring {
+  color: var(--accent-foreground);
+  background: var(--muted);
+  font-weight: 500;
+}
+
+.quality-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.quality-stats > div {
+  min-width: 12rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.quality-stats dt {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.quality-stats dd {
+  margin: 0.15rem 0 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.quality-stats dd .cell-note {
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.group-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.group-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.group-item + .group-item {
+  border-top: 1px solid var(--border);
+}
+
+.group-text {
+  flex: 1 1 20rem;
+  min-width: 0;
+}
+
+.group-label {
+  margin: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.group-meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.group-suggestion {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: var(--primary);
+}
+
+.group-form,
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.group-form select,
+.inline-form select {
+  max-width: 16rem;
+}
+
+.group-form .button,
+.inline-form .button {
+  margin-top: 0;
+}
