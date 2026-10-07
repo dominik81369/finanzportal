@@ -21,6 +21,7 @@ type TransactionTableProps = {
 export async function TransactionTable({ transactions, caption, editable }: TransactionTableProps) {
   const t = await getTranslations('Transactions.list');
   const tCategories = await getTranslations('DefaultCategories');
+  const tRecurrence = await getTranslations('Recurrence');
   const format = await getFormatter();
   const collator = new Intl.Collator(await getLocale());
 
@@ -52,11 +53,33 @@ export async function TransactionTable({ transactions, caption, editable }: Tran
               dateStyle: 'medium',
               timeZone: 'UTC',
             });
+            // Tooltip der Markierung „automatisch“: Regel bzw. Gedächtnis.
+            const autoTitle =
+              tx.categorization_source === 'learned'
+                ? t('autoMemory')
+                : tx.categorization_source !== 'rule'
+                  ? null
+                  : !tx.rule
+                    ? t('autoTitle')
+                    : t(
+                        tx.rule.origin === 'standard'
+                          ? 'autoStandardRule'
+                          : tx.rule.origin === 'own_account'
+                            ? 'autoOwnAccount'
+                            : 'autoOwnRule',
+                        { pattern: tx.rule.pattern },
+                      );
             return (
               <tr key={tx.id}>
                 <td className="nowrap">{date}</td>
                 <td>
                   {tx.counterparty_name}
+                  {tx.recurrence ? (
+                    <>
+                      {' '}
+                      <span className="badge badge-recurring">{tRecurrence(tx.recurrence)}</span>
+                    </>
+                  ) : null}
                   {tx.purpose ? <span className="cell-note">{tx.purpose}</span> : null}
                 </td>
                 <td>
@@ -68,23 +91,9 @@ export async function TransactionTable({ transactions, caption, editable }: Tran
                         style={{ background: tx.category.color ?? 'var(--muted-foreground)' }}
                       />
                       {categoryDisplayName(tx.category, tCategories)}
-                      {/* Schicht 2/3: per Regel vergeben – unterscheidbar von manuell. */}
-                      {tx.categorization_source === 'rule' ? (
-                        <span
-                          className="badge badge-auto"
-                          title={
-                            tx.rule
-                              ? t(
-                                  tx.rule.origin === 'standard'
-                                    ? 'autoStandardRule'
-                                    : tx.rule.origin === 'own_account'
-                                      ? 'autoOwnAccount'
-                                      : 'autoOwnRule',
-                                  { pattern: tx.rule.pattern },
-                                )
-                              : t('autoTitle')
-                          }
-                        >
+                      {/* Automatisch (Regel oder Gedächtnis) – unterscheidbar von manuell. */}
+                      {autoTitle ? (
+                        <span className="badge badge-auto" title={autoTitle}>
                           {t('auto')}
                         </span>
                       ) : null}

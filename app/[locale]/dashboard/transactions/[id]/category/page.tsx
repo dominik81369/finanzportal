@@ -46,6 +46,7 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
   }
   const t = await getTranslations('TransactionCategory');
   const tRules = await getTranslations('Rules');
+  const tRecurrence = await getTranslations('Recurrence');
   const format = await getFormatter();
 
   const supabase = await createClient();
@@ -54,7 +55,7 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
       .from('transactions')
       .select(
         `id, source, booking_date, amount, currency, counterparty_name, purpose, category_id,
-         transaction_type, counterparty_iban, description, categorization_source,
+         transaction_type, counterparty_iban, description, categorization_source, counterparty_key, recurrence,
          rule:categorization_rules!transactions_categorization_rule_fkey ( pattern, origin, match_field )`,
       )
       .eq('id', id)
@@ -68,6 +69,21 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
   if (!tx && !error) {
     notFound();
   }
+
+  // Gegenpartei-Gedächtnis: wie oft wurde diese Gegenpartei manuell so
+  // zugeordnet (Grundlage der gelernten Zuordnung)?
+  let memoryCount = 0;
+  if (tx?.categorization_source === 'learned' && tx.counterparty_key && tx.category_id) {
+    const { count } = await supabase
+      .from('transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('counterparty_key', tx.counterparty_key)
+      .eq('category_id', tx.category_id)
+      .eq('categorization_source', 'manual');
+    memoryCount = count ?? 0;
+  }
+  const automatic = tx?.categorization_source === 'rule' || tx?.categorization_source === 'learned';
 
   return (
     <section className="page-narrow" aria-labelledby="page-title">
@@ -112,6 +128,12 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
                 <dd>{tx.transaction_type}</dd>
               </>
             ) : null}
+            {tx.recurrence ? (
+              <>
+                <dt>{t('recurrence')}</dt>
+                <dd>{tRecurrence(tx.recurrence)}</dd>
+              </>
+            ) : null}
             {tx.counterparty_iban ? (
               <>
                 <dt>{t('counterpartyIban')}</dt>
@@ -125,9 +147,11 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
             <p>
               {tx.category_id === null
                 ? t('why.none')
-                : tx.categorization_source !== 'rule'
-                  ? t('why.manual')
-                  : tx.rule
+                : tx.categorization_source === 'learned'
+                  ? t('why.memory', { count: memoryCount })
+                  : tx.categorization_source !== 'rule'
+                    ? t('why.manual')
+                    : tx.rule
                     ? t(`why.${whyKey(tx.rule.origin)}`, {
                         pattern: tx.rule.pattern,
                         field: tRules(`fields.${tx.rule.match_field}`),
@@ -137,7 +161,7 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
                 <Link href="/dashboard/transactions/rules">{t('why.toRules')}</Link>
               ) : null}
             </p>
-            {tx.categorization_source === 'rule' ? <p className="hint">{t('why.confirmHint')}</p> : null}
+            {automatic ? <p className="hint">{t('why.confirmHint')}</p> : null}
           </section>
 
           {tx.source !== 'manual' ? <p className="hint">{t('learnHint')}</p> : null}

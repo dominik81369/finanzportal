@@ -224,7 +224,9 @@
       "similarFoundAuto": "{count, plural, one {# similar transaction is assigned differently by a rule. Overwrite it with your correction? Manual assignments stay unchanged.} other {# similar transactions are assigned differently by rules. Overwrite them with your correction? Manual assignments stay unchanged.}}",
       "similarFoundBoth": "Found {open, plural, one {# similar uncategorised transaction} other {# similar uncategorised transactions}}; {auto, plural, one {# more is assigned differently by a rule} other {# more are assigned differently by rules}}. Assign them too? Manual assignments stay unchanged.",
       "similarApplyAll": "{count, plural, one {Also overwrite automatic ones (#)} other {Also overwrite automatic ones (#)}}",
-      "autoOwnAccount": "Recognised automatically as your own account (“{pattern}”)"
+      "autoOwnAccount": "Recognised automatically as your own account (“{pattern}”)",
+      "groups": "By counterparty",
+      "autoMemory": "Assigned automatically: counterparty memory (always assigned like this so far)"
     },
     "filters": {
       "heading": "Search and filter transactions",
@@ -566,11 +568,11 @@
     "autoHeading": "Automatic categorisation",
     "autoIntro": "Standard rules recognise common merchants and transaction types (e.g. REWE, Netflix, Deutsche Bahn, interest payments). Rules apply to every import; apply them here to existing transactions without a category. Automatically assigned categories are marked in the list.",
     "stats": {
-      "auto": "Automatic",
+      "auto": "Currently automatic",
       "manual": "Manual",
       "uncategorized": "Uncategorised",
       "value": "{count} ({percent}%)",
-      "autoDetail": "own rules: {rule}, standard rules: {standard}"
+      "autoDetail": "own rules: {rule}, memory: {learned}, standard rules: {standard}"
     },
     "loadStandard": "Load standard rules",
     "applyAll": "Apply to all uncategorised transactions",
@@ -584,15 +586,17 @@
       "loaded": "{count, plural, =0 {The standard rules are up to date.} one {# standard rule added.} other {# standard rules added.}}",
       "applied": "{count, plural, =0 {No further transactions assigned.} one {# transaction was assigned automatically.} other {# transactions were assigned automatically.}}",
       "reset": "{count, plural, =0 {There were no automatic assignments.} one {# automatic assignment was removed.} other {# automatic assignments were removed.}}",
-      "removed": "{count, plural, one {# outdated standard rule removed and its automatic assignments reset.} other {# outdated standard rules removed and their automatic assignments reset.}}"
+      "removed": "{count, plural, one {# outdated standard rule removed and its automatic assignments reset.} other {# outdated standard rules removed and their automatic assignments reset.}}",
+      "ownUpdated": "{count, plural, =0 {Target category saved.} one {Target category saved; # transaction reassigned.} other {Target category saved; # transactions reassigned.}}"
     },
     "ownAccounts": {
       "heading": "Own accounts",
-      "intro": "Payments to your own accounts are transfers. Enter your name (first and last name) or the IBAN of one of your accounts: matching transactions are assigned to Transfer automatically – including name variants such as “MUSTERMANN, DOMINIK MAXIMILIAN”. Your own rules and manual assignments take precedence.",
+      "intro": "Payments to your own accounts: enter the IBAN of one of your accounts with a target category (e.g. Transfer or Saving & investing) – matching transactions are assigned automatically. Your name (first and last name) is only used as a suggestion in the group view, because names are not unique. Your own rules and manual assignments always take precedence.",
       "badge": "own account",
       "kinds": {
         "name": "Name",
-        "iban": "IBAN"
+        "iban": "IBAN",
+        "nameSuggestion": "Name (suggestion only)"
       },
       "kind": "Recognise by",
       "value": "Name or IBAN",
@@ -600,14 +604,20 @@
       "hint": "For names, all words must appear in the payee (in any order), so enter at least first and last name.",
       "save": "Add own account",
       "saving": "Saving …",
-      "added": "{count, plural, =0 {Added; no transaction matches yet.} one {Added; # transaction assigned to Transfer.} other {Added; # transactions assigned to Transfer.}}",
+      "added": "{count, plural, =0 {Added; no transaction matches yet.} one {Added; # transaction assigned.} other {Added; # transactions assigned.}}",
       "errors": {
         "invalidName": "Please enter first and last name (at least two words).",
         "invalidIban": "Please enter a valid IBAN.",
         "exists": "This own account has already been added.",
         "noTransferCategory": "The “Transfer” category is missing. Please create it again.",
         "generic": "Something went wrong. Please try again."
-      }
+      },
+      "categoryFor": "Target category for {pattern}",
+      "change": "Change",
+      "category": "Target category",
+      "categoryDefault": "Transfer (default)",
+      "hintIban": "Transactions with this counterparty IBAN are assigned to the target category automatically.",
+      "addedName": "{count, plural, =0 {Added; no uncategorised transaction matches yet.} one {Added; # transaction appears as a suggestion in the group view.} other {Added; # transactions appear as suggestions in the group view.}}"
     },
     "newHeading": "New rule",
     "listHeading": "Your rules in matching order",
@@ -659,6 +669,14 @@
       "categoryMissing": "Please choose a category.",
       "ruleExists": "An identical rule for this pattern already exists.",
       "generic": "Something went wrong. Please try again."
+    },
+    "quality": {
+      "heading": "Quality",
+      "intro": "Rules whose automatic assignments you often correct (more than 30% corrected after at least 5 matches) are listed here for review.",
+      "none": "No rule with conspicuously many corrections.",
+      "rate": "{corrected} of {hits} assignments corrected ({percent}%)",
+      "deactivate": "Deactivate",
+      "activate": "Activate again"
     }
   },
   "TransactionCategory": {
@@ -682,7 +700,8 @@
       "ruleDeleted": "Assigned automatically by a rule that has since been deleted.",
       "toRules": "View rules",
       "confirmHint": "Saving confirms the category; it then counts as manual and rules will no longer change it.",
-      "ownAccount": "Recognised automatically as a transfer: own account “{pattern}” ({field})."
+      "ownAccount": "Recognised automatically as a transfer: own account “{pattern}” ({field}).",
+      "memory": "Assigned automatically by the counterparty memory: you have assigned this counterparty like this {count, plural, one {# time} other {# times}} so far."
     },
     "learnHint": "A rule for this merchant is learned from your choice; future transactions will then be assigned automatically.",
     "category": "Category",
@@ -692,6 +711,47 @@
     "errors": {
       "generic": "Something went wrong. Please try again.",
       "notFound": "The transaction or category no longer exists."
+    },
+    "recurrence": "Recurring"
+  },
+  "Groups": {
+    "metaTitle": "Uncategorised by counterparty",
+    "back": "Back to transactions",
+    "heading": "Uncategorised by counterparty",
+    "intro": "Transactions without a category, grouped by counterparty (counterparty IBAN or payee), largest groups first. One click assigns the whole group. The portal learns from it: further transactions with this counterparty will be assigned the same way automatically (with an IBAN from the first, otherwise from the second identical assignment).",
+    "loadError": "The groups could not be loaded right now. Please reload the page.",
+    "empty": "All transactions have a category.",
+    "unknown": "Unknown counterparty",
+    "summary": "{groups, plural, one {# group} other {# groups}} with {count, plural, one {# uncategorised transaction} other {# uncategorised transactions}}",
+    "count": "{count, plural, one {# transaction} other {# transactions}}",
+    "byIban": "by IBAN",
+    "suggestion": {
+      "own_name": "Suggestion: {category} – the name matches your own account “{detail}”.",
+      "memory": "Suggestion: {category} – you have assigned this counterparty like this {detail} time(s) so far.",
+      "variant": "Suggestion: {category} – name variant of “{detail}” (only a suggestion without the same IBAN)."
+    },
+    "categoryFor": "Category for “{label}”",
+    "choose": "Choose category",
+    "assign": "{count, plural, one {Assign} other {Assign all #}}",
+    "assigned": "{count, plural, =0 {No transaction assigned.} one {# transaction assigned.} other {# transactions assigned.}} Future transactions with this counterparty will be assigned like this automatically.",
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "category": "Please choose a category."
     }
+  },
+  "Recurrence": {
+    "weekly": "weekly",
+    "monthly": "monthly",
+    "quarterly": "quarterly",
+    "semiannual": "half-yearly",
+    "yearly": "yearly"
+  },
+  "Quality": {
+    "label": "Quality of automatic categorisation",
+    "automationRate": "Automation rate",
+    "automationDetail": "{automated} of {total} transactions assigned automatically",
+    "accuracy": "Accuracy",
+    "accuracyDetail": "{accurate} of {automated} automatic assignments not corrected",
+    "accuracyNone": "no automatic assignments yet"
   }
 }

@@ -224,7 +224,9 @@
       "similarFoundAuto": "{count, plural, one {# ähnliche Buchung ist automatisch anders zugeordnet. Mit Ihrer Korrektur überschreiben? Manuelle Zuordnungen bleiben unverändert.} other {# ähnliche Buchungen sind automatisch anders zugeordnet. Mit Ihrer Korrektur überschreiben? Manuelle Zuordnungen bleiben unverändert.}}",
       "similarFoundBoth": "{open, plural, one {# ähnliche Buchung ohne Kategorie} other {# ähnliche Buchungen ohne Kategorie}} gefunden, {auto, plural, one {# weitere ist automatisch anders zugeordnet} other {# weitere sind automatisch anders zugeordnet}}. Auch zuordnen? Manuelle Zuordnungen bleiben unverändert.",
       "similarApplyAll": "{count, plural, one {Auch automatische überschreiben (#)} other {Auch automatische überschreiben (#)}}",
-      "autoOwnAccount": "Automatisch als eigenes Konto erkannt („{pattern}“)"
+      "autoOwnAccount": "Automatisch als eigenes Konto erkannt („{pattern}“)",
+      "groups": "Nach Gegenpartei",
+      "autoMemory": "Automatisch zugeordnet: Gegenpartei-Gedächtnis (bisher immer so zugeordnet)"
     },
     "filters": {
       "heading": "Transaktionen durchsuchen und filtern",
@@ -566,11 +568,11 @@
     "autoHeading": "Automatische Kategorisierung",
     "autoIntro": "Standardregeln erkennen verbreitete Händler und Buchungsarten (z. B. REWE, Netflix, Deutsche Bahn, Zinszahlung). Regeln wirken bei jedem Import; auf bereits vorhandene Buchungen ohne Kategorie wenden Sie sie hier an. Automatisch vergebene Kategorien sind in der Liste markiert.",
     "stats": {
-      "auto": "Automatisch",
+      "auto": "Derzeit automatisch",
       "manual": "Manuell",
       "uncategorized": "Ohne Kategorie",
       "value": "{count} ({percent} %)",
-      "autoDetail": "eigene Regeln: {rule}, Standardregeln: {standard}"
+      "autoDetail": "eigene Regeln: {rule}, Gedächtnis: {learned}, Standardregeln: {standard}"
     },
     "loadStandard": "Standardregeln laden",
     "applyAll": "Auf alle unkategorisierten Buchungen anwenden",
@@ -584,15 +586,17 @@
       "loaded": "{count, plural, =0 {Die Standardregeln sind aktuell.} one {# Standardregel ergänzt.} other {# Standardregeln ergänzt.}}",
       "applied": "{count, plural, =0 {Keine weiteren Buchungen zugeordnet.} one {# Buchung wurde automatisch zugeordnet.} other {# Buchungen wurden automatisch zugeordnet.}}",
       "reset": "{count, plural, =0 {Es gab keine automatischen Zuordnungen.} one {# automatische Zuordnung wurde entfernt.} other {# automatische Zuordnungen wurden entfernt.}}",
-      "removed": "{count, plural, one {# veraltete Standardregel entfernt, ihre automatischen Zuordnungen zurückgesetzt.} other {# veraltete Standardregeln entfernt, ihre automatischen Zuordnungen zurückgesetzt.}}"
+      "removed": "{count, plural, one {# veraltete Standardregel entfernt, ihre automatischen Zuordnungen zurückgesetzt.} other {# veraltete Standardregeln entfernt, ihre automatischen Zuordnungen zurückgesetzt.}}",
+      "ownUpdated": "{count, plural, =0 {Zielkategorie gespeichert.} one {Zielkategorie gespeichert; # Buchung neu zugeordnet.} other {Zielkategorie gespeichert; # Buchungen neu zugeordnet.}}"
     },
     "ownAccounts": {
       "heading": "Eigene Konten",
-      "intro": "Überweisungen an Ihre eigenen Konten sind Umbuchungen. Tragen Sie Ihren Namen (Vor- und Nachname) oder die IBAN eines eigenen Kontos ein: Passende Buchungen werden automatisch als Umbuchung zugeordnet – auch Namensvarianten wie „MUSTERMANN, DOMINIK MAXIMILIAN“. Ihre eigenen Regeln und manuellen Zuordnungen gehen vor.",
+      "intro": "Überweisungen an Ihre eigenen Konten: Tragen Sie die IBAN eines eigenen Kontos mit Zielkategorie ein (z. B. Umbuchung oder Sparen & Investieren) – passende Buchungen werden automatisch zugeordnet. Ihr Name (Vor- und Nachname) dient nur als Vorschlag in der Gruppenansicht, weil Namen nicht eindeutig sind. Ihre eigenen Regeln und manuellen Zuordnungen gehen immer vor.",
       "badge": "eigenes Konto",
       "kinds": {
         "name": "Name",
-        "iban": "IBAN"
+        "iban": "IBAN",
+        "nameSuggestion": "Name (nur Vorschlag)"
       },
       "kind": "Erkennen über",
       "value": "Name bzw. IBAN",
@@ -600,14 +604,20 @@
       "hint": "Beim Namen müssen alle Wörter im Empfänger vorkommen (Reihenfolge egal), daher mindestens Vor- und Nachname.",
       "save": "Eigenes Konto hinzufügen",
       "saving": "Wird gespeichert …",
-      "added": "{count, plural, =0 {Hinzugefügt; derzeit passt keine Buchung.} one {Hinzugefügt; # Buchung als Umbuchung zugeordnet.} other {Hinzugefügt; # Buchungen als Umbuchung zugeordnet.}}",
+      "added": "{count, plural, =0 {Hinzugefügt; derzeit passt keine Buchung.} one {Hinzugefügt; # Buchung zugeordnet.} other {Hinzugefügt; # Buchungen zugeordnet.}}",
       "errors": {
         "invalidName": "Bitte Vor- und Nachname angeben (mindestens zwei Wörter).",
         "invalidIban": "Bitte eine gültige IBAN angeben.",
         "exists": "Dieses eigene Konto ist bereits eingetragen.",
         "noTransferCategory": "Die Kategorie „Umbuchung“ fehlt. Bitte legen Sie sie wieder an.",
         "generic": "Das hat leider nicht geklappt. Bitte versuchen Sie es erneut."
-      }
+      },
+      "categoryFor": "Zielkategorie für {pattern}",
+      "change": "Ändern",
+      "category": "Zielkategorie",
+      "categoryDefault": "Umbuchung (Standard)",
+      "hintIban": "Buchungen mit dieser Gegenkonto-IBAN werden automatisch der Zielkategorie zugeordnet.",
+      "addedName": "{count, plural, =0 {Hinzugefügt; derzeit passt keine Buchung ohne Kategorie.} one {Hinzugefügt; # Buchung erscheint als Vorschlag in der Gruppenansicht.} other {Hinzugefügt; # Buchungen erscheinen als Vorschlag in der Gruppenansicht.}}"
     },
     "newHeading": "Neue Regel",
     "listHeading": "Eigene Regeln in Prüfreihenfolge",
@@ -659,6 +669,14 @@
       "categoryMissing": "Bitte wählen Sie eine Kategorie.",
       "ruleExists": "Für dieses Muster gibt es bereits eine gleiche Regel.",
       "generic": "Das hat leider nicht geklappt. Bitte versuchen Sie es erneut."
+    },
+    "quality": {
+      "heading": "Qualität",
+      "intro": "Regeln, deren automatische Zuordnungen Sie oft korrigieren (ab 5 Treffern mehr als 30 % korrigiert), erscheinen hier zur Prüfung.",
+      "none": "Keine Regel mit auffällig vielen Korrekturen.",
+      "rate": "{corrected} von {hits} Zuordnungen korrigiert ({percent} %)",
+      "deactivate": "Deaktivieren",
+      "activate": "Wieder aktivieren"
     }
   },
   "TransactionCategory": {
@@ -682,7 +700,8 @@
       "ruleDeleted": "Automatisch per Regel zugeordnet; die Regel wurde inzwischen gelöscht.",
       "toRules": "Regeln ansehen",
       "confirmHint": "Mit „Speichern“ bestätigen Sie die Kategorie; sie gilt dann als manuell und wird von Regeln nicht mehr geändert.",
-      "ownAccount": "Automatisch als Umbuchung erkannt: eigenes Konto „{pattern}“ ({field})."
+      "ownAccount": "Automatisch als Umbuchung erkannt: eigenes Konto „{pattern}“ ({field}).",
+      "memory": "Automatisch zugeordnet durch das Gegenpartei-Gedächtnis: Sie haben diese Gegenpartei bisher {count, plural, one {#-mal} other {#-mal}} so zugeordnet."
     },
     "learnHint": "Aus Ihrer Auswahl wird eine Regel für diesen Händler gelernt; künftige Buchungen werden dann automatisch so zugeordnet.",
     "category": "Kategorie",
@@ -692,6 +711,47 @@
     "errors": {
       "generic": "Das hat leider nicht geklappt. Bitte versuchen Sie es erneut.",
       "notFound": "Die Buchung oder Kategorie gibt es nicht (mehr)."
+    },
+    "recurrence": "Wiederkehrend"
+  },
+  "Groups": {
+    "metaTitle": "Unkategorisiert nach Gegenpartei",
+    "back": "Zurück zu den Transaktionen",
+    "heading": "Unkategorisiert nach Gegenpartei",
+    "intro": "Buchungen ohne Kategorie, gruppiert nach Gegenpartei (Gegenkonto-IBAN bzw. Empfänger), die größten Gruppen zuerst. Ein Klick ordnet die ganze Gruppe zu. Daraus lernt das Portal: Weitere Buchungen dieser Gegenpartei werden künftig automatisch so zugeordnet (bei IBAN ab der ersten, sonst ab der zweiten gleichen Zuordnung).",
+    "loadError": "Die Gruppen konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+    "empty": "Alle Buchungen haben eine Kategorie.",
+    "unknown": "Unbekannte Gegenpartei",
+    "summary": "{groups, plural, one {# Gruppe} other {# Gruppen}} mit {count, plural, one {# Buchung} other {# Buchungen}} ohne Kategorie",
+    "count": "{count, plural, one {# Buchung} other {# Buchungen}}",
+    "byIban": "per IBAN",
+    "suggestion": {
+      "own_name": "Vorschlag: {category} – Name passt zu Ihrem eigenen Konto „{detail}“.",
+      "memory": "Vorschlag: {category} – diese Gegenpartei haben Sie bisher {detail}-mal so zugeordnet.",
+      "variant": "Vorschlag: {category} – Namensvariante von „{detail}“ (ohne gleiche IBAN nur als Vorschlag)."
+    },
+    "categoryFor": "Kategorie für „{label}“",
+    "choose": "Kategorie wählen",
+    "assign": "{count, plural, one {Zuordnen} other {Alle # zuordnen}}",
+    "assigned": "{count, plural, =0 {Keine Buchung zugeordnet.} one {# Buchung zugeordnet.} other {# Buchungen zugeordnet.}} Künftige Buchungen dieser Gegenpartei werden automatisch so zugeordnet.",
+    "errors": {
+      "generic": "Das hat leider nicht geklappt. Bitte versuchen Sie es erneut.",
+      "category": "Bitte wählen Sie eine Kategorie."
     }
+  },
+  "Recurrence": {
+    "weekly": "wöchentlich",
+    "monthly": "monatlich",
+    "quarterly": "vierteljährlich",
+    "semiannual": "halbjährlich",
+    "yearly": "jährlich"
+  },
+  "Quality": {
+    "label": "Qualität der automatischen Kategorisierung",
+    "automationRate": "Automatisierungsquote",
+    "automationDetail": "{automated} von {total} Buchungen automatisch zugeordnet",
+    "accuracy": "Treffsicherheit",
+    "accuracyDetail": "{accurate} von {automated} automatischen Zuordnungen ohne Korrektur",
+    "accuracyNone": "noch keine automatischen Zuordnungen"
   }
 }

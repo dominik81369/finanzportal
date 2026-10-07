@@ -263,6 +263,11 @@ export type Database = {
           description: string | null;
           categorization_source: Database['public']['Enums']['categorization_source'] | null;
           categorization_rule_id: string | null;
+          counterparty_key: string | null;
+          recurrence: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly' | null;
+          auto_category_id: string | null;
+          auto_source: Database['public']['Enums']['categorization_source'] | null;
+          auto_rule_id: string | null;
           external_id: string | null;
           import_hash: string | null;
           notes: string | null;
@@ -288,6 +293,11 @@ export type Database = {
           description?: string | null;
           categorization_source?: Database['public']['Enums']['categorization_source'] | null;
           categorization_rule_id?: string | null;
+          counterparty_key?: string | null;
+          recurrence?: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly' | null;
+          auto_category_id?: string | null;
+          auto_source?: Database['public']['Enums']['categorization_source'] | null;
+          auto_rule_id?: string | null;
           external_id?: string | null;
           import_hash?: string | null;
           notes?: string | null;
@@ -313,6 +323,11 @@ export type Database = {
           description?: string | null;
           categorization_source?: Database['public']['Enums']['categorization_source'] | null;
           categorization_rule_id?: string | null;
+          counterparty_key?: string | null;
+          recurrence?: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly' | null;
+          auto_category_id?: string | null;
+          auto_source?: Database['public']['Enums']['categorization_source'] | null;
+          auto_rule_id?: string | null;
           external_id?: string | null;
           import_hash?: string | null;
           notes?: string | null;
@@ -347,6 +362,20 @@ export type Database = {
           {
             foreignKeyName: 'transactions_categorization_rule_fkey';
             columns: ['categorization_rule_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'categorization_rules';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'transactions_auto_category_fkey';
+            columns: ['auto_category_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'transactions_auto_rule_fkey';
+            columns: ['auto_rule_id', 'user_id'];
             isOneToOne: false;
             referencedRelation: 'categorization_rules';
             referencedColumns: ['id', 'user_id'];
@@ -955,8 +984,53 @@ export type Database = {
         Returns: number;
       };
       add_own_account_identifier: {
-        Args: { p_kind: 'name' | 'iban'; p_value: string };
+        Args: { p_kind: 'name' | 'iban'; p_value: string; p_category_id?: string | null };
         Returns: Json;
+      };
+      set_own_account_category: {
+        Args: { p_rule_id: string; p_category_id: string };
+        Returns: number;
+      };
+      categorization_quality: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      rule_quality: {
+        Args: { p_min_hits?: number; p_max_error?: number };
+        Returns: {
+          rule_id: string | null;
+          pattern: string | null;
+          origin: string;
+          is_active: boolean;
+          hits: number;
+          corrected: number;
+          flagged: boolean;
+        }[];
+      };
+      set_rule_active: {
+        Args: { p_rule_id: string; p_active: boolean };
+        Returns: undefined;
+      };
+      uncategorized_groups: {
+        Args: { p_limit?: number };
+        Returns: {
+          group_key: string;
+          label: string | null;
+          tx_count: number;
+          total: number;
+          currency: string;
+          first_date: string;
+          last_date: string;
+          samples: string[] | null;
+          recurrence: string | null;
+          suggestion_category_id: string | null;
+          suggestion_source: 'own_name' | 'memory' | 'variant' | null;
+          suggestion_detail: string | null;
+        }[];
+      };
+      categorize_group: {
+        Args: { p_key: string; p_category_id: string };
+        Returns: number;
       };
       reset_machine_categorization: {
         Args: Record<PropertyKey, never>;
@@ -992,7 +1066,7 @@ export type Database = {
       account_type: 'checking' | 'savings' | 'credit_card' | 'depot' | 'loan' | 'cash' | 'other';
       account_provider: 'manual' | 'csv' | 'gocardless' | 'enable_banking' | 'plaid';
       category_kind: 'income' | 'expense' | 'transfer';
-      categorization_source: 'manual' | 'rule' | 'provider' | 'ai';
+      categorization_source: 'manual' | 'rule' | 'provider' | 'ai' | 'learned';
       instrument_type: 'stock' | 'etf' | 'fund' | 'bond' | 'crypto' | 'commodity' | 'cash' | 'other';
       asset_class: 'equity' | 'fixed_income' | 'real_estate' | 'commodity' | 'crypto' | 'cash' | 'other';
       market_region:
@@ -1053,7 +1127,7 @@ export const Constants = {
       account_type: ['checking', 'savings', 'credit_card', 'depot', 'loan', 'cash', 'other'],
       account_provider: ['manual', 'csv', 'gocardless', 'enable_banking', 'plaid'],
       category_kind: ['income', 'expense', 'transfer'],
-      categorization_source: ['manual', 'rule', 'provider', 'ai'],
+      categorization_source: ['manual', 'rule', 'provider', 'ai', 'learned'],
       instrument_type: ['stock', 'etf', 'fund', 'bond', 'crypto', 'commodity', 'cash', 'other'],
       asset_class: ['equity', 'fixed_income', 'real_estate', 'commodity', 'crypto', 'cash', 'other'],
       market_region: [
