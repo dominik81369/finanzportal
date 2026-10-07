@@ -219,7 +219,7 @@ grant select on tx to authenticated, service_role;
 
 select is(
   public.set_transaction_category((select rewe from tx), (select groceries from cat)) - 'rule_id',
-  '{"changed": true, "similar": 1, "learned_pattern": "rewe sagt danke"}'::jsonb,
+  '{"changed": true, "similar": 1, "similar_auto": 0, "learned_pattern": "rewe sagt danke"}'::jsonb,
   'Kategorie gesetzt → Regel „rewe sagt danke“ gelernt'
 );
 select results_eq(

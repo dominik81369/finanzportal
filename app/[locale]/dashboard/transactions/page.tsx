@@ -56,7 +56,11 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
   const learned = typeof query.learned === 'string' ? query.learned.slice(0, 60) : null;
   // „N ähnliche Buchungen gefunden, auch zuordnen?“ (Regel-ID und Anzahl aus
   // set_transaction_category) bzw. Ergebnis danach.
-  const similar = typeof query.similar === 'string' && /^\d{1,6}$/.test(query.similar) ? Number(query.similar) : 0;
+  const count = (value: string | string[] | undefined) =>
+    typeof value === 'string' && /^\d{1,6}$/.test(value) ? Number(value) : 0;
+  const similar = count(query.similar);
+  // Automatisch (per Regel) anders zugeordnete – nur auf Wunsch überschreiben.
+  const similarAuto = count(query.similarAuto);
   const similarRule = typeof query.rule === 'string' && isUuid(query.rule) ? query.rule : null;
   const applied = typeof query.applied === 'string' && /^\d{1,6}$/.test(query.applied) ? Number(query.applied) : null;
   const t = await getTranslations('Transactions.list');
@@ -102,14 +106,31 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
         </p>
       ) : null}
 
-      {notice === 'categorized' && similar > 0 && similarRule ? (
+      {notice === 'categorized' && (similar > 0 || similarAuto > 0) && similarRule ? (
         <div className="notice similar-notice" role="status">
-          <p>{t('similarFound', { count: similar })}</p>
-          <form action={applyRuleToSimilar.bind(null, similarRule)}>
-            <button type="submit" className="button button-small">
-              {t('similarApply', { count: similar })}
-            </button>
-          </form>
+          <p>
+            {similarAuto === 0
+              ? t('similarFound', { count: similar })
+              : similar === 0
+                ? t('similarFoundAuto', { count: similarAuto })
+                : t('similarFoundBoth', { open: similar, auto: similarAuto })}
+          </p>
+          <div className="button-row">
+            {similar > 0 ? (
+              <form action={applyRuleToSimilar.bind(null, similarRule, false)}>
+                <button type="submit" className="button button-small">
+                  {t('similarApply', { count: similar })}
+                </button>
+              </form>
+            ) : null}
+            {similarAuto > 0 ? (
+              <form action={applyRuleToSimilar.bind(null, similarRule, true)}>
+                <button type="submit" className={`button button-small${similar > 0 ? ' button-secondary' : ''}`}>
+                  {t('similarApplyAll', { count: similar + similarAuto })}
+                </button>
+              </form>
+            ) : null}
+          </div>
         </div>
       ) : null}
       {applied !== null ? (

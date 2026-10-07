@@ -948,11 +948,15 @@ export type Database = {
       };
       load_standard_rules: {
         Args: Record<PropertyKey, never>;
-        Returns: number;
+        Returns: Json;
       };
       apply_categorization_rules: {
-        Args: { p_rule_id?: string | null; p_dry_run?: boolean };
+        Args: { p_rule_id?: string | null; p_dry_run?: boolean; p_overwrite_auto?: boolean };
         Returns: number;
+      };
+      add_own_account_identifier: {
+        Args: { p_kind: 'name' | 'iban'; p_value: string };
+        Returns: Json;
       };
       reset_machine_categorization: {
         Args: Record<PropertyKey, never>;
@@ -1014,7 +1018,7 @@ export type Database = {
         | 'counterparty_iban'
         | 'description'
         | 'any_text';
-      rule_match_type: 'contains' | 'equals' | 'starts_with' | 'regex' | 'word';
+      rule_match_type: 'contains' | 'equals' | 'starts_with' | 'regex' | 'word' | 'all_words';
     };
 
     CompositeTypes: {
@@ -1077,7 +1081,7 @@ export const Constants = {
         'description',
         'any_text',
       ],
-      rule_match_type: ['contains', 'equals', 'starts_with', 'regex', 'word'],
+      rule_match_type: ['contains', 'equals', 'starts_with', 'regex', 'word', 'all_words'],
     },
   },
 } as const;

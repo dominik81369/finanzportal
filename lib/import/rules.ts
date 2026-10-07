@@ -32,7 +32,7 @@ export const RULE_FIELDS = [
 export type RuleField = (typeof RULE_FIELDS)[number];
 
 /** Vergleichsarten im Formular (regex nur per Datenbank). */
-export const RULE_MATCH_TYPES = ['contains', 'word', 'equals', 'starts_with'] as const;
+export const RULE_MATCH_TYPES = ['contains', 'word', 'all_words', 'equals', 'starts_with'] as const;
 export type RuleMatchType = (typeof RULE_MATCH_TYPES)[number];
 
 /** Richtung: '' = Ein- und Ausgänge, in = nur Eingänge, out = nur Ausgaben. */

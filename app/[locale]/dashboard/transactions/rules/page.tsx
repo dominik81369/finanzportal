@@ -4,7 +4,8 @@
  * Kategorisierung in Schichten (supabase/migrations/20261007100100_…):
  *   1. manuelle Zuordnungen bleiben immer,
  *   2. eigene Regeln (angelegt oder aus Korrekturen gelernt),
- *   3. Standardregeln (REWE, Netflix, Zinszahlung … – per Knopf geladen).
+ *   3. eigene Konten (Name/IBAN → Umbuchung),
+ *   4. Standardregeln (REWE, MVG, Zinszahlung … – per Knopf geladen).
  * Oben Kennzahlen und Massenaktionen (anwenden, zurücksetzen), darunter die
  * eigenen Regeln in Prüfreihenfolge (lib/import/rules.ts) und eingeklappt
  * die Standardregeln.
@@ -26,6 +27,7 @@ import { ruleDirection, sortRules } from '@/lib/import/rules';
 import { requireOnboardedUser, createClient } from '@/lib/supabase/server';
 
 import { loadTransactionFormOptions } from '../form-options';
+import { OwnAccountForm } from './own-account-form';
 import { RuleForm } from './rule-form';
 
 type RulesPageProps = {
@@ -57,7 +59,7 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
   const tCategories = await getTranslations('DefaultCategories');
 
   const supabase = await createClient();
-  const [rules, options, statsResult] = await Promise.all([
+  const [rules, options, statsResult, profile] = await Promise.all([
     supabase
       .from('categorization_rules')
       .select(
@@ -67,6 +69,7 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
       .eq('user_id', user.id),
     loadTransactionFormOptions(user.id),
     supabase.rpc('categorization_stats'),
+    supabase.from('profiles').select('first_name, last_name').eq('user_id', user.id).maybeSingle(),
   ]);
   if (rules.error) {
     console.error('[rules] Laden fehlgeschlagen', { code: rules.error.code });
@@ -75,7 +78,18 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
     console.error('[rules] Kennzahlen fehlgeschlagen', { code: statsResult.error.code });
   }
   const all = rules.data ?? [];
-  const own = sortRules(all.filter((rule) => rule.origin !== 'standard'));
+  const own = sortRules(all.filter((rule) => rule.origin === 'manual' || rule.origin === 'learned'));
+  const ownAccounts = all
+    .filter((rule) => rule.origin === 'own_account')
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  // Vorschlag für die Erkennung eigener Konten: Vor- und Nachname aus dem
+  // Profil, solange noch keine Namensregel existiert.
+  const profileName = [profile.data?.first_name, profile.data?.last_name]
+    .map((part) => part?.trim() ?? '')
+    .filter((part) => part !== '')
+    .join(' ');
+  const suggestedName =
+    profileName.includes(' ') && !ownAccounts.some((rule) => rule.match_field === 'counterparty') ? profileName : '';
   // Standardregeln greifen untereinander nach Musterlänge; angezeigt nach
   // Kategorie und Muster, damit man sie leichter findet.
   const collator = new Intl.Collator(await getLocale());
@@ -88,6 +102,7 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
   const stats = (statsResult.data as Stats | null) ?? null;
 
   const loaded = countParam(query.loaded);
+  const removed = countParam(query.removed) ?? 0;
   const applied = countParam(query.applied);
   const reset = countParam(query.reset);
   const failed = query.error === '1';
@@ -143,7 +158,8 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
         </p>
       ) : loaded !== null ? (
         <p role="status" className="form-success">
-          {t('notices.loaded', { count: loaded })}
+          {t('notices.loaded', { count: loaded })} {removed > 0 ? `${t('notices.removed', { count: removed })} ` : ''}
+          {t('notices.applied', { count: applied ?? 0 })}
         </p>
       ) : applied !== null ? (
         <p role="status" className="form-success">
@@ -205,6 +221,28 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
           {t('resetHint')}{' '}
           <Link href={{ pathname: '/dashboard/transactions', query: { assigned: 'auto' } }}>{t('viewAuto')}</Link>
         </p>
+      </section>
+
+      <section className="advisor-section" aria-labelledby="rule-own-heading">
+        <h2 id="rule-own-heading">{t('ownAccounts.heading')}</h2>
+        <p>{t('ownAccounts.intro')}</p>
+        {ownAccounts.length > 0 ? (
+          <ul className="link-list rule-list own-account-list">
+            {ownAccounts.map((rule) => (
+              <li key={rule.id} className="link-item">
+                <div className="link-item-text">
+                  {ruleTitle(rule)}
+                  <span className="cell-note">
+                    <span className="badge badge-muted">{t('ownAccounts.badge')}</span>
+                    {` · ${t(rule.match_field === 'counterparty_iban' ? 'ownAccounts.kinds.iban' : 'ownAccounts.kinds.name')}`}
+                  </span>
+                </div>
+                <div className="link-item-actions">{deleteForm(rule)}</div>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <OwnAccountForm suggestedName={suggestedName} />
       </section>
 
       <section className="advisor-section" aria-labelledby="rule-new-heading">

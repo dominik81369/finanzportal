@@ -74,9 +74,14 @@ export async function TransactionTable({ transactions, caption, editable }: Tran
                           className="badge badge-auto"
                           title={
                             tx.rule
-                              ? t(tx.rule.origin === 'standard' ? 'autoStandardRule' : 'autoOwnRule', {
-                                  pattern: tx.rule.pattern,
-                                })
+                              ? t(
+                                  tx.rule.origin === 'standard'
+                                    ? 'autoStandardRule'
+                                    : tx.rule.origin === 'own_account'
+                                      ? 'autoOwnAccount'
+                                      : 'autoOwnRule',
+                                  { pattern: tx.rule.pattern },
+                                )
                               : t('autoTitle')
                           }
                         >
