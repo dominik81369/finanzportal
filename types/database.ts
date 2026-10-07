@@ -268,6 +268,11 @@ export type Database = {
           auto_category_id: string | null;
           auto_source: Database['public']['Enums']['categorization_source'] | null;
           auto_rule_id: string | null;
+          features: string[] | null;
+          categorization_confidence: number | null;
+          auto_confidence: number | null;
+          suggested_category_id: string | null;
+          suggestion_confidence: number | null;
           external_id: string | null;
           import_hash: string | null;
           notes: string | null;
@@ -298,6 +303,11 @@ export type Database = {
           auto_category_id?: string | null;
           auto_source?: Database['public']['Enums']['categorization_source'] | null;
           auto_rule_id?: string | null;
+          features?: string[] | null;
+          categorization_confidence?: number | null;
+          auto_confidence?: number | null;
+          suggested_category_id?: string | null;
+          suggestion_confidence?: number | null;
           external_id?: string | null;
           import_hash?: string | null;
           notes?: string | null;
@@ -328,6 +338,11 @@ export type Database = {
           auto_category_id?: string | null;
           auto_source?: Database['public']['Enums']['categorization_source'] | null;
           auto_rule_id?: string | null;
+          features?: string[] | null;
+          categorization_confidence?: number | null;
+          auto_confidence?: number | null;
+          suggested_category_id?: string | null;
+          suggestion_confidence?: number | null;
           external_id?: string | null;
           import_hash?: string | null;
           notes?: string | null;
@@ -369,6 +384,13 @@ export type Database = {
           {
             foreignKeyName: 'transactions_auto_category_fkey';
             columns: ['auto_category_id', 'user_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'transactions_suggested_category_fkey';
+            columns: ['suggested_category_id', 'user_id'];
             isOneToOne: false;
             referencedRelation: 'categories';
             referencedColumns: ['id', 'user_id'];
@@ -829,6 +851,28 @@ export type Database = {
         ];
       };
 
+      categorization_settings: {
+        Row: {
+          user_id: string;
+          bayes_threshold: number;
+          review_amount_limit: number;
+          updated_at: string;
+        };
+        Insert: {
+          user_id?: string;
+          bayes_threshold?: number;
+          review_amount_limit?: number;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          bayes_threshold?: number;
+          review_amount_limit?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+
       categorization_rules: {
         Row: {
           id: string;
@@ -1031,6 +1075,22 @@ export type Database = {
       categorize_group: {
         Args: { p_key: string; p_category_id: string };
         Returns: number;
+      };
+      refresh_suggestions: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
+      confirm_suggestions: {
+        Args: { p_ids: string[] };
+        Returns: number;
+      };
+      save_categorization_settings: {
+        Args: { p_threshold: number; p_review_amount_limit: number };
+        Returns: undefined;
+      };
+      bayes_evaluate: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
       };
       reset_machine_categorization: {
         Args: Record<PropertyKey, never>;

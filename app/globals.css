@@ -1331,3 +1331,27 @@
 .inline-form .button {
   margin-top: 0;
 }
+
+/* Prüfliste */
+.badge-warning {
+  color: var(--destructive);
+  background: color-mix(in oklch, var(--destructive) 10%, transparent);
+}
+
+.review-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+}
+
+.review-toolbar p,
+.review-toolbar form {
+  margin: 0;
+}
+
+.learning-evaluation {
+  font-weight: 500;
+}

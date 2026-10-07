@@ -12,7 +12,7 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { toAppLocale } from '@/i18n/routing';
 import { applyRuleToSimilar } from '@/lib/actions/categorization-rules';
-import { requireOnboardedUser } from '@/lib/supabase/server';
+import { createClient, requireOnboardedUser } from '@/lib/supabase/server';
 import { hasActiveFilters, parsePage, parseTransactionFilters } from '@/lib/transaction-filters';
 import { isUuid } from '@/lib/transactions';
 
@@ -71,16 +71,28 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
   const filtered = hasActiveFilters(filters);
   const page = parsePage(query);
 
-  const [{ transactions, total, pages, firstRow }, options] = await Promise.all([
+  const supabase = await createClient();
+  const [{ transactions, total, pages, firstRow }, options, review] = await Promise.all([
     loadTransactionList({ userId: user.id, filters, page, listPath: LIST_PATH }),
     loadTransactionFormOptions(user.id),
+    // Vorschläge in der Prüfliste (Stand des letzten Imports/Anwendens).
+    supabase
+      .from('transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .is('category_id', null)
+      .not('suggested_category_id', 'is', null),
   ]);
+  const reviewCount = review.count ?? 0;
 
   return (
     <section aria-labelledby="page-title">
       <div className="page-header">
         <h1 id="page-title">{tDashboard('transactions.title')}</h1>
         <div className="page-header-actions">
+          <Link className="button button-secondary" href="/dashboard/transactions/review">
+            {t('review', { count: reviewCount })}
+          </Link>
           <Link className="button button-secondary" href="/dashboard/transactions/groups">
             {t('groups')}
           </Link>

@@ -31,6 +31,7 @@ import { requireOnboardedUser, createClient } from '@/lib/supabase/server';
 import { CategorySelect } from '../category-select';
 import { loadTransactionFormOptions } from '../form-options';
 import { QualityStats } from '../quality-stats';
+import { LearningForm } from './learning-form';
 import { OwnAccountForm } from './own-account-form';
 import { RuleForm } from './rule-form';
 
@@ -39,7 +40,26 @@ type RulesPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-type Stats = { total: number; manual: number; rule: number; standard: number; learned: number; uncategorized: number };
+type Stats = {
+  total: number;
+  manual: number;
+  rule: number;
+  standard: number;
+  learned: number;
+  bayes: number;
+  suggested: number;
+  uncategorized: number;
+};
+
+type Evaluation = {
+  trained: number;
+  tested: number;
+  correct: number;
+  accuracy: number | null;
+  confident: number;
+  confident_correct: number;
+  confident_accuracy: number | null;
+};
 
 export async function generateMetadata({ params }: Pick<RulesPageProps, 'params'>): Promise<Metadata> {
   const locale = toAppLocale((await params).locale);
@@ -63,7 +83,7 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
   const tCategories = await getTranslations('DefaultCategories');
 
   const supabase = await createClient();
-  const [rules, options, statsResult, profile, quality] = await Promise.all([
+  const [rules, options, statsResult, profile, quality, settings, evaluation] = await Promise.all([
     supabase
       .from('categorization_rules')
       .select(
@@ -75,7 +95,13 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
     supabase.rpc('categorization_stats'),
     supabase.from('profiles').select('first_name, last_name').eq('user_id', user.id).maybeSingle(),
     supabase.rpc('rule_quality', {}),
+    supabase.from('categorization_settings').select('bayes_threshold, review_amount_limit').eq('user_id', user.id).maybeSingle(),
+    supabase.rpc('bayes_evaluate'),
   ]);
+  if (evaluation.error) {
+    console.error('[rules] Auswertung fehlgeschlagen', { code: evaluation.error.code });
+  }
+  const evaluationData = (evaluation.data as Evaluation | null) ?? null;
   if (quality.error) {
     console.error('[rules] Regelqualität fehlgeschlagen', { code: quality.error.code });
   }
@@ -195,11 +221,16 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
               <dt>{t('stats.auto')}</dt>
               <dd>
                 {t('stats.value', {
-                  count: stats.rule + stats.standard + stats.learned,
-                  percent: percent(stats.rule + stats.standard + stats.learned, stats.total),
+                  count: stats.rule + stats.standard + stats.learned + stats.bayes,
+                  percent: percent(stats.rule + stats.standard + stats.learned + stats.bayes, stats.total),
                 })}
                 <span className="cell-note">
-                  {t('stats.autoDetail', { rule: stats.rule, standard: stats.standard, learned: stats.learned })}
+                  {t('stats.autoDetail', {
+                    rule: stats.rule,
+                    standard: stats.standard,
+                    learned: stats.learned,
+                    bayes: stats.bayes,
+                  })}
                 </span>
               </dd>
             </div>
@@ -211,6 +242,9 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
               <dt>{t('stats.uncategorized')}</dt>
               <dd>
                 {t('stats.value', { count: stats.uncategorized, percent: percent(stats.uncategorized, stats.total) })}
+                {stats.suggested > 0 ? (
+                  <span className="cell-note">{t('stats.suggestedDetail', { count: stats.suggested })}</span>
+                ) : null}
               </dd>
             </div>
           </dl>
@@ -361,6 +395,28 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
             </ul>
           </details>
         )}
+      </section>
+
+      <section className="advisor-section" aria-labelledby="rule-learning-heading">
+        <h2 id="rule-learning-heading">{t('learning.heading')}</h2>
+        <p>{t('learning.intro')}</p>
+        <p className="learning-evaluation">
+          {!evaluationData || evaluationData.tested < 5 || evaluationData.accuracy === null
+            ? t('learning.evaluationTooFew', { trained: evaluationData?.trained ?? 0 })
+            : t('learning.evaluation', {
+                accuracy: percent(evaluationData.correct, evaluationData.tested),
+                correct: evaluationData.correct,
+                tested: evaluationData.tested,
+                trained: evaluationData.trained,
+                confidentAccuracy:
+                  evaluationData.confident > 0 ? percent(evaluationData.confident_correct, evaluationData.confident) : 0,
+                confident: evaluationData.confident,
+              })}
+        </p>
+        <LearningForm
+          threshold={Number(settings.data?.bayes_threshold ?? 0.9)}
+          limit={Number(settings.data?.review_amount_limit ?? 1000)}
+        />
       </section>
 
       <section className="advisor-section" aria-labelledby="rule-quality-heading">

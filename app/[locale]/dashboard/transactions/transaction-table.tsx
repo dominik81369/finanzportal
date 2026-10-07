@@ -56,7 +56,9 @@ export async function TransactionTable({ transactions, caption, editable }: Tran
             // Tooltip der Markierung „automatisch“: Regel bzw. Gedächtnis.
             const autoTitle =
               tx.categorization_source === 'learned'
-                ? t('autoMemory')
+                ? tx.categorization_confidence !== null
+                  ? t('autoBayes', { confidence: format.number(tx.categorization_confidence, { style: 'percent' }) })
+                  : t('autoMemory')
                 : tx.categorization_source !== 'rule'
                   ? null
                   : !tx.rule

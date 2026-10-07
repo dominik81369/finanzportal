@@ -481,6 +481,14 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
           <p role="status" className="form-success" id="import-result">
             {t('result.summary', { new: result.new, duplicates: result.duplicates, categorized: result.categorized })}
             {result.enriched > 0 ? ` ${t('result.enriched', { count: result.enriched })}` : null}
+            {result.learned > 0 ? ` ${t('result.learned', { count: result.learned })}` : null}
+            {result.suggested > 0 ? (
+              <>
+                {' '}
+                {t('result.suggested', { count: result.suggested })}{' '}
+                <Link href="/dashboard/transactions/review">{t('result.toReview')}</Link>
+              </>
+            ) : null}
           </p>
           {built?.balanceCheck.status === 'mismatch' ? <BalanceCheckNote check={built.balanceCheck} money={money} /> : null}
           {closingCheck ? (
