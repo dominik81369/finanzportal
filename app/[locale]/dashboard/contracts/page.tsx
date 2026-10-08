@@ -16,7 +16,7 @@ import { toAppLocale } from '@/i18n/routing';
 import { refreshContracts } from '@/lib/actions/contracts';
 import { requireOnboardedUser } from '@/lib/supabase/server';
 
-import { ActionForm } from './action-form';
+import { ActionForm } from '../action-form';
 import { ContractsOverview } from './contracts-overview';
 import { ContractsSkeleton } from './contracts-skeleton';
 

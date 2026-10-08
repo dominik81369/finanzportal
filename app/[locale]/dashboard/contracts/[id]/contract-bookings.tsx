@@ -10,7 +10,7 @@ import { linkContractTransaction, saveContract, unlinkContractTransaction } from
 import type { ContractFormValues, ContractStatus } from '@/lib/contracts';
 import { createClient } from '@/lib/supabase/server';
 
-import { ActionForm } from '../action-form';
+import { ActionForm } from '../../action-form';
 import { ContractForm } from '../contract-form';
 import { loadContractFormData } from '../form-data';
 

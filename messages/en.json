@@ -145,7 +145,7 @@
     },
     "budgets": {
       "title": "Budgets",
-      "description": "Your spending by the 50/30/20 rule: needs, wants and savings relative to your income.",
+      "description": "Your spending according to the 50/30/20 rule: needs, wants, and savings & debt – with target amounts as a share of your total spending.",
       "planned": {
         "periods": "Budgets per week, month, quarter or year",
         "progress": "Progress and alert from a freely selectable threshold"
@@ -340,6 +340,8 @@
     "education": "Education",
     "taxes": "Taxes & fees",
     "capital_gains_tax": "Capital gains tax",
+    "loan": "Loan",
+    "loan_interest": "Loan interest",
     "other_expenses": "Other expenses",
     "savings_investments": "Saving & investing",
     "loan_repayment": "Loan repayment",
@@ -431,34 +433,34 @@
         "thisYear": "This year"
       },
       "single": "Period: {month}",
-      "range": "Period: {from} to {to} ({count} months)"
+      "range": "Period: {from} to {to} ({count} months)",
+      "basis": "Reference"
     },
     "loadError": "The analysis could not be loaded right now. Please reload the page.",
-    "empty": "No counted transactions in this period.",
-    "rules": "All transactions count – entered manually, imported or synced – except transfers, categories without a group and transactions excluded from budgets. Refunds reduce the spending of their group. Amounts in different currencies are not converted but shown separately. Tip: if you also track your savings account, categorize the incoming payment there as “Transfer” – otherwise deposit and withdrawal cancel each other out.",
+    "empty": "No transactions in this period.",
+    "rules": "All transactions count – entered manually, imported or synchronised – except transfers, categories without a group and transactions excluded from the budget. Refunds reduce the spending of their group. Transfers to your own accounts only count if their category belongs to a group (e.g. “Savings & investments”). Amounts in different currencies are not converted but shown separately.",
     "currencyHeading": "{currency}",
     "income": "Income",
-    "noIncome": "There is no income in this currency for this period, so shares cannot be calculated.",
-    "caption": "Actual vs. 50/30/20 target in {currency}",
+    "caption": "Actual and target according to {targets} in {currency}",
     "monthsCaption": "Monthly breakdown in {currency}",
     "columns": {
       "group": "Group",
       "actual": "Actual",
-      "share": "Share of income",
       "target": "Target",
       "targetAmount": "Target amount",
-      "month": "Month"
+      "month": "Month",
+      "share": "Share",
+      "deviation": "Difference"
     },
     "groups": {
       "needs": "Needs",
       "wants": "Wants",
-      "savings": "Savings"
+      "savings": "Savings & debt"
     },
-    "unassigned": "Uncategorized",
-    "remaining": "Remaining",
+    "unassigned": "Uncategorised",
     "assignment": {
       "heading": "Category assignment",
-      "intro": "Choose which group each expense and transfer category belongs to. “Not counted” suits transfers between your own accounts. Income categories form the basis and have no group.",
+      "intro": "Choose the group each spending and transfer category belongs to. “Not counted” suits transfers between your own accounts. Income categories have no group; they determine “Not accounted for” and the reference “Income”.",
       "excluded": "Not counted",
       "save": "Save assignment",
       "saving": "Saving …",
@@ -466,6 +468,83 @@
       "invalid": "The assignment is invalid. Please reload the page.",
       "generic": "The assignment could not be saved right now. Please try again.",
       "loadError": "The categories could not be loaded right now. Please reload the page."
+    },
+    "loading": "Loading analysis …",
+    "noTransactions": {
+      "title": "No transactions yet",
+      "text": "Once there are transactions, this page shows your spending according to the 50/30/20 rule.",
+      "import": "Import a statement"
+    },
+    "totalExpenses": "Total spending",
+    "basisAmount": "Reference ({basis})",
+    "sub": {
+      "taxes": "of which taxes & duties",
+      "loan": "of which loans",
+      "ownSavings": "of which to own savings accounts",
+      "ownTransfers": "of which moved to own accounts (net)"
+    },
+    "toGroups": "Go to group view",
+    "notCaptured": "Not accounted for",
+    "notCapturedHint": "Not accounted for = income minus total spending; transfers to your own accounts do not count as spending.",
+    "netIncomeHint": "The 50/30/20 rule originally refers to net income; here taxes count as needs.",
+    "basis": {
+      "options": {
+        "expenses": "Spending of the month",
+        "expenses_avg3": "Average of the last 3 months",
+        "fixed": "Fixed amount",
+        "income": "Income"
+      },
+      "explain": {
+        "expenses": "Target amounts = percentage of this month's total spending.",
+        "expensesRange": "Target amounts = percentage of this period's total spending.",
+        "expenses_avg3": "Target amounts = percentage of the average monthly total spending of the three full months before the selected period.",
+        "expenses_avg3Range": "Target amounts = percentage of the average monthly total spending of the three full months before the selected period, times {count} months.",
+        "fixed": "Target amounts = percentage of your fixed monthly amount of {amount}.",
+        "fixedRange": "Target amounts = percentage of your fixed monthly amount of {amount}, times {count} months.",
+        "fixedMissing": "Target amounts = percentage of a fixed monthly amount – not set yet, so total spending is used for now.",
+        "income": "Target amounts = percentage of this month's income.",
+        "incomeRange": "Target amounts = percentage of this period's income."
+      },
+      "viewOnly": "Chosen for this view only – the default is set in the settings.",
+      "fallback": {
+        "fixedMissing": "No fixed monthly amount set yet – target amounts are based on total spending.",
+        "fixedOtherCurrency": "The fixed amount applies to {currency} – total spending is used in this currency.",
+        "noHistory": "There is no spending in the three previous months – target amounts are based on this period's total spending."
+      },
+      "noBasis": {
+        "expenses": "Without spending there are no target amounts.",
+        "income": "Without income in this period, no target amounts can be calculated."
+      },
+      "toSettings": "Set amount"
+    },
+    "settings": {
+      "heading": "Settings",
+      "intro": "Target percentages per group (100 % in total) and the reference the page starts with. Above, the reference can be switched for the current view at any time.",
+      "basis": "Default reference",
+      "targets": "Target percentages",
+      "sum": "Total: {sum}",
+      "fixedAmount": "Fixed monthly amount",
+      "fixedCurrency": "Currency",
+      "fixedHint": "Only for the reference “Fixed amount”; applies to transactions in this currency.",
+      "save": "Save settings",
+      "saving": "Saving …",
+      "saved": "Settings saved.",
+      "loadError": "The settings could not be loaded right now. Please reload the page.",
+      "errors": {
+        "summary": "Please check the highlighted fields.",
+        "generic": "The settings could not be saved right now. Please try again.",
+        "basisInvalid": "Please choose a reference.",
+        "percentInvalid": "Please enter a number between 0 and 100 with at most one decimal place.",
+        "percentSum": "The target percentages must add up to exactly 100 %.",
+        "fixedAmountInvalid": "Please enter an amount greater than 0, e.g. 9,600.00.",
+        "fixedAmountRequired": "The reference “Fixed amount” needs a monthly amount.",
+        "currencyInvalid": "Please choose a currency."
+      }
+    },
+    "advisor": {
+      "heading": "Budget",
+      "intro": "{month}, with the client's reference and target percentages.",
+      "noTransactions": "The client has not recorded any transactions yet."
     }
   },
   "AccountTypes": {

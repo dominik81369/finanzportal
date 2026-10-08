@@ -9,8 +9,9 @@
  *   CSS  – Abschnitte zwischen  /* <name>:start  und  /* <name>:end *\/
  *          in app/globals.css: keine Farbwerte (Hex, rgb(), oklch() …,
  *          Farbnamen), keine festen Längen bei Abständen, Schrift und Maßen.
- *   TSX  – Dateien der Abschnitte: kein style-Attribut, keine Farbwerte,
- *          keine Tailwind-Palettenfarben oder Arbitrary Values.
+ *   TSX  – Dateien der Abschnitte: style nur für CSS-Variablen (Datenwerte
+ *          wie Balkenbreiten), keine Farbwerte, keine Tailwind-Palettenfarben
+ *          oder Arbitrary Values.
  *
  * Aufruf: npm run check:tokens  (Exit-Code 1 bei Verstößen)
  */
@@ -27,6 +28,13 @@ const SECTIONS = [
     files: [
       'app/[locale]/dashboard/contracts',
       'app/[locale]/advisor/clients/[clientId]/contracts-section.tsx',
+    ],
+  },
+  {
+    name: 'budgets',
+    files: [
+      'app/[locale]/dashboard/budgets',
+      'app/[locale]/advisor/clients/[clientId]/budget-section.tsx',
     ],
   },
 ];
@@ -128,8 +136,15 @@ function checkTsx(file) {
   const name = relative(ROOT, file);
   source.split('\n').forEach((line, index) => {
     const where = `${name}:${index + 1}`;
-    if (/\bstyle\s*=\s*\{/.test(line)) {
-      problems.push(`${where}: style-Attribut – bitte Klassen mit Tokens verwenden`);
+    // style nur für CSS-Variablen (Datenwerte wie Balkenbreiten), einzeilig:
+    // style={{ '--name': … }}. Alles andere gehört in Klassen mit Tokens.
+    const style = /\bstyle\s*=\s*\{(.*)$/.exec(line);
+    if (style) {
+      const object = /^\{(.*?)\}(?:\s+as\s+\w+)?\}/.exec(style[1]);
+      const keys = object ? [...object[1].matchAll(/(?:^|,)\s*([^:,]+?)\s*:/g)].map((match) => match[1]) : [];
+      if (!object || keys.length === 0 || keys.some((key) => !/^'--[\w-]+'$/.test(key))) {
+        problems.push(`${where}: style-Attribut – nur CSS-Variablen ('--…') erlaubt, sonst Klassen mit Tokens`);
+      }
     }
     if (COLOR_LITERAL.test(line)) {
       problems.push(`${where}: Farbwert im Code`);

@@ -35,9 +35,9 @@ select results_eq(
     ('salary'::text, null::text), ('investment_income', null), ('rental_income', null), ('other_income', null),
     ('housing', 'needs'), ('groceries', 'needs'), ('mobility', 'needs'), ('insurance', 'needs'),
     ('health', 'needs'), ('leisure_travel', 'wants'), ('subscriptions_media', 'wants'),
-    ('shopping', 'wants'), ('education', 'wants'), ('taxes', 'needs'), ('capital_gains_tax', 'needs'), ('other_expenses', 'wants'),
+    ('shopping', 'wants'), ('education', 'wants'), ('taxes', 'needs'), ('capital_gains_tax', 'needs'), ('loan', 'needs'), ('loan_interest', 'needs'), ('other_expenses', 'wants'),
     ('savings_investments', 'savings'), ('loan_repayment', 'savings'), ('transfer', null) $$,
-  'Neue Nutzerin: 19 Standardkategorien mit der vereinbarten Zuordnung'
+  'Neue Nutzerin: 21 Standardkategorien mit der vereinbarten Zuordnung'
 );
 select has_type('public', 'budget_group', 'Typ public.budget_group existiert');
 

@@ -145,7 +145,7 @@
     },
     "budgets": {
       "title": "Budgets",
-      "description": "Ihre Ausgaben nach der 50/30/20-Regel: Bedarf, Wünsche und Sparen im Verhältnis zum Einkommen.",
+      "description": "Ihre Ausgaben nach der 50/30/20-Regel: Bedarf, Wünsche sowie Sparen & Schulden – mit Zielbeträgen als Anteil Ihrer Gesamtausgaben.",
       "planned": {
         "periods": "Budgets für Woche, Monat, Quartal oder Jahr",
         "progress": "Fortschritt und Warnung ab einer frei wählbaren Schwelle"
@@ -340,6 +340,8 @@
     "education": "Bildung",
     "taxes": "Steuern & Abgaben",
     "capital_gains_tax": "Kapitalertragsteuer",
+    "loan": "Darlehen",
+    "loan_interest": "Darlehenszinsen",
     "other_expenses": "Sonstige Ausgaben",
     "savings_investments": "Sparen & Investieren",
     "loan_repayment": "Kredittilgung",
@@ -431,34 +433,34 @@
         "thisYear": "Dieses Jahr"
       },
       "single": "Zeitraum: {month}",
-      "range": "Zeitraum: {from} bis {to} ({count} Monate)"
+      "range": "Zeitraum: {from} bis {to} ({count} Monate)",
+      "basis": "Bezugsgröße"
     },
     "loadError": "Die Auswertung konnte gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
-    "empty": "Keine gezählten Buchungen in diesem Zeitraum.",
-    "rules": "Gezählt werden alle Buchungen – manuell erfasst, importiert oder synchronisiert – außer Umbuchungen, Kategorien ohne Gruppe und vom Budget ausgenommenen Buchungen. Erstattungen mindern die Ausgaben ihrer Gruppe. Beträge in unterschiedlichen Währungen werden nicht umgerechnet, sondern getrennt ausgewiesen. Tipp: Erfassen Sie auch Ihr Sparkonto, kategorisieren Sie die Gutschrift dort als „Umbuchung“ – sonst heben sich Ein- und Auszahlung auf.",
+    "empty": "Keine Buchungen in diesem Zeitraum.",
+    "rules": "Gezählt werden alle Buchungen – manuell erfasst, importiert oder synchronisiert – außer Umbuchungen, Kategorien ohne Gruppe und vom Budget ausgenommenen Buchungen. Erstattungen mindern die Ausgaben ihrer Gruppe. Überweisungen auf eigene Konten zählen nur, wenn ihre Kategorie einer Gruppe angehört (z. B. „Sparen & Investieren“). Beträge in unterschiedlichen Währungen werden nicht umgerechnet, sondern getrennt ausgewiesen.",
     "currencyHeading": "{currency}",
     "income": "Einkommen",
-    "noIncome": "In diesem Zeitraum gibt es kein Einkommen in dieser Währung – Anteile lassen sich daher nicht berechnen.",
-    "caption": "Ist und Ziel nach 50/30/20 in {currency}",
+    "caption": "Ist und Ziel nach {targets} in {currency}",
     "monthsCaption": "Verlauf je Monat in {currency}",
     "columns": {
       "group": "Gruppe",
       "actual": "Ist",
-      "share": "Anteil am Einkommen",
       "target": "Ziel",
       "targetAmount": "Zielbetrag",
-      "month": "Monat"
+      "month": "Monat",
+      "share": "Anteil",
+      "deviation": "Abweichung"
     },
     "groups": {
       "needs": "Bedarf (Needs)",
       "wants": "Wünsche (Wants)",
-      "savings": "Sparen (Savings)"
+      "savings": "Sparen & Schulden"
     },
     "unassigned": "Ohne Kategorie",
-    "remaining": "Verbleibend",
     "assignment": {
       "heading": "Zuordnung der Kategorien",
-      "intro": "Legen Sie fest, welcher Gruppe jede Ausgaben- und Transferkategorie angehört. „Nicht gezählt“ eignet sich für Umbuchungen zwischen eigenen Konten. Einkommenskategorien bilden die Basis und haben keine Gruppe.",
+      "intro": "Legen Sie fest, welcher Gruppe jede Ausgaben- und Transferkategorie angehört. „Nicht gezählt“ eignet sich für Umbuchungen zwischen eigenen Konten. Einkommenskategorien haben keine Gruppe; sie bestimmen „Nicht erfasst“ und die Bezugsgröße „Einkommen“.",
       "excluded": "Nicht gezählt",
       "save": "Zuordnung speichern",
       "saving": "Wird gespeichert …",
@@ -466,6 +468,83 @@
       "invalid": "Die Zuordnung ist ungültig. Bitte laden Sie die Seite neu.",
       "generic": "Die Zuordnung konnte gerade nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "loadError": "Die Kategorien konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu."
+    },
+    "loading": "Auswertung wird geladen …",
+    "noTransactions": {
+      "title": "Noch keine Buchungen",
+      "text": "Sobald Buchungen vorhanden sind, zeigt die Auswertung Ihre Ausgaben nach der 50/30/20-Regel.",
+      "import": "Kontoauszug importieren"
+    },
+    "totalExpenses": "Gesamtausgaben",
+    "basisAmount": "Bezugsgröße ({basis})",
+    "sub": {
+      "taxes": "davon Steuern & Abgaben",
+      "loan": "davon Darlehen",
+      "ownSavings": "davon auf eigene Sparkonten",
+      "ownTransfers": "davon auf eigene Konten umgebucht (netto)"
+    },
+    "toGroups": "Zur Gruppenansicht",
+    "notCaptured": "Nicht erfasst",
+    "notCapturedHint": "Nicht erfasst = Einkommen minus Gesamtausgaben; Umbuchungen auf eigene Konten zählen nicht als Ausgabe.",
+    "netIncomeHint": "Die 50/30/20-Regel zielt ursprünglich auf das Nettoeinkommen; hier zählen Steuern zu Needs.",
+    "basis": {
+      "options": {
+        "expenses": "Ausgaben des Monats",
+        "expenses_avg3": "Durchschnitt letzte 3 Monate",
+        "fixed": "Fester Betrag",
+        "income": "Einkommen"
+      },
+      "explain": {
+        "expenses": "Zielbeträge = Prozentanteil der Gesamtausgaben dieses Monats.",
+        "expensesRange": "Zielbeträge = Prozentanteil der Gesamtausgaben dieses Zeitraums.",
+        "expenses_avg3": "Zielbeträge = Prozentanteil der durchschnittlichen monatlichen Gesamtausgaben der drei vollen Monate vor dem gewählten Zeitraum.",
+        "expenses_avg3Range": "Zielbeträge = Prozentanteil der durchschnittlichen monatlichen Gesamtausgaben der drei vollen Monate vor dem gewählten Zeitraum, mal {count} Monate.",
+        "fixed": "Zielbeträge = Prozentanteil Ihres festen Monatsbetrags von {amount}.",
+        "fixedRange": "Zielbeträge = Prozentanteil Ihres festen Monatsbetrags von {amount}, mal {count} Monate.",
+        "fixedMissing": "Zielbeträge = Prozentanteil eines festen Monatsbetrags – noch nicht festgelegt, daher vorerst aus den Gesamtausgaben.",
+        "income": "Zielbeträge = Prozentanteil des Einkommens dieses Monats.",
+        "incomeRange": "Zielbeträge = Prozentanteil des Einkommens dieses Zeitraums."
+      },
+      "viewOnly": "Nur für diese Ansicht gewählt – die Voreinstellung steht in den Einstellungen.",
+      "fallback": {
+        "fixedMissing": "Noch kein fester Monatsbetrag hinterlegt – Zielbeträge daher aus den Gesamtausgaben.",
+        "fixedOtherCurrency": "Der feste Betrag gilt für {currency} – in dieser Währung zählen die Gesamtausgaben.",
+        "noHistory": "Für die drei Vormonate liegen keine Ausgaben vor – Zielbeträge daher aus den Gesamtausgaben dieses Zeitraums."
+      },
+      "noBasis": {
+        "expenses": "Ohne Ausgaben gibt es keine Zielbeträge.",
+        "income": "Ohne Einkommen in diesem Zeitraum lassen sich keine Zielbeträge berechnen."
+      },
+      "toSettings": "Betrag festlegen"
+    },
+    "settings": {
+      "heading": "Einstellungen",
+      "intro": "Prozentziele je Gruppe (zusammen 100 %) und die Bezugsgröße, mit der die Seite startet. Oben lässt sich die Bezugsgröße jederzeit nur für die aktuelle Ansicht umschalten.",
+      "basis": "Voreinstellung der Bezugsgröße",
+      "targets": "Prozentziele",
+      "sum": "Summe: {sum}",
+      "fixedAmount": "Fester Monatsbetrag",
+      "fixedCurrency": "Währung",
+      "fixedHint": "Nur für die Bezugsgröße „Fester Betrag“; gilt für Buchungen in dieser Währung.",
+      "save": "Einstellungen speichern",
+      "saving": "Wird gespeichert …",
+      "saved": "Einstellungen gespeichert.",
+      "loadError": "Die Einstellungen konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+      "errors": {
+        "summary": "Bitte prüfen Sie die markierten Felder.",
+        "generic": "Die Einstellungen konnten gerade nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+        "basisInvalid": "Bitte wählen Sie eine Bezugsgröße.",
+        "percentInvalid": "Bitte eine Zahl zwischen 0 und 100 mit höchstens einer Nachkommastelle eingeben.",
+        "percentSum": "Die Prozentziele müssen zusammen genau 100 % ergeben.",
+        "fixedAmountInvalid": "Bitte geben Sie einen Betrag größer als 0 ein, z. B. 9.600,00.",
+        "fixedAmountRequired": "Für die Bezugsgröße „Fester Betrag“ ist ein Monatsbetrag nötig.",
+        "currencyInvalid": "Bitte wählen Sie eine Währung."
+      }
+    },
+    "advisor": {
+      "heading": "Budget",
+      "intro": "{month}, mit Bezugsgröße und Prozentzielen des Mandanten.",
+      "noTransactions": "Der Mandant hat noch keine Buchungen erfasst."
     }
   },
   "AccountTypes": {

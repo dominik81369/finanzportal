@@ -38,7 +38,7 @@ select plan(76);
 -- ---------------------------------------------------------------------
 -- 0. Testidentitäten
 -- ---------------------------------------------------------------------
--- Der Signup-Trigger (private.handle_new_user) legt Profil + 19
+-- Der Signup-Trigger (private.handle_new_user) legt Profil + 21
 -- Standardkategorien an. Bobs Metadaten enthalten role=advisor – das muss
 -- ignoriert werden (Test 2).
 select tests.create_supabase_user(
@@ -120,8 +120,8 @@ select is(
 select is(
   (select count(*)::int from public.categories
     where user_id = tests.get_supabase_uid('alice') and is_default),
-  19,
-  'Signup-Trigger seedet 19 Standardkategorien'
+  21,
+  'Signup-Trigger seedet 21 Standardkategorien'
 );                                                                                          -- 3
 
 -- ---------------------------------------------------------------------
@@ -443,8 +443,8 @@ select results_eq(
 );                                                                                          -- 47
 select is(
   (select count(*)::int from public.categories where user_id = tests.get_supabase_uid('alice')),
-  20,
-  'Carol liest Alices Kategorien (19 Standard + 1 eigene)'
+  22,
+  'Carol liest Alices Kategorien (21 Standard + 1 eigene)'
 );                                                                                          -- 48
 select results_eq(
   $$ select name from public.portfolios where user_id = tests.get_supabase_uid('alice') $$,

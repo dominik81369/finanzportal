@@ -157,6 +157,7 @@
   /* Linien, Maße, Bewegung */
   --border-hairline: 1px;
   --size-form: 36rem;
+  --size-field: 12rem;
   --size-fact: 9rem;
   --size-skeleton-card: 7rem;
   --size-skeleton-row: 2.5rem;
@@ -935,140 +936,6 @@
   }
 }
 
-/* ---------------------------------------------------------------------
-   Budgets (50/30/20)
-   --------------------------------------------------------------------- */
-.budget-period {
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-}
-
-.budget-presets {
-  display: flex;
-  flex-wrap: wrap;
-  grid-column: 1 / -1;
-  gap: 0.25rem 1rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: 0.9rem;
-}
-
-.budget-presets a[aria-current] {
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.budget-currency {
-  margin-top: 1.5rem;
-}
-
-.budget-currency h2 {
-  margin: 0 0 0.25rem;
-  font-size: 1.15rem;
-  font-weight: 600;
-}
-
-.budget-income {
-  margin: 0 0 0.75rem;
-}
-
-.budget-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
-}
-
-.budget-table caption {
-  padding: 0.6rem 0.75rem;
-  text-align: left;
-  font-size: 0.85rem;
-  color: var(--muted-foreground);
-}
-
-.budget-table th,
-.budget-table td {
-  padding: 0.6rem 0.75rem;
-  text-align: left;
-  border-top: 1px solid var(--border);
-}
-
-.budget-table .amount {
-  text-align: right;
-  white-space: nowrap;
-}
-
-.budget-table tbody th,
-.budget-table tfoot th {
-  font-weight: 500;
-  min-width: 12rem;
-}
-
-.budget-table tfoot th,
-.budget-table tfoot td {
-  font-weight: 600;
-}
-
-.budget-months {
-  margin-top: 1rem;
-}
-
-.budget-bar {
-  position: relative;
-  display: block;
-  height: 0.5rem;
-  margin-top: 0.35rem;
-  background: var(--muted);
-  border-radius: 999px;
-}
-
-.budget-bar-fill {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-}
-
-.budget-bar-needs {
-  background: var(--chart-5);
-}
-
-.budget-bar-wants {
-  background: var(--chart-3);
-}
-
-.budget-bar-savings {
-  background: var(--chart-1);
-}
-
-/* Zielmarke (50 / 30 / 20 %). */
-.budget-bar-target {
-  position: absolute;
-  top: -0.2rem;
-  bottom: -0.2rem;
-  width: 2px;
-  background: var(--foreground);
-}
-
-.budget-rules {
-  margin-top: 1.5rem;
-}
-
-.budget-group-form .link-item {
-  align-items: center;
-}
-
-.budget-group-form .link-item label {
-  margin: 0;
-  font-weight: 400;
-}
-
-.budget-group-form .link-item select {
-  flex: 0 1 14rem;
-}
-
-.link-item-child label {
-  padding-left: 1.25rem;
-}
-
 .read-only-note {
   padding: 0.75rem 1rem;
   color: var(--muted-foreground);
@@ -1715,3 +1582,287 @@
   }
 }
 /* contracts:end */
+
+/* budgets:start --------------------------------------------------------
+   Budget (50/30/20). Nur Design-Tokens: Farben aus der Palette, Abstände
+   --space-N, Schrift --type-N, --weight-N, --line-N, Maße --size-N.
+   Balkenbreiten kommen als CSS-Variablen (--budget-share, --budget-target).
+   --------------------------------------------------------------------- */
+.budgets-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.budgets-page > * {
+  margin: 0;
+}
+
+.budgets-intro {
+  color: var(--muted-foreground);
+}
+
+.budget-period {
+  grid-template-columns: repeat(auto-fill, minmax(var(--size-field), 1fr));
+}
+
+.budget-presets {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--type-sm);
+}
+
+.budget-presets a[aria-current] {
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+.budget-basis-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--type-sm);
+  background: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.budget-currency {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.budget-currency > * {
+  margin: 0;
+}
+
+.budget-currency h2 {
+  font-size: var(--type-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--line-tight);
+}
+
+.budget-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--size-fact), 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+}
+
+.budget-summary dt {
+  font-size: var(--type-xs);
+  color: var(--muted-foreground);
+}
+
+.budget-summary dd {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-sm);
+}
+
+.budget-table caption {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  font-size: var(--type-xs);
+  color: var(--muted-foreground);
+}
+
+.budget-table th,
+.budget-table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  border-top: var(--border-hairline) solid var(--border);
+}
+
+.budget-table .amount {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.budget-table tbody th,
+.budget-table tfoot th {
+  min-width: var(--size-field);
+  font-weight: var(--weight-medium);
+}
+
+.budget-table tfoot th,
+.budget-table tfoot td {
+  font-weight: var(--weight-semibold);
+}
+
+.budget-table .budget-subrow th,
+.budget-table .budget-subrow td {
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+  font-size: var(--type-xs);
+  font-weight: var(--weight-normal);
+  color: var(--muted-foreground);
+  border-top: none;
+}
+
+.budget-table .budget-subrow th {
+  padding-left: var(--space-6);
+}
+
+.budget-over {
+  color: var(--destructive);
+}
+
+.budget-bar {
+  position: relative;
+  display: block;
+  height: var(--space-2);
+  margin-top: var(--space-1);
+  background: var(--muted);
+  border-radius: var(--radius-4xl);
+}
+
+.budget-bar-fill {
+  display: block;
+  width: var(--budget-share);
+  height: 100%;
+  border-radius: var(--radius-4xl);
+}
+
+.budget-bar-needs {
+  background: var(--chart-5);
+}
+
+.budget-bar-wants {
+  background: var(--chart-3);
+}
+
+.budget-bar-savings {
+  background: var(--chart-1);
+}
+
+/* Zielmarke (Prozentziel der Gruppe). */
+.budget-bar-target {
+  position: absolute;
+  top: calc(var(--space-1) * -1);
+  bottom: calc(var(--space-1) * -1);
+  left: var(--budget-target);
+  width: var(--border-hairline);
+  background: var(--foreground);
+}
+
+.budget-footnote,
+.budget-fallback {
+  font-size: var(--type-xs);
+}
+
+.budget-months {
+  margin-top: var(--space-2);
+}
+
+.budget-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  color: var(--muted-foreground);
+  border: var(--border-hairline) dashed var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.budget-empty > * {
+  margin: 0;
+}
+
+.budget-empty strong {
+  font-size: var(--type-base);
+  color: var(--foreground);
+}
+
+.budget-empty .button {
+  margin-top: 0;
+}
+
+.budget-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.budget-section > * {
+  margin: 0;
+}
+
+.budget-section > h2 {
+  font-size: var(--type-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--line-tight);
+}
+
+.budget-settings-form {
+  max-width: var(--size-form);
+}
+
+.budget-targets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.budget-target-fields,
+.budget-fixed-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--size-fact), 1fr));
+  gap: var(--space-2) var(--space-3);
+}
+
+.budget-target-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.budget-target-field label {
+  margin-top: 0;
+  font-size: var(--type-sm);
+}
+
+.budget-sum {
+  margin: 0;
+  font-size: var(--type-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+.budget-sum-invalid {
+  color: var(--destructive);
+}
+
+.budget-group-form .link-item {
+  align-items: center;
+}
+
+.budget-group-form .link-item label {
+  margin: 0;
+  font-weight: var(--weight-normal);
+}
+
+.budget-group-form .link-item select {
+  flex: 0 1 var(--size-field);
+}
+
+.link-item-child label {
+  padding-left: var(--space-5);
+}
+/* budgets:end */

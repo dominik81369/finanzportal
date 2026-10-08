@@ -3,7 +3,8 @@
  *
  * Leseansicht des Beraters auf die Finanzdaten eines verbundenen Mandanten:
  * Konten mit Saldo (Fremdwährungsbuchungen getrennt, siehe Migration
- * 20261002160000), Verträge (contracts-section.tsx) und Buchungen (mit denselben Filtern und Seiten wie die eigene
+ * 20261002160000), Budget (budget-section.tsx), Verträge (contracts-section.tsx)
+ * und Buchungen (mit denselben Filtern und Seiten wie die eigene
  * Liste des Mandanten). Keine Schreibaktionen – RLS erlaubt Beratern auf
  * Mandantendaten ohnehin nur SELECT.
  *
@@ -29,6 +30,7 @@ import { Pagination } from '../../../dashboard/transactions/pagination';
 import { TransactionFiltersForm } from '../../../dashboard/transactions/transaction-filters-form';
 import { loadTransactionList } from '../../../dashboard/transactions/transaction-list';
 import { TransactionTable } from '../../../dashboard/transactions/transaction-table';
+import { AdvisorBudgetSection } from './budget-section';
 import { AdvisorContractsSection } from './contracts-section';
 
 type ClientPageProps = {
@@ -165,6 +167,8 @@ export default async function AdvisorClientPage({ params, searchParams }: Client
           </ul>
         )}
       </section>
+
+      <AdvisorBudgetSection clientId={clientId} />
 
       <AdvisorContractsSection clientId={clientId} name={name} />
 

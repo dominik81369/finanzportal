@@ -1,11 +1,12 @@
 'use client';
 
 /**
- * Formular für Vertragsaktionen (Bestätigen, Verwerfen, Lösen …): ruft die
- * Server Action auf und zeigt danach den neuen Stand mit Meldung.
+ * Formular für Aktionen auf gestreamten Seiten (Verträge: Bestätigen,
+ * Verwerfen, Lösen …): ruft die Server Action auf und zeigt danach den
+ * neuen Stand mit Meldung.
  *
  * Die Actions leiten nicht per redirect() weiter, sondern liefern das Ziel
- * (lib/actions/contracts.ts); der Client navigiert selbst – auf derselben
+ * (z. B. lib/actions/contracts.ts); der Client navigiert selbst – auf derselben
  * Seite mit router.replace (Meldungen erzeugen keinen Verlaufseintrag),
  * sonst mit router.push. Die Suspense-Grenzen der Seiten tragen je Render
  * einen neuen Schlüssel; sonst wurde der gestreamte Inhalt nach einer
