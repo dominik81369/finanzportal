@@ -37,6 +37,8 @@ export type ImportSummary = {
   learned: number;
   /** Vorschläge in der Prüfliste (nur nach dem Import). */
   suggested: number;
+  /** Neu erkannte Vertragsvorschläge (nur nach dem Import). */
+  contracts: number;
   balance: number | null;
 };
 
@@ -124,8 +126,18 @@ async function callImport(request: ImportRequest, dryRun: boolean): Promise<Impo
   }
 
   const result = data as Record<string, unknown>;
+  let contracts = 0;
   if (!dryRun) {
+    // Verträge erkennen; ein Fehler hier macht den Import nicht ungültig
+    // (die Verträge-Seite erkennt beim Öffnen erneut).
+    const detected = await supabase.rpc('refresh_contracts');
+    if (detected.error) {
+      console.error('[import] Vertragserkennung fehlgeschlagen', { code: detected.error.code });
+    } else {
+      contracts = Number((detected.data as { created?: number } | null)?.created ?? 0);
+    }
     revalidatePath('/[locale]/dashboard/transactions', 'page');
+    revalidatePath('/[locale]/dashboard/contracts', 'layout');
   }
   return {
     status: 'ok',
@@ -139,6 +151,7 @@ async function callImport(request: ImportRequest, dryRun: boolean): Promise<Impo
       enriched: Number(result.enriched ?? 0),
       learned: Number(result.learned ?? 0),
       suggested: Number(result.suggested ?? 0),
+      contracts,
       balance: result.balance === null || result.balance === undefined ? null : Number(result.balance),
     },
   };

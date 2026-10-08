@@ -264,7 +264,7 @@ export type Database = {
           categorization_source: Database['public']['Enums']['categorization_source'] | null;
           categorization_rule_id: string | null;
           counterparty_key: string | null;
-          recurrence: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly' | null;
+          recurrence: 'weekly' | 'biweekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'semiannual' | 'yearly' | null;
           auto_category_id: string | null;
           auto_source: Database['public']['Enums']['categorization_source'] | null;
           auto_rule_id: string | null;
@@ -279,6 +279,7 @@ export type Database = {
           exclude_from_budget: boolean;
           source: Database['public']['Enums']['transaction_source'];
           recurring_contract_id: string | null;
+          contract_link_manual: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -299,7 +300,7 @@ export type Database = {
           categorization_source?: Database['public']['Enums']['categorization_source'] | null;
           categorization_rule_id?: string | null;
           counterparty_key?: string | null;
-          recurrence?: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly' | null;
+          recurrence?: 'weekly' | 'biweekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'semiannual' | 'yearly' | null;
           auto_category_id?: string | null;
           auto_source?: Database['public']['Enums']['categorization_source'] | null;
           auto_rule_id?: string | null;
@@ -314,6 +315,7 @@ export type Database = {
           exclude_from_budget?: boolean;
           source?: Database['public']['Enums']['transaction_source'];
           recurring_contract_id?: string | null;
+          contract_link_manual?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -334,7 +336,7 @@ export type Database = {
           categorization_source?: Database['public']['Enums']['categorization_source'] | null;
           categorization_rule_id?: string | null;
           counterparty_key?: string | null;
-          recurrence?: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly' | null;
+          recurrence?: 'weekly' | 'biweekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'semiannual' | 'yearly' | null;
           auto_category_id?: string | null;
           auto_source?: Database['public']['Enums']['categorization_source'] | null;
           auto_rule_id?: string | null;
@@ -349,6 +351,7 @@ export type Database = {
           exclude_from_budget?: boolean;
           source?: Database['public']['Enums']['transaction_source'];
           recurring_contract_id?: string | null;
+          contract_link_manual?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -774,6 +777,8 @@ export type Database = {
           detection_confidence: number | null;
           cancelled_on: string | null;
           notes: string | null;
+          contract_type: Database['public']['Enums']['contract_type'];
+          counterparty_key: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -802,6 +807,8 @@ export type Database = {
           detection_confidence?: number | null;
           cancelled_on?: string | null;
           notes?: string | null;
+          contract_type?: Database['public']['Enums']['contract_type'];
+          counterparty_key?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -830,6 +837,8 @@ export type Database = {
           detection_confidence?: number | null;
           cancelled_on?: string | null;
           notes?: string | null;
+          contract_type?: Database['public']['Enums']['contract_type'];
+          counterparty_key?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -1080,6 +1089,54 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: number;
       };
+      refresh_contracts: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      contract_counterparties: {
+        Args: { p_limit?: number };
+        Returns: {
+          counterparty_key: string;
+          label: string | null;
+          tx_count: number;
+          last_amount: number;
+          last_date: string;
+        }[];
+      };
+      save_contract: {
+        Args: {
+          p_id: string | null;
+          p_name: string;
+          p_counterparty_key: string | null;
+          p_counterparty_name: string | null;
+          p_rhythm: Database['public']['Enums']['contract_rhythm'];
+          p_interval_count: number;
+          p_amount: number;
+          p_next_expected_date: string | null;
+          p_contract_type: Database['public']['Enums']['contract_type'];
+          p_account_id: string | null;
+          p_category_id: string | null;
+          p_notes: string | null;
+          p_tolerance_pct?: number;
+        };
+        Returns: string;
+      };
+      set_contract_status: {
+        Args: {
+          p_id: string;
+          p_status: Database['public']['Enums']['contract_status'];
+          p_contract_type?: Database['public']['Enums']['contract_type'] | null;
+        };
+        Returns: undefined;
+      };
+      delete_contract: {
+        Args: { p_id: string };
+        Returns: undefined;
+      };
+      set_contract_link: {
+        Args: { p_transaction_id: string; p_contract_id: string | null };
+        Returns: undefined;
+      };
       confirm_suggestions: {
         Args: { p_ids: string[] };
         Returns: number;
@@ -1144,6 +1201,17 @@ export type Database = {
       contract_rhythm: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly';
       contract_status: 'suggested' | 'active' | 'cancellation_pending' | 'cancelled' | 'dismissed';
       contract_detection: 'manual' | 'auto';
+      contract_type:
+        | 'subscription'
+        | 'telecom'
+        | 'energy'
+        | 'insurance'
+        | 'housing'
+        | 'loan'
+        | 'membership'
+        | 'public_fee'
+        | 'savings'
+        | 'other';
       rule_match_field:
         | 'counterparty'
         | 'purpose'
@@ -1206,6 +1274,18 @@ export const Constants = {
       contract_rhythm: ['weekly', 'monthly', 'quarterly', 'semiannual', 'yearly'],
       contract_status: ['suggested', 'active', 'cancellation_pending', 'cancelled', 'dismissed'],
       contract_detection: ['manual', 'auto'],
+      contract_type: [
+        'subscription',
+        'telecom',
+        'energy',
+        'insurance',
+        'housing',
+        'loan',
+        'membership',
+        'public_fee',
+        'savings',
+        'other',
+      ],
       rule_match_field: [
         'counterparty',
         'purpose',

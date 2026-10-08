@@ -14,6 +14,7 @@ import { getFormatter, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { toAppLocale } from '@/i18n/routing';
 import { categorizeGroup } from '@/lib/actions/categorization-rules';
+import { isRhythmKey, type RhythmKey } from '@/lib/contracts';
 import { createClient, requireOnboardedUser } from '@/lib/supabase/server';
 
 import { CategorySelect } from '../category-select';
@@ -25,10 +26,7 @@ type GroupsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const RECURRENCES = ['weekly', 'monthly', 'quarterly', 'semiannual', 'yearly'] as const;
-type Recurrence = (typeof RECURRENCES)[number];
-const isRecurrence = (value: string | null): value is Recurrence =>
-  value !== null && (RECURRENCES as readonly string[]).includes(value);
+const isRecurrence = (value: string | null): value is RhythmKey => value !== null && isRhythmKey(value);
 
 export async function generateMetadata({ params }: Pick<GroupsPageProps, 'params'>): Promise<Metadata> {
   const locale = toAppLocale((await params).locale);
