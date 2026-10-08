@@ -243,7 +243,7 @@ select is(
 
 select is(
   public.categorization_stats(),
-  '{"total": 8, "manual": 3, "rule": 1, "standard": 3, "learned": 0, "uncategorized": 1}'::jsonb,
+  '{"total": 8, "manual": 3, "rule": 1, "standard": 3, "learned": 0, "bayes": 0, "suggested": 0, "uncategorized": 1}'::jsonb,
   'Kennzahlen: manuell / eigene Regel / Standard / offen'
 );
 
@@ -296,7 +296,7 @@ select public.set_transaction_category(
 
 select is(
   public.import_transactions('2c000000-0000-4000-8000-000000000001', (select rows from c24), true)
-    - 'account_id' - 'balance' - 'currency' - 'dry_run',
+    - 'account_id' - 'balance' - 'currency' - 'dry_run' - 'learned' - 'suggested',
   '{"total": 3, "new": 0, "duplicates": 3, "enriched": 2, "categorized": 1}'::jsonb,
   'Vorschau erneuter Import: 3 Duplikate, 2 werden ergänzt, 1 danach per Regel kategorisiert'
 );

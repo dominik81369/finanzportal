@@ -47,7 +47,7 @@ export async function loadTransactionList({ userId, filters, page, listPath }: L
       // tag_filter: eigener Alias nur für den Tag-Filter, damit transaction_tags
       // weiterhin ALLE Tags der Buchung liefert.
       .select(
-        `id, source, booking_date, amount, currency, counterparty_name, purpose, categorization_source, recurrence,
+        `id, source, booking_date, amount, currency, counterparty_name, purpose, categorization_source, categorization_confidence, recurrence,
          account:accounts!transactions_account_fkey ( name ),
          rule:categorization_rules!transactions_categorization_rule_fkey ( pattern, origin ),
          category:categories!transactions_category_fkey ( name, default_key, color ),

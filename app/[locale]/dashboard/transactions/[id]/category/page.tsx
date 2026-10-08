@@ -56,6 +56,7 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
       .select(
         `id, source, booking_date, amount, currency, counterparty_name, purpose, category_id,
          transaction_type, counterparty_iban, description, categorization_source, counterparty_key, recurrence,
+         categorization_confidence,
          rule:categorization_rules!transactions_categorization_rule_fkey ( pattern, origin, match_field )`,
       )
       .eq('id', id)
@@ -73,7 +74,7 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
   // Gegenpartei-Gedächtnis: wie oft wurde diese Gegenpartei manuell so
   // zugeordnet (Grundlage der gelernten Zuordnung)?
   let memoryCount = 0;
-  if (tx?.categorization_source === 'learned' && tx.counterparty_key && tx.category_id) {
+  if (tx?.categorization_source === 'learned' && tx.categorization_confidence === null && tx.counterparty_key && tx.category_id) {
     const { count } = await supabase
       .from('transactions')
       .select('id', { count: 'exact', head: true })
@@ -147,7 +148,11 @@ export default async function TransactionCategoryPage({ params }: CategoryPagePr
             <p>
               {tx.category_id === null
                 ? t('why.none')
-                : tx.categorization_source === 'learned'
+                : tx.categorization_source === 'learned' && tx.categorization_confidence !== null
+                  ? t('why.bayes', {
+                      confidence: format.number(tx.categorization_confidence, { style: 'percent' }),
+                    })
+                  : tx.categorization_source === 'learned'
                   ? t('why.memory', { count: memoryCount })
                   : tx.categorization_source !== 'rule'
                     ? t('why.manual')

@@ -226,7 +226,9 @@
       "similarApplyAll": "{count, plural, one {Also overwrite automatic ones (#)} other {Also overwrite automatic ones (#)}}",
       "autoOwnAccount": "Recognised automatically as your own account (“{pattern}”)",
       "groups": "By counterparty",
-      "autoMemory": "Assigned automatically: counterparty memory (always assigned like this so far)"
+      "autoMemory": "Assigned automatically: counterparty memory (always assigned like this so far)",
+      "review": "{count, plural, =0 {Review list} other {Review list (#)}}",
+      "autoBayes": "Assigned automatically: learning method (confidence {confidence})"
     },
     "filters": {
       "heading": "Search and filter transactions",
@@ -538,7 +540,10 @@
       "closingMismatch": "Warning: according to the file the closing balance is {closing}, the portal shows {balance}. Check the account's opening balance or whether transactions are missing.",
       "toList": "Go to transactions",
       "again": "Import another file",
-      "enriched": "{count, plural, one {# existing transaction was completed.} other {# existing transactions were completed.}}"
+      "enriched": "{count, plural, one {# existing transaction was completed.} other {# existing transactions were completed.}}",
+      "learned": "{count, plural, one {# transaction assigned by the learning method.} other {# transactions assigned by the learning method.}}",
+      "suggested": "{count, plural, one {# suggestion in the review list.} other {# suggestions in the review list.}}",
+      "toReview": "Go to review list"
     },
     "balance": {
       "ok": "Balance check: opening balance {opening} + transactions = closing balance {closing} ✓",
@@ -572,7 +577,8 @@
       "manual": "Manual",
       "uncategorized": "Uncategorised",
       "value": "{count} ({percent}%)",
-      "autoDetail": "own rules: {rule}, memory: {learned}, standard rules: {standard}"
+      "autoDetail": "own rules: {rule}, memory: {learned}, learning: {bayes}, standard rules: {standard}",
+      "suggestedDetail": "{count} of them with a suggestion in the review list"
     },
     "loadStandard": "Load standard rules",
     "applyAll": "Apply to all uncategorised transactions",
@@ -677,6 +683,20 @@
       "rate": "{corrected} of {hits} assignments corrected ({percent}%)",
       "deactivate": "Deactivate",
       "activate": "Activate again"
+    },
+    "learning": {
+      "heading": "Learning method",
+      "intro": "For transactions that no rule and no memory matches, the portal learns from your previous assignments (words from payee and reference, transaction type, direction, rhythm). Above the threshold it assigns automatically; below, the transaction lands in the review list as a suggestion. Learned assignments never flow back into training.",
+      "evaluation": "Test on held-out data: {accuracy}% correct ({correct} of {tested}; trained on {trained} assignments). Above the threshold: {confidentAccuracy}% correct ({confident} transactions).",
+      "evaluationTooFew": "Not enough assignments yet for a meaningful test ({trained} in training so far).",
+      "threshold": "Threshold for automatic assignment (%)",
+      "limit": "Review limit (amount in €)",
+      "hint": "Matches of the learning method from this amount always go to the review list. The limit does not apply to rules and the counterparty memory.",
+      "save": "Save settings",
+      "saving": "Saving …",
+      "saved": "Saved. Applies from the next import or “Apply to all”.",
+      "invalid": "Please enter a threshold between 50 and 99.9% and a review limit above 0.",
+      "error": "Something went wrong. Please try again."
     }
   },
   "TransactionCategory": {
@@ -701,7 +721,8 @@
       "toRules": "View rules",
       "confirmHint": "Saving confirms the category; it then counts as manual and rules will no longer change it.",
       "ownAccount": "Recognised automatically as a transfer: own account “{pattern}” ({field}).",
-      "memory": "Assigned automatically by the counterparty memory: you have assigned this counterparty like this {count, plural, one {# time} other {# times}} so far."
+      "memory": "Assigned automatically by the counterparty memory: you have assigned this counterparty like this {count, plural, one {# time} other {# times}} so far.",
+      "bayes": "Assigned automatically by the learning method (word features from your previous assignments), confidence {confidence}."
     },
     "learnHint": "A rule for this merchant is learned from your choice; future transactions will then be assigned automatically.",
     "category": "Category",
@@ -753,5 +774,29 @@
     "accuracy": "Accuracy",
     "accuracyDetail": "{accurate} of {automated} automatic assignments not corrected",
     "accuracyNone": "no automatic assignments yet"
+  },
+  "Review": {
+    "metaTitle": "Review list",
+    "back": "Back to transactions",
+    "heading": "Review list",
+    "intro": "Suggestions of the learning method for uncategorised transactions, least certain first. Amounts from {limit} always end up here, even with a confident match. Accepting or changing counts as your assignment – the method keeps learning from it.",
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "category": "Please choose a category."
+    },
+    "confirmed": "{count, plural, =0 {No suggestions accepted.} one {# suggestion accepted.} other {# suggestions accepted.}}",
+    "done": "The category has been saved.",
+    "loadError": "The review list could not be loaded right now. Please reload the page.",
+    "empty": "No open suggestions.",
+    "count": "{count, plural, one {# suggestion} other {# suggestions}}, least certain first",
+    "confirmAll": "{count, plural, one {Accept suggestion} other {Accept all # suggestions}}",
+    "unknown": "Unknown counterparty",
+    "highAmount": "high amount",
+    "suggestion": "Suggestion: {category} (confidence {confidence})",
+    "categoryFor": "Category for “{label}”",
+    "choose": "Choose category",
+    "assign": "Accept",
+    "withoutSuggestion": "{count, plural, one {# uncategorised transaction has no suggestion yet.} other {# uncategorised transactions have no suggestion yet.}}",
+    "toGroups": "Assign by counterparty"
   }
 }

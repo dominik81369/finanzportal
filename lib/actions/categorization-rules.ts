@@ -374,3 +374,74 @@ export async function categorizeGroup(groupKey: string, formData: FormData): Pro
   revalidateCategorization();
   await redirectWith(GROUPS_PATH, { assigned: String(data ?? 0) });
 }
+
+const REVIEW_PATH = '/dashboard/transactions/review';
+
+/** Prüfliste: Kategorie einer Buchung setzen (Vorschlag übernehmen oder ändern). */
+export async function reviewAssign(transactionId: string, formData: FormData): Promise<void> {
+  await requireOnboardedUser(REVIEW_PATH);
+  const categoryId = String(formData.get('category') ?? '');
+  if (!isUuid(transactionId) || !isUuid(categoryId)) {
+    await redirectWith(REVIEW_PATH, { error: 'category' });
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('set_transaction_category', {
+    p_id: transactionId,
+    p_category_id: categoryId,
+  });
+  if (error) {
+    console.error('[review] Zuordnen fehlgeschlagen', { code: error.code });
+    await redirectWith(REVIEW_PATH, { error: '1' });
+  }
+  revalidateCategorization();
+  await redirectWith(REVIEW_PATH, { done: '1' });
+}
+
+/** Prüfliste: alle angezeigten Vorschläge übernehmen (gelten dann als manuell). */
+export async function confirmAllSuggestions(formData: FormData): Promise<void> {
+  await requireOnboardedUser(REVIEW_PATH);
+  const ids = formData
+    .getAll('id')
+    .map(String)
+    .filter((id) => isUuid(id))
+    .slice(0, 1000);
+  if (ids.length === 0) {
+    await redirectWith(REVIEW_PATH, {});
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('confirm_suggestions', { p_ids: ids });
+  if (error) {
+    console.error('[review] Übernehmen fehlgeschlagen', { code: error.code });
+    await redirectWith(REVIEW_PATH, { error: '1' });
+  }
+  revalidateCategorization();
+  await redirectWith(REVIEW_PATH, { confirmed: String(data ?? 0) });
+}
+
+export type SettingsFormState = { status: 'idle' | 'success' | 'error'; message?: string };
+
+/** Schwelle (in %) und Prüfgrenze (Betrag) des Lernverfahrens speichern. */
+export async function saveCategorizationSettings(
+  _prevState: SettingsFormState,
+  formData: FormData,
+): Promise<SettingsFormState> {
+  await requireOnboardedUser(RULES_PATH);
+  const t = await getTranslations('Rules.learning');
+  const threshold = Number(String(formData.get('threshold') ?? '').replace(',', '.'));
+  const limit = Number(String(formData.get('limit') ?? '').replace(/\./g, '').replace(',', '.'));
+  if (!Number.isFinite(threshold) || threshold < 50 || threshold > 99.9 || !Number.isFinite(limit) || limit <= 0) {
+    return { status: 'error', message: t('invalid') };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('save_categorization_settings', {
+    p_threshold: threshold / 100,
+    p_review_amount_limit: limit,
+  });
+  if (error) {
+    console.error('[rules] Einstellungen speichern fehlgeschlagen', { code: error.code });
+    return { status: 'error', message: error.code === '22023' ? t('invalid') : t('error') };
+  }
+  revalidateCategorization();
+  revalidatePath(`/[locale]${REVIEW_PATH}`, 'page');
+  return { status: 'success', message: t('saved') };
+}

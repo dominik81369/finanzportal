@@ -33,6 +33,10 @@ export type ImportSummary = {
   categorized: number;
   /** Vorhandene Buchungen, denen Typ/IBAN/Beschreibung ergänzt wird bzw. wurde. */
   enriched: number;
+  /** Vom Lernverfahren automatisch zugeordnet (nur nach dem Import). */
+  learned: number;
+  /** Vorschläge in der Prüfliste (nur nach dem Import). */
+  suggested: number;
   balance: number | null;
 };
 
@@ -133,6 +137,8 @@ async function callImport(request: ImportRequest, dryRun: boolean): Promise<Impo
       duplicates: Number(result.duplicates),
       categorized: Number(result.categorized),
       enriched: Number(result.enriched ?? 0),
+      learned: Number(result.learned ?? 0),
+      suggested: Number(result.suggested ?? 0),
       balance: result.balance === null || result.balance === undefined ? null : Number(result.balance),
     },
   };

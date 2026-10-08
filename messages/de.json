@@ -226,7 +226,9 @@
       "similarApplyAll": "{count, plural, one {Auch automatische überschreiben (#)} other {Auch automatische überschreiben (#)}}",
       "autoOwnAccount": "Automatisch als eigenes Konto erkannt („{pattern}“)",
       "groups": "Nach Gegenpartei",
-      "autoMemory": "Automatisch zugeordnet: Gegenpartei-Gedächtnis (bisher immer so zugeordnet)"
+      "autoMemory": "Automatisch zugeordnet: Gegenpartei-Gedächtnis (bisher immer so zugeordnet)",
+      "review": "{count, plural, =0 {Prüfliste} other {Prüfliste (#)}}",
+      "autoBayes": "Automatisch zugeordnet: Lernverfahren (Sicherheit {confidence})"
     },
     "filters": {
       "heading": "Transaktionen durchsuchen und filtern",
@@ -538,7 +540,10 @@
       "closingMismatch": "Achtung: Laut Datei beträgt der Endsaldo {closing}, im Portal ergibt sich {balance}. Prüfen Sie den Anfangsbestand des Kontos oder ob Buchungen fehlen.",
       "toList": "Zu den Transaktionen",
       "again": "Weitere Datei importieren",
-      "enriched": "{count, plural, one {# vorhandene Buchung wurde ergänzt.} other {# vorhandene Buchungen wurden ergänzt.}}"
+      "enriched": "{count, plural, one {# vorhandene Buchung wurde ergänzt.} other {# vorhandene Buchungen wurden ergänzt.}}",
+      "learned": "{count, plural, one {# Buchung vom Lernverfahren zugeordnet.} other {# Buchungen vom Lernverfahren zugeordnet.}}",
+      "suggested": "{count, plural, one {# Vorschlag in der Prüfliste.} other {# Vorschläge in der Prüfliste.}}",
+      "toReview": "Zur Prüfliste"
     },
     "balance": {
       "ok": "Saldenabgleich: Anfangssaldo {opening} + Buchungen = Endsaldo {closing} ✓",
@@ -572,7 +577,8 @@
       "manual": "Manuell",
       "uncategorized": "Ohne Kategorie",
       "value": "{count} ({percent} %)",
-      "autoDetail": "eigene Regeln: {rule}, Gedächtnis: {learned}, Standardregeln: {standard}"
+      "autoDetail": "eigene Regeln: {rule}, Gedächtnis: {learned}, Lernverfahren: {bayes}, Standardregeln: {standard}",
+      "suggestedDetail": "davon {count} mit Vorschlag in der Prüfliste"
     },
     "loadStandard": "Standardregeln laden",
     "applyAll": "Auf alle unkategorisierten Buchungen anwenden",
@@ -677,6 +683,20 @@
       "rate": "{corrected} von {hits} Zuordnungen korrigiert ({percent} %)",
       "deactivate": "Deaktivieren",
       "activate": "Wieder aktivieren"
+    },
+    "learning": {
+      "heading": "Lernverfahren",
+      "intro": "Für Buchungen, auf die keine Regel und kein Gedächtnis passt, lernt das Portal aus Ihren bisherigen Zuordnungen (Wörter aus Empfänger und Verwendungszweck, Buchungsart, Richtung, Rhythmus). Ab der Schwelle wird automatisch zugeordnet, darunter landet die Buchung als Vorschlag in der Prüfliste. Gelernte Zuordnungen fließen nie ins Training zurück.",
+      "evaluation": "Test an zurückgehaltenen Daten: {accuracy} % richtig ({correct} von {tested}; trainiert mit {trained} Zuordnungen). Über der Schwelle: {confidentAccuracy} % richtig ({confident} Buchungen).",
+      "evaluationTooFew": "Für einen aussagekräftigen Test fehlen noch Zuordnungen (bisher {trained} im Training).",
+      "threshold": "Schwelle für automatische Zuordnung (%)",
+      "limit": "Prüfgrenze (Betrag in €)",
+      "hint": "Treffer des Lernverfahrens ab dieser Betragshöhe kommen immer in die Prüfliste. Für Regeln und das Gegenpartei-Gedächtnis gilt die Grenze nicht.",
+      "save": "Einstellungen speichern",
+      "saving": "Wird gespeichert …",
+      "saved": "Gespeichert. Gilt ab dem nächsten Import bzw. „Auf alle anwenden“.",
+      "invalid": "Bitte eine Schwelle zwischen 50 und 99,9 % und eine Prüfgrenze über 0 angeben.",
+      "error": "Das hat leider nicht geklappt. Bitte versuchen Sie es erneut."
     }
   },
   "TransactionCategory": {
@@ -701,7 +721,8 @@
       "toRules": "Regeln ansehen",
       "confirmHint": "Mit „Speichern“ bestätigen Sie die Kategorie; sie gilt dann als manuell und wird von Regeln nicht mehr geändert.",
       "ownAccount": "Automatisch als Umbuchung erkannt: eigenes Konto „{pattern}“ ({field}).",
-      "memory": "Automatisch zugeordnet durch das Gegenpartei-Gedächtnis: Sie haben diese Gegenpartei bisher {count, plural, one {#-mal} other {#-mal}} so zugeordnet."
+      "memory": "Automatisch zugeordnet durch das Gegenpartei-Gedächtnis: Sie haben diese Gegenpartei bisher {count, plural, one {#-mal} other {#-mal}} so zugeordnet.",
+      "bayes": "Automatisch zugeordnet durch das Lernverfahren (Wortmerkmale aus Ihren bisherigen Zuordnungen), Sicherheit {confidence}."
     },
     "learnHint": "Aus Ihrer Auswahl wird eine Regel für diesen Händler gelernt; künftige Buchungen werden dann automatisch so zugeordnet.",
     "category": "Kategorie",
@@ -753,5 +774,29 @@
     "accuracy": "Treffsicherheit",
     "accuracyDetail": "{accurate} von {automated} automatischen Zuordnungen ohne Korrektur",
     "accuracyNone": "noch keine automatischen Zuordnungen"
+  },
+  "Review": {
+    "metaTitle": "Prüfliste",
+    "back": "Zurück zu den Transaktionen",
+    "heading": "Prüfliste",
+    "intro": "Vorschläge des Lernverfahrens für Buchungen ohne Kategorie, die unsichersten zuerst. Beträge ab {limit} landen immer hier, auch bei sicherem Treffer. Übernehmen oder Ändern zählt als Ihre Zuordnung – daraus lernt das Verfahren weiter.",
+    "errors": {
+      "generic": "Das hat leider nicht geklappt. Bitte versuchen Sie es erneut.",
+      "category": "Bitte wählen Sie eine Kategorie."
+    },
+    "confirmed": "{count, plural, =0 {Keine Vorschläge übernommen.} one {# Vorschlag übernommen.} other {# Vorschläge übernommen.}}",
+    "done": "Die Kategorie wurde gespeichert.",
+    "loadError": "Die Prüfliste konnte gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+    "empty": "Keine offenen Vorschläge.",
+    "count": "{count, plural, one {# Vorschlag} other {# Vorschläge}}, die unsichersten zuerst",
+    "confirmAll": "{count, plural, one {Vorschlag übernehmen} other {Alle # Vorschläge übernehmen}}",
+    "unknown": "Unbekannte Gegenpartei",
+    "highAmount": "hoher Betrag",
+    "suggestion": "Vorschlag: {category} (Sicherheit {confidence})",
+    "categoryFor": "Kategorie für „{label}“",
+    "choose": "Kategorie wählen",
+    "assign": "Übernehmen",
+    "withoutSuggestion": "{count, plural, one {# Buchung ohne Kategorie hat noch keinen Vorschlag.} other {# Buchungen ohne Kategorie haben noch keinen Vorschlag.}}",
+    "toGroups": "Nach Gegenpartei zuordnen"
   }
 }
