@@ -36,3 +36,6 @@ jobs:
         run: npx next typegen
       - name: Typecheck
         run: npm run typecheck
+      # Neue Oberflächen nur mit zentralen Design-Tokens (Farben, Abstände, Schrift).
+      - name: Design tokens
+        run: npm run check:tokens
