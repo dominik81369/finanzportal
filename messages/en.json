@@ -136,7 +136,19 @@
       "planned": {
         "balances": "Account balances and assets at a glance",
         "cashflow": "Income and expenses for the current month",
-        "alerts": "Notes on budgets and upcoming cancellation deadlines"
+        "alerts": "Notes on upcoming cancellation deadlines"
+      },
+      "alerts": {
+        "heading": "Alerts",
+        "loading": "Loading alerts …",
+        "loadError": "The alerts could not be loaded right now. Please reload the page.",
+        "atThreshold": "{count, plural, one {# budget above its threshold} other {# budgets above their threshold}}",
+        "over": "({count} of them exceeded)",
+        "allOk": "{count, plural, one {Your budget is below its threshold.} other {All # budgets are below their threshold.}}",
+        "toBudgets": "Go to budgets",
+        "noBudgets": "No category budgets yet.",
+        "create": "Create a category budget",
+        "scope": "Monthly budgets for {month}, yearly budgets for {year} to date."
       }
     },
     "transactions": {
@@ -145,11 +157,7 @@
     },
     "budgets": {
       "title": "Budgets",
-      "description": "Your spending according to the 50/30/20 rule: needs, wants, and savings & debt – with target amounts as a share of your total spending.",
-      "planned": {
-        "periods": "Budgets per week, month, quarter or year",
-        "progress": "Progress and alert from a freely selectable threshold"
-      }
+      "description": "Your spending according to the 50/30/20 rule: needs, wants, and savings & debt – with target amounts as a share of your total spending. Plus category budgets with a warning threshold."
     },
     "contracts": {
       "title": "Contracts",
@@ -450,7 +458,8 @@
       "targetAmount": "Target amount",
       "month": "Month",
       "share": "Share",
-      "deviation": "Difference"
+      "deviation": "Difference",
+      "budgetSum": "Budget (total)"
     },
     "groups": {
       "needs": "Needs",
@@ -458,6 +467,7 @@
       "savings": "Savings & debt"
     },
     "unassigned": "Uncategorised",
+    "budgetCount": "{count, plural, one {# budget} other {# budgets}}",
     "assignment": {
       "heading": "Category assignment",
       "intro": "Choose the group each spending and transfer category belongs to. “Not counted” suits transfers between your own accounts. Income categories have no group; they determine “Not accounted for” and the reference “Income”.",
@@ -545,6 +555,106 @@
       "heading": "Budget",
       "intro": "{month}, with the client's reference and target percentages.",
       "noTransactions": "The client has not recorded any transactions yet."
+    }
+  },
+  "CategoryBudgets": {
+    "heading": "Category budgets",
+    "intro": "A spending limit per category including its subcategories, only in the budget’s currency, net of refunds. Monthly budgets apply to the period shown, yearly budgets to the year up to the end of the period. In the “Budget (total)” column a yearly budget counts one twelfth per month.",
+    "add": "Create budget",
+    "loadError": "The category budgets could not be loaded right now. Please reload the page.",
+    "empty": {
+      "title": "No category budgets yet",
+      "text": "Set a spending limit per month or year for a category. From the warning threshold (80 % by default) you will see an alert, also on the overview.",
+      "readOnly": "The client has not created any category budgets."
+    },
+    "variableHint": "Tip: categories with active contracts are mostly fixed costs. Budgets are most useful for variable spending such as groceries, leisure or shopping.",
+    "status": {
+      "ok": "On track",
+      "warning": "Threshold reached",
+      "over": "Exceeded"
+    },
+    "periods": {
+      "monthly": "Monthly budget",
+      "yearly": "Yearly budget"
+    },
+    "perPeriod": {
+      "monthly": "{amount} per month",
+      "yearly": "{amount} per year"
+    },
+    "timesMonths": "× {count} months",
+    "threshold": "Threshold {pct} %",
+    "noGroup": "not counted in 50/30/20",
+    "used": "{actual} of {limit} ({pct})",
+    "remaining": "{amount} left",
+    "overBy": "{amount} over",
+    "yearWindow": "{year}: {months} – {elapsed} of 12 months",
+    "yearWindowCross": "{year}: {months} – {elapsed} of 12 months. The period spans the turn of the year; yearly budgets show the year in which it ends.",
+    "monthSpan": "{from} to {to}",
+    "hints": {
+      "divergent": "“{category}” belongs to the group {group} but counts towards this budget.",
+      "divergentNone": "“{category}” is not counted in the 50/30/20 view but counts towards this budget.",
+      "exceedsParent": "Higher than the budget of the parent category “{category}” ({amount}).",
+      "childrenExceed": "The subcategory budgets add up to {amount} – more than this budget.",
+      "notInGroupSum": "Not counted again in “Budget (total)” because “{category}” already has a budget."
+    },
+    "edit": "Edit",
+    "editLabel": "Edit budget “{category}”",
+    "notices": {
+      "created": "Budget created.",
+      "saved": "Budget saved.",
+      "deleted": "Budget deleted."
+    },
+    "form": {
+      "newTitle": "Create budget",
+      "editTitle": "Edit budget",
+      "intro": "A spending limit per category for a month or a year. Spending in subcategories counts too.",
+      "back": "Back to budgets",
+      "loadError": "The form could not be loaded right now. Please reload the page.",
+      "category": "Category",
+      "categoryPlaceholder": "Please choose",
+      "categoryTaken": "{category} (already has a budget)",
+      "categoryHint": "Expense categories only; one budget per category.",
+      "contractsHint": "This category has active contracts ({names}{more, plural, =0 {} other { and # more}}). These are mostly fixed costs – budgets are most useful for variable spending.",
+      "period": "Period",
+      "periods": {
+        "monthly": "Month",
+        "yearly": "Year"
+      },
+      "amount": {
+        "monthly": "Limit per month",
+        "yearly": "Limit per year"
+      },
+      "currency": "Currency",
+      "amountHint": "Only bookings in this currency count, net of refunds; bookings marked “not in budget” do not count.",
+      "suggest": "Use average",
+      "suggestion": {
+        "monthly": "Suggestion: average {window}: {amount} per month.",
+        "yearly": "Suggestion: total {window}: {amount}.",
+        "none": {
+          "monthly": "No spending in this category and currency in {window} – no suggestion.",
+          "yearly": "No spending in this category and currency in {window} – no suggestion."
+        },
+        "pickCategory": "Choose a category to get a suggestion from your spending."
+      },
+      "threshold": "Warning threshold in %",
+      "thresholdHint": "You will see an alert from this share of the limit (80 % by default).",
+      "create": "Create budget",
+      "save": "Save",
+      "saving": "Saving …",
+      "delete": "Delete budget",
+      "deleteConfirm": "The budget will be deleted. Bookings and the category stay unchanged.",
+      "deleteButton": "Yes, delete budget",
+      "errors": {
+        "summary": "Please check the highlighted fields.",
+        "generic": "The budget could not be saved right now. Please try again.",
+        "notFound": "This budget no longer exists.",
+        "categoryRequired": "Please choose an expense category.",
+        "categoryTaken": "This category already has a budget.",
+        "periodInvalid": "Please choose month or year.",
+        "amountInvalid": "Please enter an amount greater than 0, e.g. 400.00.",
+        "currencyInvalid": "Please choose a currency.",
+        "thresholdInvalid": "Please enter a whole number from 1 to 100."
+      }
     }
   },
   "AccountTypes": {

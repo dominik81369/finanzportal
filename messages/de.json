@@ -136,7 +136,19 @@
       "planned": {
         "balances": "Kontostände und Vermögen im Überblick",
         "cashflow": "Einnahmen und Ausgaben des laufenden Monats",
-        "alerts": "Hinweise zu Budgets und anstehenden Kündigungsfristen"
+        "alerts": "Hinweise zu anstehenden Kündigungsfristen"
+      },
+      "alerts": {
+        "heading": "Hinweise",
+        "loading": "Hinweise werden geladen …",
+        "loadError": "Die Hinweise konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+        "atThreshold": "{count, plural, one {# Budget über der Schwelle} other {# Budgets über der Schwelle}}",
+        "over": "(davon {count} überschritten)",
+        "allOk": "{count, plural, one {Ihr Budget liegt unter der Schwelle.} other {Alle # Budgets liegen unter der Schwelle.}}",
+        "toBudgets": "Zu den Budgets",
+        "noBudgets": "Noch keine Einzelbudgets angelegt.",
+        "create": "Einzelbudget anlegen",
+        "scope": "Monatsbudgets im {month}, Jahresbudgets {year} bis heute."
       }
     },
     "transactions": {
@@ -145,11 +157,7 @@
     },
     "budgets": {
       "title": "Budgets",
-      "description": "Ihre Ausgaben nach der 50/30/20-Regel: Bedarf, Wünsche sowie Sparen & Schulden – mit Zielbeträgen als Anteil Ihrer Gesamtausgaben.",
-      "planned": {
-        "periods": "Budgets für Woche, Monat, Quartal oder Jahr",
-        "progress": "Fortschritt und Warnung ab einer frei wählbaren Schwelle"
-      }
+      "description": "Ihre Ausgaben nach der 50/30/20-Regel: Bedarf, Wünsche sowie Sparen & Schulden – mit Zielbeträgen als Anteil Ihrer Gesamtausgaben. Dazu Einzelbudgets je Kategorie mit Warnschwelle."
     },
     "contracts": {
       "title": "Verträge",
@@ -450,7 +458,8 @@
       "targetAmount": "Zielbetrag",
       "month": "Monat",
       "share": "Anteil",
-      "deviation": "Abweichung"
+      "deviation": "Abweichung",
+      "budgetSum": "Budget (Summe)"
     },
     "groups": {
       "needs": "Bedarf (Needs)",
@@ -458,6 +467,7 @@
       "savings": "Sparen & Schulden"
     },
     "unassigned": "Ohne Kategorie",
+    "budgetCount": "{count, plural, one {# Budget} other {# Budgets}}",
     "assignment": {
       "heading": "Zuordnung der Kategorien",
       "intro": "Legen Sie fest, welcher Gruppe jede Ausgaben- und Transferkategorie angehört. „Nicht gezählt“ eignet sich für Umbuchungen zwischen eigenen Konten. Einkommenskategorien haben keine Gruppe; sie bestimmen „Nicht erfasst“ und die Bezugsgröße „Einkommen“.",
@@ -545,6 +555,106 @@
       "heading": "Budget",
       "intro": "{month}, mit Bezugsgröße und Prozentzielen des Mandanten.",
       "noTransactions": "Der Mandant hat noch keine Buchungen erfasst."
+    }
+  },
+  "CategoryBudgets": {
+    "heading": "Einzelbudgets",
+    "intro": "Höchstbetrag je Kategorie samt Unterkategorien, nur in der Währung des Budgets, netto nach Erstattungen. Monatsbudgets gelten für den angezeigten Zeitraum, Jahresbudgets für das Jahr bis zum Ende des Zeitraums. In der Spalte „Budget (Summe)“ zählt ein Jahresbudget je Monat ein Zwölftel.",
+    "add": "Budget anlegen",
+    "loadError": "Die Einzelbudgets konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+    "empty": {
+      "title": "Noch keine Einzelbudgets",
+      "text": "Legen Sie für eine Kategorie einen Höchstbetrag je Monat oder Jahr fest. Ab der Warnschwelle (Standard 80 %) erscheint ein Hinweis, auch auf der Übersicht.",
+      "readOnly": "Der Mandant hat keine Einzelbudgets angelegt."
+    },
+    "variableHint": "Tipp: Kategorien mit aktiven Verträgen sind meist Fixkosten. Budgets lohnen sich vor allem bei variablen Ausgaben wie Lebensmitteln, Freizeit oder Einkäufen.",
+    "status": {
+      "ok": "Im Rahmen",
+      "warning": "Schwelle erreicht",
+      "over": "Überschritten"
+    },
+    "periods": {
+      "monthly": "Monatsbudget",
+      "yearly": "Jahresbudget"
+    },
+    "perPeriod": {
+      "monthly": "{amount} pro Monat",
+      "yearly": "{amount} pro Jahr"
+    },
+    "timesMonths": "× {count} Monate",
+    "threshold": "Warnschwelle {pct} %",
+    "noGroup": "in 50/30/20 nicht gezählt",
+    "used": "{actual} von {limit} ({pct})",
+    "remaining": "noch {amount}",
+    "overBy": "{amount} darüber",
+    "yearWindow": "{year}: {months} – {elapsed} von 12 Monaten",
+    "yearWindowCross": "{year}: {months} – {elapsed} von 12 Monaten. Der Zeitraum reicht über den Jahreswechsel; Jahresbudgets zeigen das Jahr, in dem er endet.",
+    "monthSpan": "{from} bis {to}",
+    "hints": {
+      "divergent": "„{category}“ gehört zur Gruppe {group}, zählt in diesem Budget aber mit.",
+      "divergentNone": "„{category}“ zählt in der 50/30/20-Ansicht nicht, in diesem Budget aber mit.",
+      "exceedsParent": "Höher als das Budget der Oberkategorie „{category}“ ({amount}).",
+      "childrenExceed": "Die Budgets der Unterkategorien ergeben zusammen {amount} – mehr als dieses Budget.",
+      "notInGroupSum": "Zählt in „Budget (Summe)“ nicht extra, weil „{category}“ schon ein Budget hat."
+    },
+    "edit": "Bearbeiten",
+    "editLabel": "Budget „{category}“ bearbeiten",
+    "notices": {
+      "created": "Budget angelegt.",
+      "saved": "Budget gespeichert.",
+      "deleted": "Budget gelöscht."
+    },
+    "form": {
+      "newTitle": "Budget anlegen",
+      "editTitle": "Budget bearbeiten",
+      "intro": "Ein Höchstbetrag je Kategorie für Monat oder Jahr. Ausgaben der Unterkategorien zählen mit.",
+      "back": "Zurück zu den Budgets",
+      "loadError": "Das Formular konnte gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+      "category": "Kategorie",
+      "categoryPlaceholder": "Bitte wählen",
+      "categoryTaken": "{category} (hat schon ein Budget)",
+      "categoryHint": "Nur Ausgabenkategorien; je Kategorie ein Budget.",
+      "contractsHint": "Für diese Kategorie gibt es aktive Verträge ({names}{more, plural, =0 {} other { und # weitere}}). Das sind meist Fixkosten – Budgets lohnen sich vor allem bei variablen Ausgaben.",
+      "period": "Zeitraum",
+      "periods": {
+        "monthly": "Monat",
+        "yearly": "Jahr"
+      },
+      "amount": {
+        "monthly": "Höchstbetrag pro Monat",
+        "yearly": "Höchstbetrag pro Jahr"
+      },
+      "currency": "Währung",
+      "amountHint": "Gezählt werden nur Buchungen in dieser Währung, netto nach Erstattungen; Buchungen „nicht im Budget“ zählen nicht.",
+      "suggest": "Aus Durchschnitt übernehmen",
+      "suggestion": {
+        "monthly": "Vorschlag: Durchschnitt {window}: {amount} pro Monat.",
+        "yearly": "Vorschlag: Summe {window}: {amount}.",
+        "none": {
+          "monthly": "Keine Ausgaben in dieser Kategorie und Währung im Zeitraum {window} – kein Vorschlag.",
+          "yearly": "Keine Ausgaben in dieser Kategorie und Währung im Zeitraum {window} – kein Vorschlag."
+        },
+        "pickCategory": "Wählen Sie eine Kategorie für einen Vorschlag aus Ihren Ausgaben."
+      },
+      "threshold": "Warnschwelle in %",
+      "thresholdHint": "Ab diesem Anteil des Höchstbetrags erscheint ein Hinweis (Standard 80 %).",
+      "create": "Budget anlegen",
+      "save": "Speichern",
+      "saving": "Wird gespeichert …",
+      "delete": "Budget löschen",
+      "deleteConfirm": "Das Budget wird gelöscht. Buchungen und Kategorie bleiben unverändert.",
+      "deleteButton": "Ja, Budget löschen",
+      "errors": {
+        "summary": "Bitte prüfen Sie die markierten Felder.",
+        "generic": "Das Budget konnte gerade nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+        "notFound": "Dieses Budget gibt es nicht mehr.",
+        "categoryRequired": "Bitte wählen Sie eine Ausgabenkategorie.",
+        "categoryTaken": "Für diese Kategorie gibt es schon ein Budget.",
+        "periodInvalid": "Bitte wählen Sie Monat oder Jahr.",
+        "amountInvalid": "Bitte geben Sie einen Betrag größer als 0 ein, z. B. 400,00.",
+        "currencyInvalid": "Bitte wählen Sie eine Währung.",
+        "thresholdInvalid": "Bitte eine ganze Zahl von 1 bis 100 eingeben."
+      }
     }
   },
   "AccountTypes": {

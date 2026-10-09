@@ -1,6 +1,7 @@
 -- =====================================================================
 --  supabase/tests/budget_groups.test.sql
---  50/30/20: categories.budget_group, budget_rule_summary(),
+--  50/30/20: categories.budget_group, Summen über budget_category_totals()
+--  (budget_rule_summary() entfiel mit Budget-2),
 --  set_category_budget_groups()  (Migration 20261002150000)
 --  Ausführen: supabase test db   (setzt 00000-test-helpers.sql voraus)
 --
@@ -129,9 +130,18 @@ select 'b9000000-0000-4000-8000-000000000002', d, a, 'CHF', c
     ('2026-09-15',       -100.00, groceries)
   ) as v (d, a, c);
 
+-- Summen je Monat und Währung aus budget_category_totals (budget_rule_summary
+-- entfiel mit Budget-2).
 prepare summary(uuid, date, date) as
-  select month, currency, income, needs, wants, savings, unassigned
-    from public.budget_rule_summary($1, $2, $3);
+  select month, currency,
+         coalesce(sum(amount) filter (where kind = 'income'), 0) as income,
+         coalesce(-sum(amount) filter (where budget_group = 'needs'), 0) as needs,
+         coalesce(-sum(amount) filter (where budget_group = 'wants'), 0) as wants,
+         coalesce(-sum(amount) filter (where budget_group = 'savings'), 0) as savings,
+         coalesce(-sum(amount) filter (where category_id is null), 0) as unassigned
+    from public.budget_category_totals($1, $2, $3)
+   group by month, currency
+   order by month, currency;
 
 select results_eq(
   format($$ execute summary(%L, '2026-09-01', '2026-10-31') $$, tests.get_supabase_uid('bg_alice')),
@@ -151,15 +161,15 @@ select is_empty(
   'Monat ohne Buchungen: keine Zeile'
 );
 select throws_ok(
-  format($$ select * from public.budget_rule_summary(%L, '2026-10-01', '2026-09-01') $$, tests.get_supabase_uid('bg_alice')),
+  format($$ select * from public.budget_category_totals(%L, '2026-10-01', '2026-09-01') $$, tests.get_supabase_uid('bg_alice')),
   '22023', 'invalid_period', 'von nach bis → invalid_period'
 );
 select throws_ok(
-  format($$ select * from public.budget_rule_summary(%L, '2020-01-01', '2026-01-02') $$, tests.get_supabase_uid('bg_alice')),
+  format($$ select * from public.budget_category_totals(%L, '2020-01-01', '2026-01-02') $$, tests.get_supabase_uid('bg_alice')),
   '22023', 'invalid_period', 'mehr als 5 Jahre → invalid_period'
 );
 select throws_ok(
-  $$ select * from public.budget_rule_summary(null, '2026-09-01', '2026-09-30') $$,
+  $$ select * from public.budget_category_totals(null, '2026-09-01', '2026-09-30') $$,
   '22023', 'invalid_period', 'ohne Nutzer → invalid_period'
 );
 
@@ -167,7 +177,8 @@ select throws_ok(
 select public.set_category_budget_groups(jsonb_build_array(
   jsonb_build_object('id', (select groceries from ids), 'budget_group', null)));
 select results_eq(
-  format($$ select needs from public.budget_rule_summary(%L, '2026-09-01', '2026-09-30') where currency = 'EUR' $$,
+  format($$ select -sum(amount) from public.budget_category_totals(%L, '2026-09-01', '2026-09-30')
+             where currency = 'EUR' and budget_group = 'needs' $$,
          tests.get_supabase_uid('bg_alice')),
   $$ values (1000.00::numeric) $$,
   'Kategorie ausgeschlossen (NULL): ihre Buchungen zählen nicht mehr'
@@ -178,7 +189,10 @@ select results_eq(
 -- ---------------------------------------------------------------------
 select tests.authenticate_as('bg_carol');
 select results_eq(
-  format($$ select currency, income, needs from public.budget_rule_summary(%L, '2026-09-01', '2026-09-30') $$,
+  format($$ select currency, coalesce(sum(amount) filter (where kind = 'income'), 0),
+                    coalesce(-sum(amount) filter (where budget_group = 'needs'), 0)
+               from public.budget_category_totals(%L, '2026-09-01', '2026-09-30')
+              group by currency order by currency $$,
          tests.get_supabase_uid('bg_alice')),
   $$ values ('CHF'::text, 1000.00::numeric, 0::numeric), ('EUR', 3000.00, 1000.00) $$,
   'Beraterin mit aktiver Verbindung sieht die Auswertung der Mandantin'
@@ -191,7 +205,7 @@ select is(
 );
 select tests.authenticate_as('bg_dave');
 select is_empty(
-  format($$ select * from public.budget_rule_summary(%L, '2026-09-01', '2026-10-31') $$,
+  format($$ select * from public.budget_category_totals(%L, '2026-09-01', '2026-10-31') $$,
          tests.get_supabase_uid('bg_alice')),
   'Berater ohne Verbindung: leeres Ergebnis'
 );
@@ -205,9 +219,9 @@ select is(
 -- ---------------------------------------------------------------------
 -- 5. Rechte, Bestand, service_role (20–26)
 -- ---------------------------------------------------------------------
-select ok(
-  not has_function_privilege('anon', 'public.budget_rule_summary(uuid, date, date)', 'execute'),
-  'anon darf budget_rule_summary nicht ausführen'
+select hasnt_function(
+  'public', 'budget_rule_summary', array['uuid', 'date', 'date'],
+  'budget_rule_summary entfällt mit Budget-2'
 );
 select ok(
   not has_function_privilege('anon', 'public.set_category_budget_groups(jsonb)', 'execute'),

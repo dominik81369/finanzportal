@@ -1,11 +1,15 @@
 /**
- * Auswertung 50/30/20 (gestreamt; Fallback: BudgetSkeleton) – für die
- * eigene Budgetseite und die Leseansicht des Beraters (readOnly).
+ * Auswertung 50/30/20 und Einzelbudgets (gestreamt; Fallback:
+ * BudgetSkeleton) – für die eigene Budgetseite und die Leseansicht des
+ * Beraters (readOnly).
  *
  * Daten: public.budget_category_totals() ab drei Monaten vor dem Zeitraum
- * (für den Durchschnitt der Vormonate), Auswertung in lib/budget-rule.ts.
- * Alle Abfragen filtern ausdrücklich auf user_id = userId (RLS gibt
- * Beratern zusätzlich die Daten ihrer Mandanten frei).
+ * (Durchschnitt der Vormonate) bzw. ab Januar im Jahr des Zeitraumendes
+ * (Jahresbudgets); Auswertung in lib/budget-rule.ts und
+ * lib/category-budgets.ts. Die Spalte „Budget (Summe)“ zeigt die
+ * Einzelbudgets je Gruppe, umgerechnet auf den Zeitraum. Alle Abfragen
+ * filtern ausdrücklich auf user_id = userId (RLS gibt Beratern zusätzlich
+ * die Daten ihrer Mandanten frei).
  */
 import { getFormatter, getTranslations } from 'next-intl/server';
 import type { CSSProperties } from 'react';
@@ -15,17 +19,24 @@ import {
   BUDGET_GROUPS,
   addMonths,
   monthCount,
-  rangeDates,
   summarizeBudget,
   type BudgetBasis,
   type BudgetGroupKey,
   type BudgetSettings,
-  type CategoryTotalRow,
   type CurrencyBudget,
   type MonthKey,
   type MonthRange,
 } from '@/lib/budget-rule';
+import {
+  evaluateCategoryBudgets,
+  evaluationStart,
+  groupBudgetSums,
+  type GroupBudgetSum,
+} from '@/lib/category-budgets';
 import { createClient } from '@/lib/supabase/server';
+
+import { loadBudgetCategories, loadCategoryBudgets, loadCategoryTotals } from './budget-data';
+import { CategoryBudgetList } from './category-budget-list';
 
 type BudgetOverviewProps = {
   userId: string;
@@ -41,65 +52,81 @@ export async function BudgetOverview({ userId, range, basis, settings, readOnly 
   const format = await getFormatter();
   const supabase = await createClient();
 
-  const { toDate } = rangeDates(range);
-  const historyFrom = rangeDates({ from: addMonths(range.from, -3), to: range.from }).fromDate;
-  const [totals, transactionCount] = await Promise.all([
-    supabase.rpc('budget_category_totals', { p_user_id: userId, p_from: historyFrom, p_to: toDate }),
+  // Vormonate (Bezugsgröße Durchschnitt) und Januar (Jahresbudgets) – der frühere Monat zählt.
+  const fetchFrom = [addMonths(range.from, -3), evaluationStart(range)].sort()[0]!;
+  const [totals, transactionCount, categories, budgets] = await Promise.all([
+    loadCategoryTotals(userId, { from: fetchFrom, to: range.to }),
     supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+    loadBudgetCategories(userId),
+    loadCategoryBudgets(userId),
   ]);
-  if (totals.error) {
-    console.error('[budgets] Auswertung nicht ladbar', { code: totals.error.code });
+  if (!totals) {
     return (
       <p role="alert" className="form-error">
         {t('loadError')}
       </p>
     );
   }
+
+  const results = categories && budgets ? evaluateCategoryBudgets(budgets, categories, totals, range) : null;
+  const budgetList = (
+    <CategoryBudgetList results={results} categories={categories ?? []} months={monthCount(range)} readOnly={readOnly} />
+  );
+
   if ((transactionCount.count ?? 0) === 0) {
-    return readOnly ? (
-      <p className="empty-state">{t('advisor.noTransactions')}</p>
-    ) : (
-      <div className="budget-empty">
-        <strong>{t('noTransactions.title')}</strong>
-        <p>{t('noTransactions.text')}</p>
-        <Link href="/dashboard/transactions/import" className="button button-small">
-          {t('noTransactions.import')}
-        </Link>
-      </div>
+    return (
+      <>
+        {readOnly ? (
+          <p className="empty-state">{t('advisor.noTransactions')}</p>
+        ) : (
+          <div className="budget-empty">
+            <strong>{t('noTransactions.title')}</strong>
+            <p>{t('noTransactions.text')}</p>
+            <Link href="/dashboard/transactions/import" className="button button-small">
+              {t('noTransactions.import')}
+            </Link>
+          </div>
+        )}
+        {budgetList}
+      </>
     );
   }
 
-  const currencies = summarizeBudget((totals.data ?? []) as CategoryTotalRow[], { range, basis, settings });
-  if (currencies.length === 0) {
-    return <p className="empty-state">{t('empty')}</p>;
-  }
+  const currencies = summarizeBudget(totals, { range, basis, settings });
+  const sums = results ? groupBudgetSums(results) : new Map<string, Partial<Record<BudgetGroupKey, GroupBudgetSum>>>();
   const monthLabel = (month: MonthKey) =>
     format.dateTime(new Date(`${month}-01T00:00:00Z`), { month: 'long', year: 'numeric', timeZone: 'UTC' });
 
   return (
     <>
+      {currencies.length === 0 ? <p className="empty-state">{t('empty')}</p> : null}
       {currencies.map((currency) => (
         <CurrencyBlock
           key={currency.currency}
           budget={currency}
+          budgetSums={sums.get(currency.currency) ?? {}}
           settings={settings}
           multiMonth={monthCount(range) > 1}
           monthLabel={monthLabel}
           readOnly={readOnly}
         />
       ))}
+      {budgetList}
     </>
   );
 }
 
 async function CurrencyBlock({
   budget,
+  budgetSums,
   settings,
   multiMonth,
   monthLabel,
   readOnly,
 }: {
   budget: CurrencyBudget;
+  /** Einzelbudgets je Gruppe in dieser Währung (Cent, auf den Zeitraum umgerechnet). */
+  budgetSums: Partial<Record<BudgetGroupKey, GroupBudgetSum>>;
   settings: BudgetSettings;
   multiMonth: boolean;
   monthLabel: (month: MonthKey) => string;
@@ -117,13 +144,31 @@ async function CurrencyBlock({
   const totalDeviation = basisAmount === null ? null : Math.round((figures.expenses - basisAmount) * 100) / 100;
   const targetsLabel = BUDGET_GROUPS.map((group) => format.number(settings.targets[group])).join('/');
   const fallback = budget.basis.fallback;
+  // Spalte „Budget (Summe)“ nur, wenn es in dieser Währung Einzelbudgets gibt.
+  const sumList = BUDGET_GROUPS.map((group) => budgetSums[group]).filter((sum) => sum !== undefined);
+  const showBudgets = sumList.length > 0;
+  const budgetTotal = sumList.reduce((total, sum) => total + sum.cents, 0);
+  const extraColumns = showBudgets ? 5 : 4;
+  const budgetCell = (sum: GroupBudgetSum | undefined) =>
+    showBudgets ? (
+      <td className="amount">
+        {sum ? (
+          <>
+            {money(sum.cents / 100)}
+            <span className="cell-note">{t('budgetCount', { count: sum.count })}</span>
+          </>
+        ) : (
+          '–'
+        )}
+      </td>
+    ) : null;
 
   const subRow = (key: string, label: string, value: number) =>
     value !== 0 ? (
       <tr key={key} className="budget-subrow">
         <th scope="row">{label}</th>
         <td className="amount">{money(value)}</td>
-        <td colSpan={4} />
+        <td colSpan={extraColumns} />
       </tr>
     ) : null;
 
@@ -180,6 +225,11 @@ async function CurrencyBlock({
               <th scope="col" className="amount">
                 {t('columns.deviation')}
               </th>
+              {showBudgets ? (
+                <th scope="col" className="amount">
+                  {t('columns.budgetSum')}
+                </th>
+              ) : null}
             </tr>
           </thead>
           <tbody>
@@ -204,6 +254,7 @@ async function CurrencyBlock({
                   <td className={`amount ${row.deviation !== null && row.deviation > 0 ? 'budget-over' : ''}`}>
                     {row.deviation === null ? '–' : signed(row.deviation)}
                   </td>
+                  {budgetCell(budgetSums[group])}
                 </tr>,
                 subRow(`${group}-taxes`, t('sub.taxes'), row.taxes),
                 subRow(`${group}-loan`, t('sub.loan'), row.loan),
@@ -224,6 +275,7 @@ async function CurrencyBlock({
               <td className="amount">–</td>
               <td className="amount">–</td>
               <td className="amount">–</td>
+              {showBudgets ? <td className="amount">–</td> : null}
             </tr>
           </tbody>
           <tfoot>
@@ -238,17 +290,18 @@ async function CurrencyBlock({
               <td className={`amount ${totalDeviation !== null && totalDeviation > 0 ? 'budget-over' : ''}`}>
                 {totalDeviation === null ? '–' : signed(totalDeviation)}
               </td>
+              {showBudgets ? <td className="amount">{money(budgetTotal / 100)}</td> : null}
             </tr>
             <tr data-group="not-captured">
               <th scope="row">{t('notCaptured')}</th>
               <td className={`amount ${figures.notCaptured < 0 ? 'budget-over' : ''}`}>{money(figures.notCaptured)}</td>
-              <td colSpan={4} />
+              <td colSpan={extraColumns} />
             </tr>
             {figures.ownTransfers !== 0 ? (
               <tr className="budget-subrow" data-group="own-transfers">
                 <th scope="row">{t('sub.ownTransfers')}</th>
                 <td className="amount">{money(figures.ownTransfers)}</td>
-                <td colSpan={4} />
+                <td colSpan={extraColumns} />
               </tr>
             ) : null}
           </tfoot>

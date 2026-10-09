@@ -28,3 +28,31 @@ export function categoryDisplayName(
   const key = category.default_key as DefaultCategoryKey | null;
   return key && t.has(key) ? t(key) : category.name;
 }
+
+/**
+ * Kategorien in Baumreihenfolge: jede Oberkategorie, direkt darunter ihre
+ * Unterkategorien (beliebig tief). Die Eingabe bestimmt die Reihenfolge
+ * innerhalb einer Ebene (z. B. nach sort_order, name sortiert). Kategorien,
+ * deren Oberkategorie fehlt, gelten als Oberkategorien.
+ */
+export function orderCategoryTree<T extends { id: string; parent_category_id: string | null }>(
+  categories: T[],
+): { category: T; depth: number }[] {
+  const ids = new Set(categories.map((c) => c.id));
+  const result: { category: T; depth: number }[] = [];
+  const seen = new Set<string>();
+  const visit = (category: T, depth: number) => {
+    if (seen.has(category.id)) {
+      return;
+    }
+    seen.add(category.id);
+    result.push({ category, depth });
+    for (const child of categories.filter((c) => c.parent_category_id === category.id)) {
+      visit(child, depth + 1);
+    }
+  };
+  for (const root of categories.filter((c) => !c.parent_category_id || !ids.has(c.parent_category_id))) {
+    visit(root, 0);
+  }
+  return result;
+}

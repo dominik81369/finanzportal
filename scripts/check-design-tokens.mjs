@@ -34,6 +34,7 @@ const SECTIONS = [
     name: 'budgets',
     files: [
       'app/[locale]/dashboard/budgets',
+      'app/[locale]/dashboard/page.tsx',
       'app/[locale]/advisor/clients/[clientId]/budget-section.tsx',
     ],
   },

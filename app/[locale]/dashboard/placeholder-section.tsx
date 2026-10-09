@@ -10,7 +10,7 @@ import { getMessages, getTranslations } from 'next-intl/server';
 
 import { toAppLocale } from '@/i18n/routing';
 
-export type DashboardSection = 'overview' | 'budgets' | 'contracts' | 'netWorth';
+export type DashboardSection = 'overview' | 'contracts' | 'netWorth';
 
 type LocaleParams = { params: Promise<{ locale: string }> };
 
@@ -24,20 +24,29 @@ export function placeholderMetadata(section: DashboardSection) {
 
 export async function PlaceholderSection({ section }: { section: DashboardSection }) {
   const t = await getTranslations('Dashboard');
-  const planned = Object.values((await getMessages()).Dashboard[section].planned);
 
   return (
     <section className="placeholder" aria-labelledby="page-title">
       <h1 id="page-title">{t(`${section}.title`)}</h1>
       <p>{t(`${section}.description`)}</p>
-      <div className="placeholder-box">
-        <p className="placeholder-label">{t('placeholderLabel')}</p>
-        <ul>
-          {planned.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </div>
+      <PlannedBox section={section} />
     </section>
+  );
+}
+
+/** Kasten „In Vorbereitung“ mit den geplanten Punkten eines Bereichs. */
+export async function PlannedBox({ section }: { section: DashboardSection }) {
+  const t = await getTranslations('Dashboard');
+  const planned = Object.values((await getMessages()).Dashboard[section].planned);
+
+  return (
+    <div className="placeholder-box">
+      <p className="placeholder-label">{t('placeholderLabel')}</p>
+      <ul>
+        {planned.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
   );
 }
