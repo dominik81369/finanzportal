@@ -25,9 +25,9 @@ import {
   type ContractFormValues,
 } from '@/lib/contracts';
 
+import { useShowResult } from '../action-form';
 import { CategorySelect } from '../transactions/category-select';
 import type { CategoryOption } from '../transactions/transaction-form';
-import { useShowResult } from './action-form';
 
 export type CounterpartyOption = { key: string; label: string; count: number; lastAmount: number };
 

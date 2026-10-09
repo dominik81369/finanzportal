@@ -13,7 +13,7 @@ import { getContractLabels } from '@/lib/contract-labels';
 import { CONTRACT_TYPES, confidenceLevel } from '@/lib/contracts';
 import { createClient } from '@/lib/supabase/server';
 
-import { ActionForm } from './action-form';
+import { ActionForm } from '../action-form';
 
 /** Je Vorschlag angezeigte verknüpfte Buchungen (Rest als „… und N weitere“). */
 const BOOKINGS_PER_SUGGESTION = 12;

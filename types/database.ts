@@ -751,6 +751,43 @@ export type Database = {
         ];
       };
 
+      budget_settings: {
+        Row: {
+          user_id: string;
+          basis: Database['public']['Enums']['budget_basis'];
+          needs_pct: number;
+          wants_pct: number;
+          savings_pct: number;
+          fixed_amount: number | null;
+          fixed_currency: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id?: string;
+          basis?: Database['public']['Enums']['budget_basis'];
+          needs_pct?: number;
+          wants_pct?: number;
+          savings_pct?: number;
+          fixed_amount?: number | null;
+          fixed_currency?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          basis?: Database['public']['Enums']['budget_basis'];
+          needs_pct?: number;
+          wants_pct?: number;
+          savings_pct?: number;
+          fixed_amount?: number | null;
+          fixed_currency?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+
       recurring_contracts: {
         Row: {
           id: string;
@@ -1093,6 +1130,30 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
+      budget_category_totals: {
+        Args: { p_user_id: string; p_from: string; p_to: string };
+        Returns: {
+          month: string;
+          currency: string;
+          category_id: string | null;
+          budget_group: Database['public']['Enums']['budget_group'] | null;
+          kind: Database['public']['Enums']['category_kind'] | null;
+          flag: string | null;
+          own_account: boolean;
+          amount: number;
+        }[];
+      };
+      save_budget_settings: {
+        Args: {
+          p_basis: Database['public']['Enums']['budget_basis'];
+          p_needs_pct: number;
+          p_wants_pct: number;
+          p_savings_pct: number;
+          p_fixed_amount: number | null;
+          p_fixed_currency: string;
+        };
+        Returns: undefined;
+      };
       contract_counterparties: {
         Args: { p_limit?: number };
         Returns: {
@@ -1201,6 +1262,7 @@ export type Database = {
       contract_rhythm: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly';
       contract_status: 'suggested' | 'active' | 'cancellation_pending' | 'cancelled' | 'dismissed';
       contract_detection: 'manual' | 'auto';
+      budget_basis: 'expenses' | 'expenses_avg3' | 'fixed' | 'income';
       contract_type:
         | 'subscription'
         | 'telecom'
@@ -1274,6 +1336,7 @@ export const Constants = {
       contract_rhythm: ['weekly', 'monthly', 'quarterly', 'semiannual', 'yearly'],
       contract_status: ['suggested', 'active', 'cancellation_pending', 'cancelled', 'dismissed'],
       contract_detection: ['manual', 'auto'],
+      budget_basis: ['expenses', 'expenses_avg3', 'fixed', 'income'],
       contract_type: [
         'subscription',
         'telecom',

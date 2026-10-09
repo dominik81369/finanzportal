@@ -22,7 +22,7 @@ import { CONTRACT_TYPES, rhythmKey, type ContractFormValues } from '@/lib/contra
 import { createClient, requireOnboardedUser } from '@/lib/supabase/server';
 import { formatAmountInput, isUuid } from '@/lib/transactions';
 
-import { ActionForm } from '../action-form';
+import { ActionForm } from '../../action-form';
 import { ContractsSkeleton } from '../contracts-skeleton';
 import { ContractBookings } from './contract-bookings';
 
