@@ -1039,18 +1039,6 @@ export type Database = {
         Args: { p_user_id: string };
         Returns: { account_id: string; currency: string; total: number }[];
       };
-      budget_rule_summary: {
-        Args: { p_user_id: string; p_from: string; p_to: string };
-        Returns: {
-          month: string;
-          currency: string;
-          income: number;
-          needs: number;
-          wants: number;
-          savings: number;
-          unassigned: number;
-        }[];
-      };
       set_category_budget_groups: {
         Args: { p_assignments: Json };
         Returns: number;
@@ -1142,6 +1130,17 @@ export type Database = {
           own_account: boolean;
           amount: number;
         }[];
+      };
+      save_category_budget: {
+        Args: {
+          p_id: string | null;
+          p_category_id: string;
+          p_period: Database['public']['Enums']['budget_period'];
+          p_amount: number;
+          p_currency: string;
+          p_threshold_pct: number;
+        };
+        Returns: string;
       };
       save_budget_settings: {
         Args: {

@@ -7,6 +7,10 @@
  * Ansicht (?basis=), Voreinstellung und Prozentziele in den Einstellungen
  * (public.budget_settings). Zeitraum ?from=YYYY-MM&to=YYYY-MM.
  *
+ * Einzelbudgets je Kategorie (Monat/Jahr, Warnschwelle) stehen mit
+ * Fortschritt in der Auswertung; Anlegen und Bearbeiten unter ./new und
+ * ./[id] (Meldung danach über ?budget=created|saved|deleted).
+ *
  * Kopf, Zeitraum und Formulare sofort; die Auswertung wird gestreamt
  * (budget-overview.tsx, Ladezustand budget-skeleton.tsx). Die Suspense-
  * Grenze trägt je Render einen neuen Schlüssel: Nach dem Speichern
@@ -17,7 +21,7 @@
  * zusätzlich die Daten ihrer Mandanten frei.
  */
 import type { Metadata } from 'next';
-import { getFormatter, getMessages, getTranslations } from 'next-intl/server';
+import { getFormatter, getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 
 import { Link } from '@/i18n/navigation';
@@ -33,7 +37,7 @@ import {
   type MonthRange,
 } from '@/lib/budget-rule';
 import { toBudgetSettings } from '@/lib/budget-settings';
-import { categoryDisplayName } from '@/lib/categories';
+import { categoryDisplayName, orderCategoryTree } from '@/lib/categories';
 import { createClient, requireOnboardedUser } from '@/lib/supabase/server';
 import { todayInGermany } from '@/lib/transactions';
 
@@ -65,6 +69,7 @@ export default async function BudgetsPage({ searchParams }: BudgetsPageProps) {
   const t = await getTranslations('Budgets');
   const tDashboard = await getTranslations('Dashboard');
   const tCategories = await getTranslations('DefaultCategories');
+  const tLimits = await getTranslations('CategoryBudgets');
   const format = await getFormatter();
   const query = await searchParams;
 
@@ -94,26 +99,21 @@ export default async function BudgetsPage({ searchParams }: BudgetsPageProps) {
   if (categories.error) {
     console.error('[budgets] Kategorien nicht ladbar', { code: categories.error.code });
   }
+  // Meldung nach Anlegen, Ändern oder Löschen eines Einzelbudgets.
+  const notice = (['created', 'saved', 'deleted', 'error'] as const).find((value) => query.budget === value) ?? null;
   const settings = toBudgetSettings(settingsRow.data);
   const basis = parseBasis(query, settings.basis);
   const viewBasis = basis === settings.basis ? null : basis;
 
   // Oberkategorien in Sortierung, Unterkategorien jeweils direkt darunter.
-  const formCategories: BudgetGroupFormCategory[] = [];
-  const all = categories.data ?? [];
-  const ids = new Set(all.map((c) => c.id));
-  const toFormCategory = (c: (typeof all)[number], isChild: boolean) => ({
-    id: c.id,
-    label: categoryDisplayName(c, tCategories),
-    isChild,
-    group: c.budget_group,
-  });
-  for (const parent of all.filter((c) => !c.parent_category_id || !ids.has(c.parent_category_id))) {
-    formCategories.push(toFormCategory(parent, false));
-    for (const child of all.filter((c) => c.parent_category_id === parent.id)) {
-      formCategories.push(toFormCategory(child, true));
-    }
-  }
+  const formCategories: BudgetGroupFormCategory[] = orderCategoryTree(categories.data ?? []).map(
+    ({ category, depth }) => ({
+      id: category.id,
+      label: categoryDisplayName(category, tCategories),
+      isChild: depth > 0,
+      group: category.budget_group,
+    }),
+  );
 
   const presets: { key: 'thisMonth' | 'lastMonth' | 'last3Months' | 'thisYear'; range: MonthRange }[] = [
     { key: 'thisMonth', range: { from: currentMonth, to: currentMonth } },
@@ -121,13 +121,21 @@ export default async function BudgetsPage({ searchParams }: BudgetsPageProps) {
     { key: 'last3Months', range: { from: addMonths(currentMonth, -2), to: currentMonth } },
     { key: 'thisYear', range: { from: `${currentMonth.slice(0, 4)}-01`, to: currentMonth } },
   ];
-  const planned = Object.values((await getMessages()).Dashboard.budgets.planned);
   const explanation = await basisExplanation(basis, monthCount(range), settings);
 
   return (
     <section aria-labelledby="page-title" className="budgets-page">
       <h1 id="page-title">{tDashboard('budgets.title')}</h1>
       <p className="budgets-intro">{tDashboard('budgets.description')}</p>
+      {notice === 'error' ? (
+        <p role="alert" className="form-error">
+          {tLimits('form.errors.generic')}
+        </p>
+      ) : notice ? (
+        <p role="status" className="form-success">
+          {tLimits(`notices.${notice}`)}
+        </p>
+      ) : null}
 
       <form method="get" className="filters budget-period" aria-label={t('period.label')}>
         <div className="filter-field">
@@ -206,15 +214,6 @@ export default async function BudgetsPage({ searchParams }: BudgetsPageProps) {
           <BudgetGroupForm categories={formCategories} />
         )}
       </section>
-
-      <div className="placeholder-box">
-        <p className="placeholder-label">{tDashboard('placeholderLabel')}</p>
-        <ul>
-          {planned.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </div>
     </section>
   );
 }
