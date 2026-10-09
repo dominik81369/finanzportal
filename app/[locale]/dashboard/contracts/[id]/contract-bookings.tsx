@@ -75,6 +75,7 @@ export async function ContractBookings({ contract, userId, editable, initialValu
         ) : (
           <>
             <p className="hint">{t('detail.linkedHint')}</p>
+            {linkedRows.some((tx) => tx.amount > 0) ? <p className="hint">{t('detail.counterBookingHint')}</p> : null}
             <div className="table-scroll">
               <table className="transactions-table">
                 <caption>{t('detail.linkedCaption', { name: contract.name })}</caption>
@@ -95,14 +96,24 @@ export async function ContractBookings({ contract, userId, editable, initialValu
                 </thead>
                 <tbody>
                   {linkedRows.map((tx) => (
-                    <tr key={tx.id}>
+                    <tr key={tx.id} data-counter-booking={tx.amount > 0 ? 'true' : undefined}>
                       <td className="nowrap">{date(tx.booking_date)}</td>
                       <td>
                         {tx.counterparty_name ?? t('notSet')}
+                        {tx.amount > 0 ? (
+                          <>
+                            {' '}
+                            <span className="badge badge-muted">{t('detail.counterBooking')}</span>
+                          </>
+                        ) : null}
                         {tx.purpose ? <span className="cell-note">{tx.purpose}</span> : null}
                       </td>
                       <td>{tx.account?.name ?? t('notSet')}</td>
-                      <td className="amount">{money(tx.amount, tx.currency)}</td>
+                      <td className="amount">
+                        {tx.amount > 0
+                          ? format.number(tx.amount, { style: 'currency', currency: tx.currency, signDisplay: 'always' })
+                          : money(tx.amount, tx.currency)}
+                      </td>
                       {contract.status !== 'dismissed' ? (
                         <td className="row-actions">
                           <ActionForm action={unlinkContractTransaction.bind(null, contract.id, tx.id)}>

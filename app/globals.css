@@ -567,6 +567,9 @@
 }
 
 .table-scroll {
+  /* Bezugsrahmen für absolut positionierte Inhalte (z. B. .sr-only in
+     Kopfzellen), damit sie mitscrollen statt die Seite zu verbreitern. */
+  position: relative;
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
@@ -1544,6 +1547,22 @@
 
 .contract-danger .button {
   margin-top: 0;
+}
+
+/* Mandatsreferenz und Gläubiger-ID: Kennungen, ggf. umbrechen. */
+.contract-sepa-ref {
+  font-family: var(--font-mono);
+  font-size: var(--type-sm);
+  overflow-wrap: anywhere;
+}
+
+.contract-costs-table thead .cell-note {
+  font-weight: var(--weight-normal);
+}
+
+.contract-costs-table tfoot th,
+.contract-costs-table tfoot td {
+  font-weight: var(--weight-semibold);
 }
 
 /* Ladezustand: Platzhalterflächen in Palettenfarben, ohne Bewegung bei

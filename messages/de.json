@@ -689,9 +689,10 @@
       "invalidAmount": "Zeile {line}: Betrag „{value}“ nicht erkannt",
       "moreErrors": "… und {count} weitere.",
       "skippedZero": "{count, plural, one {# Buchung mit Betrag 0 wird nicht importiert.} other {# Buchungen mit Betrag 0 werden nicht importiert.}}",
+      "skippedPending": "{count, plural, one {# vorgemerkt, nicht übernommen – der Umsatz kommt mit dem nächsten Auszug, sobald die Bank ihn bucht.} other {# vorgemerkt, nicht übernommen – die Umsätze kommen mit dem nächsten Auszug, sobald die Bank sie bucht.}}",
       "checking": "Abgleich mit vorhandenen Buchungen …",
       "summary": "{new, plural, =0 {Keine neuen Buchungen} one {# neue Buchung} other {# neue Buchungen}}, {duplicates, plural, =0 {keine bereits vorhanden} one {# bereits vorhanden (wird übersprungen)} other {# bereits vorhanden (werden übersprungen)}}, {categorized, plural, =0 {keine per Regel kategorisiert} one {# per Regel kategorisiert} other {# per Regel kategorisiert}}.",
-      "enriched": "{count, plural, one {Bei # vorhandenen Buchung werden fehlender Transaktionstyp, IBAN bzw. Beschreibung ergänzt.} other {Bei # vorhandenen Buchungen werden fehlender Transaktionstyp, IBAN bzw. Beschreibung ergänzt.}}"
+      "enriched": "{count, plural, one {Bei # vorhandenen Buchung werden fehlende Angaben ergänzt (Transaktionstyp, IBAN, Beschreibung, Mandatsreferenz oder Gläubiger-ID).} other {Bei # vorhandenen Buchungen werden fehlende Angaben ergänzt (Transaktionstyp, IBAN, Beschreibung, Mandatsreferenz oder Gläubiger-ID).}}"
     },
     "detected": {
       "excel": "Excel-Datei (erstes Tabellenblatt)",
@@ -724,7 +725,10 @@
       "currency": "Währung",
       "transactionType": "Transaktionstyp",
       "counterpartyIban": "IBAN Gegenkonto",
-      "description": "Beschreibung"
+      "description": "Beschreibung",
+      "mandateReference": "Mandatsreferenz",
+      "creditorId": "Gläubiger-ID",
+      "bookingStatus": "Buchungsstatus (gebucht/vorgemerkt)"
     },
     "import": "{count, plural, =0 {Keine neuen Buchungen} one {# Buchung importieren} other {# Buchungen importieren}}",
     "importEnrich": "{count, plural, one {# vorhandene Buchung ergänzen} other {# vorhandene Buchungen ergänzen}}",
@@ -1040,7 +1044,11 @@
       "category": "Kategorie",
       "bookings": "Verknüpfte Buchungen",
       "source": "Herkunft",
-      "notes": "Notiz"
+      "notes": "Notiz",
+      "mandate": "Mandatsreferenz",
+      "creditor": "Gläubiger-ID",
+      "annual": "Jahreskosten",
+      "actual": "Tatsächlich ({window})"
     },
     "rhythms": {
       "weekly": "wöchentlich",
@@ -1101,7 +1109,11 @@
       "editHeading": "Bearbeiten",
       "delete": "Vertrag löschen …",
       "deleteConfirm": "Der Vertrag wird gelöscht, seine Buchungen bleiben erhalten und werden gelöst.",
-      "deleteButton": "Endgültig löschen"
+      "deleteButton": "Endgültig löschen",
+      "annualValue": "≈ {amount} ({count} × {single})",
+      "actualValue": "{amount} ({debits, plural, one {# Abbuchung} other {# Abbuchungen}}{credits, plural, =0 {} one {, # Gegenbuchung} other {, # Gegenbuchungen}})",
+      "counterBooking": "Gegenbuchung",
+      "counterBookingHint": "Erstattungen und Rücklastschriften derselben Gegenpartei werden als Gegenbuchung verknüpft. Sie mindern die tatsächlichen Kosten, zählen aber nicht für Termine und Betrag."
     },
     "form": {
       "newTitle": "Vertrag anlegen",
@@ -1140,6 +1152,26 @@
         "toleranceInvalid": "Bitte geben Sie eine Toleranz zwischen 0 und 50 % ein.",
         "notesTooLong": "Die Notiz darf höchstens 2.000 Zeichen lang sein."
       }
+    },
+    "costs": {
+      "heading": "Jahreskosten",
+      "intro": "Erwarteter Betrag × Abbuchungen pro Jahr (z. B. monatlich × 12), für aktive Verträge und solche mit vorgemerkter Kündigung. „Tatsächlich“ sind die verknüpften Abbuchungen abzüglich Erstattungen und Rücklastschriften.",
+      "caption": "Jahreskosten der Verträge in {currency}",
+      "columns": {
+        "type": "Vertragstyp",
+        "count": "Verträge",
+        "annual": "Jahreskosten",
+        "monthly": "≈ pro Monat",
+        "actual": "Tatsächlich"
+      },
+      "window": "{from} – {to}",
+      "total": "Summe",
+      "withoutAmount": "{count, plural, one {# Vertrag ohne Betrag zählt nicht in die Jahreskosten.} other {# Verträge ohne Betrag zählen nicht in die Jahreskosten.}}",
+      "note": "Beträge in unterschiedlichen Währungen werden nicht umgerechnet.",
+      "empty": "Keine aktiven Verträge.",
+      "perYear": "≈ pro Jahr",
+      "approx": "≈ {amount}",
+      "loadError": "Die Jahreskosten konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu."
     }
   },
   "Quality": {

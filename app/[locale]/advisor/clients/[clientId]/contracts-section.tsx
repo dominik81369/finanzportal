@@ -1,13 +1,19 @@
 /**
  * Leseansicht des Beraters: Verträge eines verbundenen Mandanten
- * (bestätigte bzw. manuell angelegte; offene Vorschläge nur als Anzahl).
+ * (bestätigte bzw. manuell angelegte; offene Vorschläge nur als Anzahl)
+ * mit Jahreskosten.
  * Keine Aktionen und keine Erkennung – RLS erlaubt Beratern nur SELECT.
  * Die Abfrage filtert ausdrücklich auf user_id = clientId.
  */
 import { getFormatter, getTranslations } from 'next-intl/server';
 
+import { rangeDates } from '@/lib/budget-rule';
+import { actualsWindow, annualCents, summarizeContractCosts, type ContractActualRow } from '@/lib/contract-costs';
 import { getContractLabels } from '@/lib/contract-labels';
 import { createClient } from '@/lib/supabase/server';
+import { todayInGermany } from '@/lib/transactions';
+
+import { ContractCosts } from '../../../dashboard/contracts/contract-costs';
 
 export async function AdvisorContractsSection({ clientId, name }: { clientId: string; name: string }) {
   const t = await getTranslations('Advisor.client.contracts');
@@ -16,6 +22,12 @@ export async function AdvisorContractsSection({ clientId, name }: { clientId: st
   const format = await getFormatter();
 
   const supabase = await createClient();
+  const window = actualsWindow(todayInGermany().slice(0, 7));
+  const { fromDate, toDate } = rangeDates(window);
+  const actuals = await supabase.rpc('contract_actuals', { p_user_id: clientId, p_from: fromDate, p_to: toDate });
+  if (actuals.error) {
+    console.error('[advisor] Abbuchungen je Vertrag nicht ladbar', { code: actuals.error.code });
+  }
   const { data, error } = await supabase
     .from('recurring_contracts')
     .select(
@@ -38,6 +50,26 @@ export async function AdvisorContractsSection({ clientId, name }: { clientId: st
     value
       ? format.dateTime(new Date(`${value}T00:00:00Z`), { dateStyle: 'medium', timeZone: 'UTC' })
       : tContracts('notSet');
+  const perYear = (row: (typeof rows)[number]) => {
+    const cents = annualCents(row.expected_amount, row.rhythm, row.interval_count);
+    return cents === null
+      ? tContracts('notSet')
+      : tContracts('costs.approx', { amount: format.number(cents / 100, { style: 'currency', currency: row.currency }) });
+  };
+  const costs = actuals.error
+    ? null
+    : summarizeContractCosts(
+        rows.map((row) => ({
+          id: row.id,
+          contractType: row.contract_type,
+          status: row.status,
+          rhythm: row.rhythm,
+          intervalCount: row.interval_count,
+          expectedAmount: row.expected_amount,
+          currency: row.currency,
+        })),
+        (actuals.data ?? []) as ContractActualRow[],
+      );
 
   return (
     <section className="advisor-section" aria-labelledby="contracts-heading">
@@ -62,6 +94,9 @@ export async function AdvisorContractsSection({ clientId, name }: { clientId: st
                 </th>
                 <th scope="col">{tContracts('fields.next')}</th>
                 <th scope="col" className="amount">
+                  {tContracts('costs.perYear')}
+                </th>
+                <th scope="col" className="amount">
                   {tContracts('fields.bookings')}
                 </th>
               </tr>
@@ -85,6 +120,7 @@ export async function AdvisorContractsSection({ clientId, name }: { clientId: st
                   <td>{labels.rhythm(row.rhythm, row.interval_count)}</td>
                   <td className="amount">{money(row.expected_amount, row.currency)}</td>
                   <td className="nowrap">{date(row.next_expected_date)}</td>
+                  <td className="amount">{perYear(row)}</td>
                   <td className="amount">{row.transactions[0]?.count ?? 0}</td>
                 </tr>
               ))}
@@ -93,6 +129,7 @@ export async function AdvisorContractsSection({ clientId, name }: { clientId: st
         </div>
       )}
       {open > 0 ? <p className="hint">{t('openSuggestions', { count: open })}</p> : null}
+      {rows.length > 0 && costs ? <ContractCosts costs={costs} window={window} idPrefix="advisor-costs" /> : null}
     </section>
   );
 }

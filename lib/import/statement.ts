@@ -11,7 +11,9 @@
  *                       dann die manuelle Zuordnung statt eines Fehlers).
  * 3. buildRows():       Zeilen normalisieren (Datum, Betrag), Fehler je Zeile
  *                       sammeln, Salden aus Meta-Zeilen bzw. Saldo-Spalte
- *                       lesen und die Summe dagegen prüfen.
+ *                       lesen und die Summe dagegen prüfen. Vorgemerkte
+ *                       Umsätze (Buchungsstatus, z. B. „Umsatz vorgemerkt“)
+ *                       werden nicht übernommen, nur gezählt.
  *
  * Reine Funktionen, im Browser (Vorschau) und in Tests nutzbar. Der Server
  * prüft die Zeilen beim Import erneut (public.import_transactions).
@@ -37,6 +39,9 @@ export const IMPORT_FIELDS = [
   'transactionType',
   'counterpartyIban',
   'description',
+  'mandateReference',
+  'creditorId',
+  'bookingStatus',
 ] as const;
 export type ImportField = (typeof IMPORT_FIELDS)[number];
 export const REQUIRED_FIELDS: readonly ImportField[] = ['date', 'amount', 'purpose'];
@@ -93,6 +98,11 @@ export const COLUMN_ALIASES: Record<ImportField, readonly string[]> = {
   ],
   // Nur zusätzlich zum Verwendungszweck – allein ist „Beschreibung“ der Zweck.
   description: ['beschreibung'],
+  // SEPA-Lastschrift (DKB, Sparkasse CSV-CAMT u. a.).
+  mandateReference: ['mandatsreferenz', 'mandatsref', 'mandat', 'mandate reference'],
+  creditorId: ['glaeubiger id', 'glaeubigerid', 'glaeubiger identifikationsnummer', 'glaeubiger identifikation', 'creditor id'],
+  // „Umsatz gebucht“ / „Umsatz vorgemerkt“ (Sparkasse), „Gebucht“ / „Vorgemerkt“ (DKB).
+  bookingStatus: ['status', 'buchungsstatus', 'umsatzstatus', 'info'],
 };
 
 /**
@@ -186,6 +196,9 @@ export function detectColumns(header: Cell[]): ColumnDetection {
     'currency',
     'balance',
     'description',
+    'mandateReference',
+    'creditorId',
+    'bookingStatus',
   ];
   for (const field of order) {
     let bestRank: number | null = null;
@@ -234,6 +247,8 @@ export type ImportRow = {
   transaction_type: string | null;
   counterparty_iban: string | null;
   description: string | null;
+  mandate_reference: string | null;
+  creditor_id: string | null;
 };
 
 export type RowError = {
@@ -262,6 +277,8 @@ export type BuiltStatement = {
   errors: RowError[];
   /** Zeilen mit Betrag 0 (reine Info-Buchungen), nicht importiert. */
   skippedZero: number;
+  /** Vorgemerkte Umsätze, nicht importiert (kommen gebucht mit dem nächsten Auszug). */
+  skippedPending: number;
   /** Summe aller Beträge der Datei (in Cent gerundet). */
   sum: number;
   balances: StatementBalances;
@@ -298,6 +315,28 @@ export function normalizeIban(text: string): string | null {
   return /^[A-Z]{2}[0-9]{2}[0-9A-Z]{11,30}$/.test(iban) ? iban : null;
 }
 
+/** SEPA-Mandatsreferenz: höchstens 35 Zeichen, sonst null (dann liest der Server sie aus dem Zweck). */
+export const MANDATE_REFERENCE_MAX_LENGTH = 35;
+
+export function normalizeMandateReference(text: string): string | null {
+  const value = text.replace(/\s+/g, ' ').trim();
+  return value !== '' && value.length <= MANDATE_REFERENCE_MAX_LENGTH ? value : null;
+}
+
+/** Gläubiger-ID in Großbuchstaben ohne Leerzeichen (z. B. DE98ZZZ09999999999), sonst null. */
+export function normalizeCreditorId(text: string): string | null {
+  const id = text.replace(/\s+/g, '').toUpperCase();
+  return /^[A-Z]{2}[0-9]{2}[A-Z0-9]{3}[A-Z0-9]{1,28}$/.test(id) ? id : null;
+}
+
+/**
+ * Vorgemerkter (noch nicht gebuchter) Umsatz laut Status-Spalte bzw. als
+ * Buchungstag („offen“, comdirect).
+ */
+export function isPendingStatus(text: string): boolean {
+  return /\b(vorgemerkt|vormerkung|pending|offen|nicht gebucht|in bearbeitung)\b/i.test(text);
+}
+
 const BALANCE_LABEL = /(konto)?stand|saldo/i;
 const OPENING_LABEL = /anfang|alter|alt\b|eroeffnung|eröffnung|vortrag|opening/i;
 
@@ -331,6 +370,7 @@ export function buildRows(rows: Cell[][], headerIndex: number, mapping: ColumnMa
   const errors: RowError[] = [];
   const balances: StatementBalances = { opening: null, closing: null };
   let skippedZero = 0;
+  let skippedPending = 0;
   let sum = 0;
   const rowBalances: { amount: number; balance: number; date: string }[] = [];
 
@@ -356,6 +396,16 @@ export function buildRows(rows: Cell[][], headerIndex: number, mapping: ColumnMa
     const rawAmount = get(row, 'amount');
     const date = parseDate(rawDate instanceof Date ? rawDate : cellText(rawDate));
     const amount = parseAmount(typeof rawAmount === 'number' ? rawAmount : cellText(rawAmount));
+
+    // Vorgemerkt: nicht übernehmen und nicht in die Summe (Salden zählen nur
+    // gebuchte Umsätze).
+    if (
+      amount !== null &&
+      (isPendingStatus(cellText(get(row, 'bookingStatus'))) || (date === null && isPendingStatus(cellText(rawDate))))
+    ) {
+      skippedPending += 1;
+      return;
+    }
 
     if (date === null) {
       // Fuß-/Meta-Zeile, z. B. „Endsaldo;;;1.234,56“ – der Betrag steht
@@ -403,6 +453,8 @@ export function buildRows(rows: Cell[][], headerIndex: number, mapping: ColumnMa
       transaction_type: clip(cellText(get(row, 'transactionType')), TRANSACTION_TYPE_MAX_LENGTH),
       counterparty_iban: normalizeIban(cellText(get(row, 'counterpartyIban'))),
       description: clip(cellText(get(row, 'description')), PURPOSE_MAX_LENGTH),
+      mandate_reference: normalizeMandateReference(cellText(get(row, 'mandateReference'))),
+      creditor_id: normalizeCreditorId(cellText(get(row, 'creditorId'))),
     });
   });
 
@@ -430,5 +482,5 @@ export function buildRows(rows: Cell[][], headerIndex: number, mapping: ColumnMa
     balanceCheck = { status: 'closingOnly', closing: balances.closing };
   }
 
-  return { rows: result, errors, skippedZero, sum, balances, balanceCheck };
+  return { rows: result, errors, skippedZero, skippedPending, sum, balances, balanceCheck };
 }

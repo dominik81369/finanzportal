@@ -64,6 +64,9 @@ const MAPPED_FIELDS: readonly ImportField[] = [
   'transactionType',
   'counterpartyIban',
   'description',
+  'mandateReference',
+  'creditorId',
+  'bookingStatus',
 ];
 
 const emptyMapping = (): ColumnMapping =>
@@ -422,6 +425,11 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
                 </div>
               ) : null}
               {built.skippedZero > 0 ? <p className="cell-note">{t('preview.skippedZero', { count: built.skippedZero })}</p> : null}
+              {built.skippedPending > 0 ? (
+                <p className="cell-note" id="import-skipped-pending">
+                  {t('preview.skippedPending', { count: built.skippedPending })}
+                </p>
+              ) : null}
               {built.rows.length > MAX_IMPORT_ROWS ? (
                 <p role="alert" className="form-error">
                   {t('errors.tooManyRows', { max: MAX_IMPORT_ROWS })}

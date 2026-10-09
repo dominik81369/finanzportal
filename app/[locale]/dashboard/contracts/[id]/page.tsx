@@ -1,9 +1,11 @@
 /**
  * app/[locale]/dashboard/contracts/[id]/page.tsx
  *
- * Ein Vertrag: Angaben und Status-Aktionen (Vorschlag bestätigen/verwerfen,
- * erkannten Vertrag verwerfen, wiederherstellen, manuellen löschen) sofort;
- * verknüpfte Buchungen und Bearbeiten gestreamt (contract-bookings.tsx).
+ * Ein Vertrag: Angaben (mit Jahreskosten, tatsächlich abgebucht in den
+ * letzten 12 vollen Monaten, Mandatsreferenz und Gläubiger-ID) und
+ * Status-Aktionen (Vorschlag bestätigen/verwerfen, erkannten Vertrag
+ * verwerfen, wiederherstellen, manuellen löschen) sofort; verknüpfte
+ * Buchungen und Bearbeiten gestreamt (contract-bookings.tsx).
  *
  * Nur eigene Verträge (user_id = eigener Nutzer); für Berater und fremde
  * IDs ist die Seite ein 404. Die RPCs prüfen Eigentum zusätzlich selbst.
@@ -16,11 +18,13 @@ import { Suspense } from 'react';
 import { Link } from '@/i18n/navigation';
 import { toAppLocale } from '@/i18n/routing';
 import { confirmContract, deleteContract, dismissContract, restoreContract } from '@/lib/actions/contracts';
+import { rangeDates } from '@/lib/budget-rule';
 import { categoryDisplayName } from '@/lib/categories';
+import { actualsByContract, actualsWindow, annualCents, paymentsPerYear, type ContractActualRow } from '@/lib/contract-costs';
 import { getContractLabels } from '@/lib/contract-labels';
 import { CONTRACT_TYPES, rhythmKey, type ContractFormValues } from '@/lib/contracts';
 import { createClient, requireOnboardedUser } from '@/lib/supabase/server';
-import { formatAmountInput, isUuid } from '@/lib/transactions';
+import { formatAmountInput, isUuid, todayInGermany } from '@/lib/transactions';
 
 import { ActionForm } from '../../action-form';
 import { ContractsSkeleton } from '../contracts-skeleton';
@@ -56,7 +60,7 @@ export default async function ContractPage({ params, searchParams }: ContractPag
     .select(
       `id, name, counterparty_name, counterparty_key, contract_type, rhythm, interval_count, expected_amount,
        amount_tolerance_pct, currency, first_booking_date, last_booking_date, next_expected_date, status,
-       detection_source, detection_confidence, notes, account_id, category_id,
+       detection_source, detection_confidence, notes, account_id, category_id, mandate_reference, creditor_id,
        account:accounts!recurring_contracts_account_fkey ( name ),
        category:categories!recurring_contracts_category_fkey ( name, default_key )`,
     )
@@ -82,6 +86,23 @@ export default async function ContractPage({ params, searchParams }: ContractPag
       </section>
     );
   }
+
+  const window = actualsWindow(todayInGermany().slice(0, 7));
+  const { fromDate, toDate } = rangeDates(window);
+  const actualRows = await supabase.rpc('contract_actuals', { p_user_id: user.id, p_from: fromDate, p_to: toDate });
+  if (actualRows.error) {
+    console.error('[contracts] Abbuchungen des Vertrags nicht ladbar', { code: actualRows.error.code });
+  }
+  const actual = actualRows.error
+    ? null
+    : (actualsByContract([contract], (actualRows.data ?? []) as ContractActualRow[]).get(contract.id) ?? {
+        debitCount: 0,
+        creditCount: 0,
+        netCents: 0,
+      });
+  const annual = annualCents(contract.expected_amount, contract.rhythm, contract.interval_count);
+  const monthShort = (month: string) =>
+    format.dateTime(new Date(`${month}-01T00:00:00Z`), { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
   const editable = ['active', 'cancellation_pending', 'cancelled'].includes(contract.status);
   const money = (amount: number | null, currency: string) =>
@@ -182,6 +203,42 @@ export default async function ContractPage({ params, searchParams }: ContractPag
           <dt>{t('fields.category')}</dt>
           <dd>{contract.category ? categoryDisplayName(contract.category, tCategories) : t('notSet')}</dd>
         </div>
+        <div>
+          <dt>{t('fields.annual')}</dt>
+          <dd>
+            {annual === null || contract.expected_amount === null
+              ? t('notSet')
+              : t('detail.annualValue', {
+                  amount: format.number(annual / 100, { style: 'currency', currency: contract.currency }),
+                  count: format.number(paymentsPerYear(contract.rhythm, contract.interval_count), { maximumFractionDigits: 2 }),
+                  single: money(contract.expected_amount, contract.currency),
+                })}
+          </dd>
+        </div>
+        <div>
+          <dt>{t('fields.actual', { window: t('costs.window', { from: monthShort(window.from), to: monthShort(window.to) }) })}</dt>
+          <dd>
+            {actual === null
+              ? t('notSet')
+              : t('detail.actualValue', {
+                  amount: format.number(actual.netCents / 100, { style: 'currency', currency: contract.currency }),
+                  debits: actual.debitCount,
+                  credits: actual.creditCount,
+                })}
+          </dd>
+        </div>
+        {contract.mandate_reference ? (
+          <div>
+            <dt>{t('fields.mandate')}</dt>
+            <dd className="contract-sepa-ref">{contract.mandate_reference}</dd>
+          </div>
+        ) : null}
+        {contract.creditor_id ? (
+          <div>
+            <dt>{t('fields.creditor')}</dt>
+            <dd className="contract-sepa-ref">{contract.creditor_id}</dd>
+          </div>
+        ) : null}
         <div>
           <dt>{t('fields.source')}</dt>
           <dd>
