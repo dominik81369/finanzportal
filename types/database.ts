@@ -280,6 +280,8 @@ export type Database = {
           source: Database['public']['Enums']['transaction_source'];
           recurring_contract_id: string | null;
           contract_link_manual: boolean;
+          mandate_reference: string | null;
+          creditor_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -316,6 +318,8 @@ export type Database = {
           source?: Database['public']['Enums']['transaction_source'];
           recurring_contract_id?: string | null;
           contract_link_manual?: boolean;
+          mandate_reference?: string | null;
+          creditor_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -352,6 +356,8 @@ export type Database = {
           source?: Database['public']['Enums']['transaction_source'];
           recurring_contract_id?: string | null;
           contract_link_manual?: boolean;
+          mandate_reference?: string | null;
+          creditor_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -816,6 +822,8 @@ export type Database = {
           notes: string | null;
           contract_type: Database['public']['Enums']['contract_type'];
           counterparty_key: string | null;
+          mandate_reference: string | null;
+          creditor_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -846,6 +854,8 @@ export type Database = {
           notes?: string | null;
           contract_type?: Database['public']['Enums']['contract_type'];
           counterparty_key?: string | null;
+          mandate_reference?: string | null;
+          creditor_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -876,6 +886,8 @@ export type Database = {
           notes?: string | null;
           contract_type?: Database['public']['Enums']['contract_type'];
           counterparty_key?: string | null;
+          mandate_reference?: string | null;
+          creditor_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -1152,6 +1164,17 @@ export type Database = {
           p_fixed_currency: string;
         };
         Returns: undefined;
+      };
+      contract_actuals: {
+        Args: { p_user_id: string; p_from: string; p_to: string };
+        Returns: {
+          contract_id: string;
+          currency: string;
+          debit_count: number;
+          debits: number;
+          credit_count: number;
+          credits: number;
+        }[];
       };
       contract_counterparties: {
         Args: { p_limit?: number };

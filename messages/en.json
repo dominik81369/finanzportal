@@ -689,9 +689,10 @@
       "invalidAmount": "Row {line}: amount “{value}” not recognised",
       "moreErrors": "… and {count} more.",
       "skippedZero": "{count, plural, one {# transaction with amount 0 will not be imported.} other {# transactions with amount 0 will not be imported.}}",
+      "skippedPending": "{count, plural, one {# pending, not imported – it will come with the next statement once the bank books it.} other {# pending, not imported – they will come with the next statement once the bank books them.}}",
       "checking": "Comparing with existing transactions …",
       "summary": "{new, plural, =0 {No new transactions} one {# new transaction} other {# new transactions}}, {duplicates, plural, =0 {none already present} one {# already present (skipped)} other {# already present (skipped)}}, {categorized, plural, =0 {none categorised by rules} other {# categorised by rules}}.",
-      "enriched": "{count, plural, one {Missing transaction type, IBAN or description will be added to # existing transaction.} other {Missing transaction type, IBAN or description will be added to # existing transactions.}}"
+      "enriched": "{count, plural, one {Missing details (transaction type, IBAN, description, mandate reference or creditor ID) will be added to # existing transaction.} other {Missing details (transaction type, IBAN, description, mandate reference or creditor ID) will be added to # existing transactions.}}"
     },
     "detected": {
       "excel": "Excel file (first sheet)",
@@ -724,7 +725,10 @@
       "currency": "Currency",
       "transactionType": "Transaction type",
       "counterpartyIban": "Counterparty IBAN",
-      "description": "Description"
+      "description": "Description",
+      "mandateReference": "Mandate reference",
+      "creditorId": "Creditor ID",
+      "bookingStatus": "Booking status (booked/pending)"
     },
     "import": "{count, plural, =0 {No new transactions} one {Import # transaction} other {Import # transactions}}",
     "importEnrich": "{count, plural, one {Complete # existing transaction} other {Complete # existing transactions}}",
@@ -1040,7 +1044,11 @@
       "category": "Category",
       "bookings": "Linked transactions",
       "source": "Origin",
-      "notes": "Note"
+      "notes": "Note",
+      "mandate": "Mandate reference",
+      "creditor": "Creditor ID",
+      "annual": "Annual costs",
+      "actual": "Actual ({window})"
     },
     "rhythms": {
       "weekly": "weekly",
@@ -1101,7 +1109,11 @@
       "editHeading": "Edit",
       "delete": "Delete contract …",
       "deleteConfirm": "The contract will be deleted; its transactions are kept and unlinked.",
-      "deleteButton": "Delete permanently"
+      "deleteButton": "Delete permanently",
+      "annualValue": "≈ {amount} ({count} × {single})",
+      "actualValue": "{amount} ({debits, plural, one {# debit} other {# debits}}{credits, plural, =0 {} one {, # counter-booking} other {, # counter-bookings}})",
+      "counterBooking": "Counter-booking",
+      "counterBookingHint": "Refunds and returned debits from the same counterparty are linked as counter-bookings. They reduce the actual costs but do not affect dates or the amount."
     },
     "form": {
       "newTitle": "Add contract",
@@ -1140,6 +1152,26 @@
         "toleranceInvalid": "Please enter a tolerance between 0 and 50 %.",
         "notesTooLong": "The note may be at most 2,000 characters long."
       }
+    },
+    "costs": {
+      "heading": "Annual costs",
+      "intro": "Expected amount × debits per year (e.g. monthly × 12), for active contracts and those with a pending cancellation. “Actual” is the linked debits minus refunds and returned debits.",
+      "caption": "Annual contract costs in {currency}",
+      "columns": {
+        "type": "Contract type",
+        "count": "Contracts",
+        "annual": "Annual costs",
+        "monthly": "≈ per month",
+        "actual": "Actual"
+      },
+      "window": "{from} – {to}",
+      "total": "Total",
+      "withoutAmount": "{count, plural, one {# contract without an amount is not included in the annual costs.} other {# contracts without an amount are not included in the annual costs.}}",
+      "note": "Amounts in different currencies are not converted.",
+      "empty": "No active contracts.",
+      "perYear": "≈ per year",
+      "approx": "≈ {amount}",
+      "loadError": "The annual costs could not be loaded right now. Please reload the page."
     }
   },
   "Quality": {

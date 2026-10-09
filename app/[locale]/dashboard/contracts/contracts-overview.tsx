@@ -1,19 +1,24 @@
 /**
  * Inhalt der Verträge-Seite (gestreamt, Fallback: ContractsSkeleton):
  * Erkennung beim Öffnen (public.refresh_contracts – ändert nur Vorschläge
- * und verknüpft neue Buchungen), dann Vorschläge, eigene Verträge und
- * verworfene. Alle Abfragen filtern auf user_id = eigener Nutzer (RLS gibt
- * Beratern zusätzlich die Daten ihrer Mandanten frei).
+ * und verknüpft neue Buchungen), dann Vorschläge, eigene Verträge mit
+ * Jahreskosten (contract-costs.tsx) und verworfene. Alle Abfragen filtern
+ * auf user_id = eigener Nutzer (RLS gibt Beratern zusätzlich die Daten
+ * ihrer Mandanten frei).
  */
 import { getFormatter, getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
 import { confirmContract, dismissContract, restoreContract } from '@/lib/actions/contracts';
+import { rangeDates } from '@/lib/budget-rule';
+import { actualsWindow, annualCents, summarizeContractCosts, type ContractActualRow } from '@/lib/contract-costs';
 import { getContractLabels } from '@/lib/contract-labels';
 import { CONTRACT_TYPES, confidenceLevel } from '@/lib/contracts';
 import { createClient } from '@/lib/supabase/server';
+import { todayInGermany } from '@/lib/transactions';
 
 import { ActionForm } from '../action-form';
+import { ContractCosts } from './contract-costs';
 
 /** Je Vorschlag angezeigte verknüpfte Buchungen (Rest als „… und N weitere“). */
 const BOOKINGS_PER_SUGGESTION = 12;
@@ -29,7 +34,9 @@ export async function ContractsOverview({ userId }: { userId: string }) {
     console.error('[contracts] Erkennung beim Öffnen fehlgeschlagen', { code: refreshed.error.code });
   }
 
-  const [contracts, transactionCount] = await Promise.all([
+  const window = actualsWindow(todayInGermany().slice(0, 7));
+  const { fromDate, toDate } = rangeDates(window);
+  const [contracts, transactionCount, actuals] = await Promise.all([
     supabase
       .from('recurring_contracts')
       .select(
@@ -42,9 +49,13 @@ export async function ContractsOverview({ userId }: { userId: string }) {
       .order('next_expected_date', { ascending: true, nullsFirst: false })
       .order('name'),
     supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+    supabase.rpc('contract_actuals', { p_user_id: userId, p_from: fromDate, p_to: toDate }),
   ]);
   if (contracts.error) {
     console.error('[contracts] Laden fehlgeschlagen', { code: contracts.error.code });
+  }
+  if (actuals.error) {
+    console.error('[contracts] Abbuchungen je Vertrag nicht ladbar', { code: actuals.error.code });
   }
 
   const rows = (contracts.data ?? []).map((row) => ({ ...row, bookings: row.transactions[0]?.count ?? 0 }));
@@ -52,6 +63,20 @@ export async function ContractsOverview({ userId }: { userId: string }) {
   const mine = rows.filter((row) => ['active', 'cancellation_pending', 'cancelled'].includes(row.status));
   const dismissed = rows.filter((row) => row.status === 'dismissed');
   const hasTransactions = (transactionCount.count ?? 0) > 0;
+  const costs = actuals.error
+    ? null
+    : summarizeContractCosts(
+        mine.map((row) => ({
+          id: row.id,
+          contractType: row.contract_type,
+          status: row.status,
+          rhythm: row.rhythm,
+          intervalCount: row.interval_count,
+          expectedAmount: row.expected_amount,
+          currency: row.currency,
+        })),
+        (actuals.data ?? []) as ContractActualRow[],
+      );
 
   // Verknüpfte Buchungen der Vorschläge (zum Aufklappen).
   const bookings = new Map<string, { id: string; booking_date: string; amount: number; currency: string; label: string }[]>();
@@ -91,6 +116,11 @@ export async function ContractsOverview({ userId }: { userId: string }) {
     value
       ? format.dateTime(new Date(`${value}T00:00:00Z`), { dateStyle: 'medium', timeZone: 'UTC' })
       : t('notSet');
+  const annualPerYear = (...args: [...Parameters<typeof annualCents>, string]) => {
+    const [amount, rhythm, intervalCount, currency] = args;
+    const cents = annualCents(amount, rhythm, intervalCount);
+    return cents === null ? t('notSet') : t('costs.approx', { amount: format.number(cents / 100, { style: 'currency', currency }) });
+  };
 
   return (
     <>
@@ -246,6 +276,9 @@ export async function ContractsOverview({ userId }: { userId: string }) {
                         </th>
                         <th scope="col">{t('fields.next')}</th>
                         <th scope="col" className="amount">
+                          {t('costs.perYear')}
+                        </th>
+                        <th scope="col" className="amount">
                           {t('fields.bookings')}
                         </th>
                       </tr>
@@ -269,6 +302,9 @@ export async function ContractsOverview({ userId }: { userId: string }) {
                           <td>{labels.rhythm(row.rhythm, row.interval_count)}</td>
                           <td className="amount">{money(row.expected_amount, row.currency)}</td>
                           <td className="nowrap">{date(row.next_expected_date)}</td>
+                          <td className="amount">
+                            {annualPerYear(row.expected_amount, row.rhythm, row.interval_count, row.currency)}
+                          </td>
                           <td className="amount">{row.bookings}</td>
                         </tr>
                       ))}
@@ -277,6 +313,16 @@ export async function ContractsOverview({ userId }: { userId: string }) {
                 </div>
               )}
             </section>
+
+            {mine.length > 0 ? (
+              costs ? (
+                <ContractCosts costs={costs} window={window} idPrefix="costs" />
+              ) : (
+                <p role="alert" className="form-error">
+                  {t('costs.loadError')}
+                </p>
+              )
+            ) : null}
 
             {dismissed.length > 0 ? (
               <section className="contracts-section" aria-labelledby="dismissed-heading">

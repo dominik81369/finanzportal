@@ -31,7 +31,7 @@ export type ImportSummary = {
   new: number;
   duplicates: number;
   categorized: number;
-  /** Vorhandene Buchungen, denen Typ/IBAN/Beschreibung ergänzt wird bzw. wurde. */
+  /** Vorhandene Buchungen, denen Typ/IBAN/Beschreibung/Mandat/Gläubiger-ID ergänzt wird bzw. wurde. */
   enriched: number;
   /** Vom Lernverfahren automatisch zugeordnet (nur nach dem Import). */
   learned: number;
@@ -60,7 +60,9 @@ function isImportRow(value: unknown): value is ImportRow {
     optionalString('purpose') &&
     optionalString('transaction_type') &&
     optionalString('counterparty_iban') &&
-    optionalString('description')
+    optionalString('description') &&
+    optionalString('mandate_reference') &&
+    optionalString('creditor_id')
   );
 }
 
