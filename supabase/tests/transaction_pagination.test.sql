@@ -71,9 +71,12 @@ $$;
 select tests.authenticate_as('pg_alice');
 
 -- Wie die App: Filter auf die eigene user_id als Literal (.eq('user_id',
--- user.id)), gleiche Sortierung, Seite 2. Sequenzielle Scans aus, weil der
--- Planer bei 28 Zeilen sonst immer die Tabelle liest.
+-- user.id)), gleiche Sortierung, Seite 2. Sequenzielle und Bitmap-Scans aus,
+-- weil der Planer bei 28 Zeilen sonst die Tabelle liest bzw. – je nach
+-- Leerraum, den vorherige Testdateien hinterlassen – Bitmap-Scan plus
+-- Sortierung wählt. Geprüft wird, dass der Index die Reihenfolge liefert.
 set local enable_seqscan = off;
+set local enable_bitmapscan = off;
 select ok(
   pg_temp.query_plan(format($q$
     select id from public.transactions
@@ -89,6 +92,7 @@ select ok(
   'Seitenabfrage nutzt den Index und braucht keinen eigenen Sortierschritt'
 );
 reset enable_seqscan;
+reset enable_bitmapscan;
 
 select results_eq(
   $$ select counterparty_name from public.transactions

@@ -410,10 +410,9 @@
       },
       "contracts": {
         "heading": "Verträge",
-        "empty": "Der Mandant hat noch keine Verträge bestätigt oder angelegt.",
+        "empty": "Der Mandant hat noch keine Verträge angelegt.",
         "loadError": "Die Verträge konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
-        "caption": "Verträge von {name}, nach nächster Abbuchung sortiert",
-        "openSuggestions": "{count, plural, one {# erkannter Vertrag wartet noch auf Bestätigung durch den Mandanten.} other {# erkannte Verträge warten noch auf Bestätigung durch den Mandanten.}}"
+        "caption": "Verträge von {name}, nach nächster Abbuchung sortiert"
       },
       "transactions": {
         "heading": "Buchungen",
@@ -743,9 +742,7 @@
       "enriched": "{count, plural, one {# vorhandene Buchung wurde ergänzt.} other {# vorhandene Buchungen wurden ergänzt.}}",
       "learned": "{count, plural, one {# Buchung vom Lernverfahren zugeordnet.} other {# Buchungen vom Lernverfahren zugeordnet.}}",
       "suggested": "{count, plural, one {# Vorschlag in der Prüfliste.} other {# Vorschläge in der Prüfliste.}}",
-      "toReview": "Zur Prüfliste",
-      "contracts": "{count, plural, one {# neuer Vertragsvorschlag.} other {# neue Vertragsvorschläge.}}",
-      "toContracts": "Zu den Verträgen"
+      "toReview": "Zur Prüfliste"
     },
     "balance": {
       "ok": "Saldenabgleich: Anfangssaldo {opening} + Buchungen = Endsaldo {closing} ✓",
@@ -974,17 +971,12 @@
   "Contracts": {
     "metaTitle": "Verträge",
     "heading": "Verträge",
-    "intro": "Wiederkehrende Zahlungen wie Abos, Versicherungen und Mitgliedschaften – automatisch aus Ihren Buchungen erkannt oder von Ihnen angelegt.",
+    "intro": "Wiederkehrende Zahlungen wie Abos, Versicherungen und Mitgliedschaften. Sie legen einen Vertrag an, passende Abbuchungen werden automatisch verknüpft – über alle Konten.",
     "back": "Zu den Verträgen",
     "new": "Vertrag anlegen",
-    "refresh": "Erneut prüfen",
     "notSet": "–",
     "loading": "Verträge werden geladen …",
     "messages": {
-      "refreshed": "{count, plural, =0 {Keine neuen Vorschläge.} one {# neuer Vorschlag erkannt.} other {# neue Vorschläge erkannt.}}",
-      "confirmed": "Vertrag bestätigt.",
-      "dismissed": "Vorschlag verworfen. Er wird nicht erneut vorgeschlagen.",
-      "restored": "Vorschlag wiederhergestellt.",
       "deleted": "Vertrag gelöscht.",
       "created": "Vertrag angelegt. Passende Abbuchungen wurden verknüpft.",
       "saved": "Änderungen gespeichert.",
@@ -998,38 +990,18 @@
     "empty": {
       "noTransactions": {
         "title": "Noch keine Buchungen",
-        "text": "Sobald Sie Kontoauszüge importieren, erkennt das Portal regelmäßige Abbuchungen und schlägt sie als Verträge vor.",
-        "import": "Kontoauszug importieren",
-        "new": "Vertrag manuell anlegen"
+        "text": "Sobald Sie Kontoauszüge importieren, können Sie Verträge aus Ihren Buchungen anlegen – regelmäßige Abbuchungen stehen im Formular zur Auswahl.",
+        "import": "Kontoauszug importieren"
       },
-      "nothingDetected": {
-        "title": "Noch keine Verträge erkannt",
-        "text": "Ein Vertrag wird vorgeschlagen, sobald dieselbe Gegenpartei mindestens dreimal in regelmäßigem Abstand abbucht – bei halbjährlichen und jährlichen Zahlungen genügen zwei Abbuchungen."
-      }
-    },
-    "suggestions": {
-      "heading": "Erkannte Verträge",
-      "intro": "Aus regelmäßigen Abbuchungen erkannt. Bestätigen Sie, was ein Vertrag ist – Verworfenes wird nicht erneut vorgeschlagen.",
-      "empty": "Keine offenen Vorschläge.",
-      "confidence": "Sicherheit: {level}",
-      "fewBookings": "erst {count} Abbuchungen",
-      "showBookings": "{count, plural, one {# verknüpfte Buchung anzeigen} other {# verknüpfte Buchungen anzeigen}}",
-      "moreBookings": "… und {count} weitere",
-      "confirm": "Bestätigen",
-      "confirmLabel": "{name} als Vertrag bestätigen",
-      "dismiss": "Verwerfen",
-      "dismissLabel": "Vorschlag {name} verwerfen"
+      "noContracts": {
+        "title": "Noch keine Verträge",
+        "text": "Legen Sie Abos, Versicherungen und andere Verträge an. Im Formular stehen regelmäßige Abbuchungen aus Ihren Buchungen zur Auswahl; Name, Betrag und Rhythmus werden vorbelegt."
+      },
+      "new": "Vertrag anlegen"
     },
     "list": {
       "heading": "Meine Verträge",
-      "empty": "Noch keine bestätigten Verträge. Bestätigen Sie einen Vorschlag oder legen Sie einen Vertrag an.",
-      "caption": "Bestätigte und angelegte Verträge, nach nächster Abbuchung sortiert"
-    },
-    "dismissed": {
-      "heading": "Verworfen ({count})",
-      "hint": "Diese Vorschläge werden nicht erneut vorgeschlagen – auch nicht nach neuen Importen.",
-      "restore": "Wiederherstellen",
-      "restoreLabel": "{name} wiederherstellen"
+      "caption": "Ihre Verträge, nach nächster Abbuchung sortiert"
     },
     "fields": {
       "name": "Vertrag",
@@ -1043,10 +1015,7 @@
       "account": "Konto (Standard)",
       "category": "Kategorie",
       "bookings": "Verknüpfte Buchungen",
-      "source": "Herkunft",
       "notes": "Notiz",
-      "mandate": "Mandatsreferenz",
-      "creditor": "Gläubiger-ID",
       "annual": "Jahreskosten",
       "actual": "Tatsächlich ({window})"
     },
@@ -1079,20 +1048,12 @@
       "cancelled": "Gekündigt",
       "dismissed": "Verworfen"
     },
-    "confidenceLevels": {
-      "high": "hoch",
-      "medium": "mittel",
-      "low": "gering"
-    },
     "detail": {
       "metaTitle": "Vertrag",
-      "tolerance": "(±{pct} %)",
-      "sourceAuto": "Automatisch erkannt (Sicherheit {level})",
-      "sourceManual": "Manuell angelegt",
-      "dismissActive": "Kein Vertrag – verwerfen",
+      "lastValue": "am {date} ({amount})",
       "linkedHeading": "Verknüpfte Buchungen ({count})",
-      "linkedHint": "Abbuchungen dieser Gegenpartei innerhalb der Toleranz werden automatisch verknüpft – über alle Konten.",
-      "linkedEmpty": "Noch keine Buchungen verknüpft. Abbuchungen dieser Gegenpartei innerhalb der Toleranz werden automatisch verknüpft.",
+      "linkedHint": "Abbuchungen dieser Gegenpartei mit ähnlichem Betrag (höchstens 50 % Abweichung) werden automatisch verknüpft – höchstens eine je Zeitraum, über alle Konten.",
+      "linkedEmpty": "Noch keine Buchungen verknüpft. Abbuchungen dieser Gegenpartei mit ähnlichem Betrag werden automatisch verknüpft.",
       "linkedEmptyNoCounterparty": "Ohne Gegenpartei werden keine Buchungen verknüpft. Wählen Sie unter „Bearbeiten“ eine Gegenpartei aus Ihren Buchungen.",
       "linkedCaption": "Buchungen zu {name}, neueste zuerst",
       "date": "Datum",
@@ -1102,8 +1063,9 @@
       "actions": "Aktionen",
       "unlink": "Lösen",
       "unlinkLabel": "Buchung vom {date} lösen",
-      "unlinkedHeading": "Gelöste Buchungen dieser Gegenpartei",
-      "unlinkedHint": "Von Ihnen gelöst – die automatische Verknüpfung lässt sie aus.",
+      "unlinkedHeading": "Weitere Buchungen dieser Gegenpartei",
+      "unlinkedHint": "Nicht verknüpft – etwa Einkäufe, eine zweite Abbuchung im selben Zeitraum oder ein stark abweichender Betrag. Sie können eine Buchung von Hand verknüpfen.",
+      "unlinkedByYou": "von Ihnen gelöst",
       "link": "Verknüpfen",
       "linkLabel": "Buchung vom {date} verknüpfen",
       "editHeading": "Bearbeiten",
@@ -1117,21 +1079,25 @@
     },
     "form": {
       "newTitle": "Vertrag anlegen",
-      "newIntro": "Mit einer Gegenpartei aus Ihren Buchungen werden passende Abbuchungen automatisch verknüpft – über alle Konten.",
+      "newIntro": "Wählen Sie eine Gegenpartei aus Ihren Buchungen: Name, Betrag, Rhythmus und Typ werden vorbelegt, passende Abbuchungen automatisch verknüpft – über alle Konten.",
       "counterparty": "Gegenpartei aus Ihren Buchungen",
       "counterpartyNone": "Keine Auswahl (frei eingeben)",
-      "counterpartyOption": "{label} ({count, plural, one {# Abbuchung} other {# Abbuchungen}})",
+      "counterpartyRecurring": "Regelmäßige Abbuchungen",
+      "counterpartyOthers": "Weitere Gegenparteien",
+      "counterpartyCount": "{count, plural, one {# Abbuchung} other {# Abbuchungen}}",
+      "counterpartyLast": "zuletzt {amount}",
+      "counterpartyHasContract": "Vertrag vorhanden",
       "counterpartyHint": "Bei Zahlungen über PayPal & Co. zählt der Händler aus dem Verwendungszweck.",
+      "prefilled": "Aus Ihren Buchungen vorbelegt – bitte prüfen.",
+      "hasContract": "Zu dieser Gegenpartei gibt es schon einen Vertrag. Ein zweiter lohnt sich nur, wenn es wirklich zwei sind (z. B. Hausrat und Haftpflicht bei derselben Versicherung).",
       "counterpartyFree": "Gegenpartei (frei, optional)",
       "name": "Bezeichnung",
       "amount": "Betrag der Abbuchung",
-      "amountHint": "Ohne Vorzeichen, z. B. 12,99.",
+      "amountHint": "Ohne Vorzeichen, z. B. 12,99. Mit verknüpften Abbuchungen folgt der Betrag dem mittleren der letzten drei – eine einzelne Abweichung ändert ihn nicht.",
       "nextHint": "Optional. Mit verknüpften Buchungen rückt das Datum nach jeder Abbuchung weiter.",
       "noAccount": "Kein Standardkonto",
       "accountHint": "Nur Voreinstellung – Abbuchungen werden kontenübergreifend verknüpft.",
       "noCategory": "Keine Kategorie",
-      "tolerance": "Toleranz (%)",
-      "toleranceHint": "Abbuchungen dieser Gegenpartei mit höchstens so viel Abweichung vom Betrag werden automatisch verknüpft (0–50 %).",
       "create": "Vertrag anlegen",
       "save": "Änderungen speichern",
       "saving": "Wird gespeichert …",
@@ -1139,7 +1105,7 @@
         "summary": "Bitte prüfen Sie die markierten Felder.",
         "generic": "Der Vertrag konnte gerade nicht gespeichert werden. Bitte versuchen Sie es erneut.",
         "notFound": "Diesen Vertrag gibt es nicht (mehr). Bitte laden Sie die Seite neu.",
-        "notEditable": "Vorschläge und verworfene Verträge lassen sich nicht bearbeiten. Bitte bestätigen Sie den Vorschlag zuerst.",
+        "notEditable": "Dieser Vertrag lässt sich nicht bearbeiten. Bitte laden Sie die Seite neu.",
         "nameRequired": "Bitte geben Sie eine Bezeichnung ein.",
         "nameTooLong": "Die Bezeichnung darf höchstens 120 Zeichen lang sein.",
         "counterpartyTooLong": "Die Gegenpartei darf höchstens 200 Zeichen lang sein.",
@@ -1149,7 +1115,6 @@
         "dateInvalid": "Bitte geben Sie ein gültiges Datum ein.",
         "typeInvalid": "Bitte wählen Sie einen Vertragstyp.",
         "selectionInvalid": "Bitte wählen Sie einen Eintrag aus der Liste.",
-        "toleranceInvalid": "Bitte geben Sie eine Toleranz zwischen 0 und 50 % ein.",
         "notesTooLong": "Die Notiz darf höchstens 2.000 Zeichen lang sein."
       }
     },

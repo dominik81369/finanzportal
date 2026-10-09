@@ -497,13 +497,6 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
                 <Link href="/dashboard/transactions/review">{t('result.toReview')}</Link>
               </>
             ) : null}
-            {result.contracts > 0 ? (
-              <>
-                {' '}
-                {t('result.contracts', { count: result.contracts })}{' '}
-                <Link href="/dashboard/contracts">{t('result.toContracts')}</Link>
-              </>
-            ) : null}
           </p>
           {built?.balanceCheck.status === 'mismatch' ? <BalanceCheckNote check={built.balanceCheck} money={money} /> : null}
           {closingCheck ? (

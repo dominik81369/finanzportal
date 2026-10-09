@@ -1130,6 +1130,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
+      sync_contracts: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       budget_category_totals: {
         Args: { p_user_id: string; p_from: string; p_to: string };
         Returns: {
@@ -1184,6 +1188,9 @@ export type Database = {
           tx_count: number;
           last_amount: number;
           last_date: string;
+          recurrence: string | null;
+          contract_type: Database['public']['Enums']['contract_type'];
+          has_contract: boolean;
         }[];
       };
       save_contract: {

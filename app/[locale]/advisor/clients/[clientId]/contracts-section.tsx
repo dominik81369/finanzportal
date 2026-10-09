@@ -1,8 +1,7 @@
 /**
- * Leseansicht des Beraters: Verträge eines verbundenen Mandanten
- * (bestätigte bzw. manuell angelegte; offene Vorschläge nur als Anzahl)
- * mit Jahreskosten.
- * Keine Aktionen und keine Erkennung – RLS erlaubt Beratern nur SELECT.
+ * Leseansicht des Beraters: Verträge eines verbundenen Mandanten (aktiv,
+ * Kündigung vorgemerkt, gekündigt) mit Jahreskosten.
+ * Keine Aktionen und kein Verknüpfen – RLS erlaubt Beratern nur SELECT.
  * Die Abfrage filtert ausdrücklich auf user_id = clientId.
  */
 import { getFormatter, getTranslations } from 'next-intl/server';
@@ -10,6 +9,7 @@ import { getFormatter, getTranslations } from 'next-intl/server';
 import { rangeDates } from '@/lib/budget-rule';
 import { actualsWindow, annualCents, summarizeContractCosts, type ContractActualRow } from '@/lib/contract-costs';
 import { getContractLabels } from '@/lib/contract-labels';
+import { LISTED_CONTRACT_STATUSES } from '@/lib/contracts';
 import { createClient } from '@/lib/supabase/server';
 import { todayInGermany } from '@/lib/transactions';
 
@@ -36,14 +36,13 @@ export async function AdvisorContractsSection({ clientId, name }: { clientId: st
        transactions!transactions_recurring_contract_fkey ( count )`,
     )
     .eq('user_id', clientId)
-    .in('status', ['suggested', 'active', 'cancellation_pending', 'cancelled'])
+    .in('status', LISTED_CONTRACT_STATUSES)
     .order('next_expected_date', { ascending: true, nullsFirst: false })
     .order('name');
   if (error) {
     console.error('[advisor] Verträge des Mandanten nicht ladbar', { code: error.code });
   }
-  const rows = (data ?? []).filter((row) => row.status !== 'suggested');
-  const open = (data ?? []).length - rows.length;
+  const rows = data ?? [];
   const money = (amount: number | null, currency: string) =>
     amount === null ? tContracts('notSet') : format.number(Math.abs(amount), { style: 'currency', currency });
   const date = (value: string | null) =>
@@ -128,7 +127,6 @@ export async function AdvisorContractsSection({ clientId, name }: { clientId: st
           </table>
         </div>
       )}
-      {open > 0 ? <p className="hint">{t('openSuggestions', { count: open })}</p> : null}
       {rows.length > 0 && costs ? <ContractCosts costs={costs} window={window} idPrefix="advisor-costs" /> : null}
     </section>
   );

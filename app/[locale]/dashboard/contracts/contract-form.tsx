@@ -5,9 +5,11 @@
  * Action kommt als Prop: saveContract.bind(null, null | id); nach Erfolg
  * navigiert das Formular zur gelieferten Detailseite.
  *
- * Gegenpartei: Auswahl aus den eigenen Buchungen (verknüpft über denselben
- * Schlüssel wie die Erkennung, auch über Zahlungsvermittler) oder frei
- * eingegeben. Die Auswahl belegt leere Felder Name und Betrag vor.
+ * Gegenpartei: Auswahl aus den eigenen Buchungen (wiederkehrende zuerst,
+ * mit Rhythmus und letztem Betrag; verknüpft über den Gegenpartei-Schlüssel,
+ * auch über Zahlungsvermittler) oder frei eingegeben. Die Auswahl belegt
+ * Name, Betrag, Rhythmus und Vertragstyp vor – nur Felder, die noch nicht
+ * von Hand geändert wurden (beim Bearbeiten nur leere).
  */
 import { useLocale, useTranslations } from 'next-intl';
 import { startTransition, useActionState, useEffect, useState, type FormEvent, type ReactNode } from 'react';
@@ -18,18 +20,31 @@ import {
   CONTRACT_NAME_MAX_LENGTH,
   CONTRACT_NOTES_MAX_LENGTH,
   CONTRACT_TYPES,
-  DEFAULT_TOLERANCE_PCT,
-  MAX_TOLERANCE_PCT,
   RHYTHM_KEYS,
   type ContractField,
   type ContractFormValues,
+  type ContractType,
+  type RhythmKey,
 } from '@/lib/contracts';
 
 import { useShowResult } from '../action-form';
 import { CategorySelect } from '../transactions/category-select';
 import type { CategoryOption } from '../transactions/transaction-form';
 
-export type CounterpartyOption = { key: string; label: string; count: number; lastAmount: number };
+export type CounterpartyOption = {
+  key: string;
+  label: string;
+  count: number;
+  lastAmount: number;
+  /** Rhythmus der wiederkehrenden Buchungen (transactions.recurrence), sonst null. */
+  recurrence: RhythmKey | null;
+  /** Vorschlag aus Name, Zweck und Kategorie. */
+  contractType: ContractType | null;
+  /** Es gibt schon einen (aktiven, vorgemerkten oder gekündigten) Vertrag. */
+  hasContract: boolean;
+};
+
+type PrefillField = 'name' | 'amount' | 'rhythm' | 'type';
 
 type ContractFormProps = {
   mode: 'create' | 'edit';
@@ -59,17 +74,65 @@ export function ContractForm({ mode, action, counterparties, accounts, categorie
   }, [state, showResult]);
   const fieldErrors = state.fieldErrors ?? {};
 
-  // Kontrolliert, weil die Auswahl der Gegenpartei Name und Betrag vorbelegt.
+  // Kontrolliert, weil die Auswahl der Gegenpartei vorbelegt.
   const [counterpartyKey, setCounterpartyKey] = useState(values?.counterpartyKey ?? '');
   const [name, setName] = useState(values?.name ?? '');
   const [amount, setAmount] = useState(values?.amount ?? '');
+  const [rhythm, setRhythm] = useState(values?.rhythm || 'monthly');
+  const [type, setType] = useState(values?.type ?? 'other');
+  // Von Hand geänderte Felder werden nicht mehr vorbelegt; beim Bearbeiten
+  // gelten alle als geändert (dann nur leere Felder vorbelegen).
+  const [touched, setTouched] = useState<ReadonlySet<PrefillField>>(
+    () => new Set<PrefillField>(mode === 'edit' ? ['name', 'amount', 'rhythm', 'type'] : []),
+  );
+  const [prefilled, setPrefilled] = useState(false);
+  const touch = (field: PrefillField) => setTouched((current) => new Set(current).add(field));
   const amountInput = (value: number) =>
     new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: false }).format(value);
+  const amountText = (value: number) =>
+    new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+
+  const selected = counterparties.find((c) => c.key === counterpartyKey) ?? null;
   // Gespeicherter Schlüssel ohne Buchungen: als eigene Option anbieten.
-  const options =
-    counterpartyKey !== '' && !counterparties.some((c) => c.key === counterpartyKey)
-      ? [{ key: counterpartyKey, label: values?.counterpartyName || counterpartyKey, count: 0, lastAmount: 0 }, ...counterparties]
-      : counterparties;
+  const storedOnly = counterpartyKey !== '' && selected === null;
+  const recurring = counterparties.filter((c) => c.recurrence !== null);
+  const others = counterparties.filter((c) => c.recurrence === null);
+  const optionText = (option: CounterpartyOption) =>
+    [
+      option.label,
+      option.recurrence ? t(`rhythms.${option.recurrence}`) : t('form.counterpartyCount', { count: option.count }),
+      option.lastAmount > 0 ? t('form.counterpartyLast', { amount: amountText(option.lastAmount) }) : null,
+      option.hasContract ? t('form.counterpartyHasContract') : null,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+
+  const selectCounterparty = (key: string) => {
+    setCounterpartyKey(key);
+    const option = counterparties.find((c) => c.key === key);
+    if (!option) {
+      setPrefilled(false);
+      return;
+    }
+    let changed = false;
+    if (!touched.has('name') || name.trim() === '') {
+      setName(option.label);
+      changed = true;
+    }
+    if ((!touched.has('amount') || amount.trim() === '') && option.lastAmount > 0) {
+      setAmount(amountInput(option.lastAmount));
+      changed = true;
+    }
+    if (!touched.has('rhythm') && option.recurrence) {
+      setRhythm(option.recurrence);
+      changed = true;
+    }
+    if (!touched.has('type') && option.contractType) {
+      setType(option.contractType);
+      changed = true;
+    }
+    setPrefilled(changed);
+  };
 
   const errorProps = (field: ContractField, id: string, hintId?: string) => {
     const describedBy = [fieldErrors[field] ? `${id}-error` : null, hintId].filter(Boolean).join(' ');
@@ -106,29 +169,40 @@ export function ContractForm({ mode, action, counterparties, accounts, categorie
         id="contract-counterparty"
         name="counterparty_key"
         value={counterpartyKey}
-        onChange={(event) => {
-          const key = event.target.value;
-          setCounterpartyKey(key);
-          const option = counterparties.find((c) => c.key === key);
-          if (option && name.trim() === '') {
-            setName(option.label);
-          }
-          if (option && amount.trim() === '' && option.lastAmount > 0) {
-            setAmount(amountInput(option.lastAmount));
-          }
-        }}
+        onChange={(event) => selectCounterparty(event.target.value)}
         {...errorProps('counterparty', 'contract-counterparty', 'contract-counterparty-hint')}
       >
         <option value="">{t('form.counterpartyNone')}</option>
-        {options.map((option) => (
-          <option key={option.key} value={option.key}>
-            {option.count > 0 ? t('form.counterpartyOption', { label: option.label, count: option.count }) : option.label}
-          </option>
-        ))}
+        {storedOnly ? <option value={counterpartyKey}>{values?.counterpartyName || counterpartyKey}</option> : null}
+        {recurring.length > 0 ? (
+          <optgroup label={t('form.counterpartyRecurring')}>
+            {recurring.map((option) => (
+              <option key={option.key} value={option.key}>
+                {optionText(option)}
+              </option>
+            ))}
+          </optgroup>
+        ) : null}
+        {others.length > 0 ? (
+          <optgroup label={t('form.counterpartyOthers')}>
+            {others.map((option) => (
+              <option key={option.key} value={option.key}>
+                {optionText(option)}
+              </option>
+            ))}
+          </optgroup>
+        ) : null}
       </select>
-      <p id="contract-counterparty-hint" className="hint">
-        {t('form.counterpartyHint')}
-      </p>
+      <div>
+        <p id="contract-counterparty-hint" className="hint">
+          {t('form.counterpartyHint')}
+        </p>
+        {/* Meldungen zur Auswahl; leer ohne eigenen Abstand im Formular. */}
+        <div role="status">
+          {prefilled ? <p className="hint">{t('form.prefilled')}</p> : null}
+          {mode === 'create' && selected?.hasContract ? <p className="hint">{t('form.hasContract')}</p> : null}
+        </div>
+      </div>
       {counterpartyKey === '' ? (
         <>
           <label htmlFor="contract-counterparty-name">{t('form.counterpartyFree')}</label>
@@ -152,13 +226,25 @@ export function ContractForm({ mode, action, counterparties, accounts, categorie
         required
         maxLength={CONTRACT_NAME_MAX_LENGTH}
         value={name}
-        onChange={(event) => setName(event.target.value)}
+        onChange={(event) => {
+          setName(event.target.value);
+          touch('name');
+        }}
         {...errorProps('name', 'contract-name')}
       />
       {fieldError('name', 'contract-name')}
 
       <label htmlFor="contract-type">{t('fields.type')}</label>
-      <select id="contract-type" name="type" defaultValue={values?.type ?? 'other'} {...errorProps('type', 'contract-type')}>
+      <select
+        id="contract-type"
+        name="type"
+        value={type}
+        onChange={(event) => {
+          setType(event.target.value);
+          touch('type');
+        }}
+        {...errorProps('type', 'contract-type')}
+      >
         {CONTRACT_TYPES.map((type) => (
           <option key={type} value={type}>
             {t(`types.${type}`)}
@@ -171,7 +257,11 @@ export function ContractForm({ mode, action, counterparties, accounts, categorie
       <select
         id="contract-rhythm"
         name="rhythm"
-        defaultValue={values?.rhythm || 'monthly'}
+        value={rhythm}
+        onChange={(event) => {
+          setRhythm(event.target.value);
+          touch('rhythm');
+        }}
         {...errorProps('rhythm', 'contract-rhythm')}
       >
         {RHYTHM_KEYS.map((key) => (
@@ -192,7 +282,10 @@ export function ContractForm({ mode, action, counterparties, accounts, categorie
         required
         maxLength={20}
         value={amount}
-        onChange={(event) => setAmount(event.target.value)}
+        onChange={(event) => {
+          setAmount(event.target.value);
+          touch('amount');
+        }}
         {...errorProps('amount', 'contract-amount', 'contract-amount-hint')}
       />
       <p id="contract-amount-hint" className="hint">
@@ -241,22 +334,6 @@ export function ContractForm({ mode, action, counterparties, accounts, categorie
         emptyLabel={t('form.noCategory')}
       />
       {fieldError('category', 'contract-category')}
-
-      <label htmlFor="contract-tolerance">{t('form.tolerance')}</label>
-      <input
-        id="contract-tolerance"
-        name="tolerance"
-        type="number"
-        min={0}
-        max={MAX_TOLERANCE_PCT}
-        step={1}
-        defaultValue={values?.tolerance || String(DEFAULT_TOLERANCE_PCT)}
-        {...errorProps('tolerance', 'contract-tolerance', 'contract-tolerance-hint')}
-      />
-      <p id="contract-tolerance-hint" className="hint">
-        {t('form.toleranceHint')}
-      </p>
-      {fieldError('tolerance', 'contract-tolerance')}
 
       <label htmlFor="contract-notes">{t('fields.notes')}</label>
       <textarea

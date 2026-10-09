@@ -1,10 +1,12 @@
 /**
  * Auswahllisten des Vertragsformulars: Gegenparteien der eigenen Ausgaben
- * (public.contract_counterparties), Konten und Kategorien – nur eigene
- * Daten (Berater sehen per RLS auch Mandantendaten).
+ * (public.contract_counterparties – wiederkehrende zuerst, mit Rhythmus,
+ * Typvorschlag und ob schon ein Vertrag besteht), Konten und Kategorien –
+ * nur eigene Daten (Berater sehen per RLS auch Mandantendaten).
  */
 import 'server-only';
 
+import { isRhythmKey } from '@/lib/contracts';
 import { createClient } from '@/lib/supabase/server';
 
 import { loadTransactionFormOptions } from '../transactions/form-options';
@@ -26,6 +28,9 @@ export async function loadContractFormData(userId: string) {
     label: row.label ?? row.counterparty_key,
     count: row.tx_count,
     lastAmount: Number(row.last_amount),
+    recurrence: row.recurrence && isRhythmKey(row.recurrence) ? row.recurrence : null,
+    contractType: row.contract_type,
+    hasContract: row.has_contract,
   }));
   return {
     counterparties: list,

@@ -1,9 +1,9 @@
 /**
  * app/[locale]/dashboard/contracts/new/page.tsx
  *
- * Vertrag manuell anlegen. Mit Gegenpartei werden passende Abbuchungen
- * (gleiche Gegenpartei, Betrag innerhalb der Toleranz, alle Konten)
- * automatisch verknüpft.
+ * Vertrag anlegen. Mit Gegenpartei werden passende Abbuchungen (gleiche
+ * Gegenpartei, ähnlicher Betrag, eine je Zeitraum, alle Konten) automatisch
+ * verknüpft.
  */
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';

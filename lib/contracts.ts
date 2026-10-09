@@ -1,8 +1,8 @@
 /**
  * lib/contracts.ts
  *
- * Verträge: Rhythmen, Vertragstypen, Sicherheit der Erkennung und die
- * Prüfung des Vertragsformulars. Reine Funktionen ohne Server-Abhängigkeiten
+ * Verträge: Rhythmen, Vertragstypen, angezeigte Status und die Prüfung des
+ * Vertragsformulars. Reine Funktionen ohne Server-Abhängigkeiten
  * (Client, Server Actions, Unit-Tests).
  *
  * Rhythmus in der Datenbank: rhythm + interval_count (14-tägig = weekly ×2,
@@ -56,8 +56,13 @@ export const CONTRACT_TYPES: readonly ContractType[] = [
 export const CONTRACT_NAME_MAX_LENGTH = 120;
 export const CONTRACT_COUNTERPARTY_MAX_LENGTH = 200;
 export const CONTRACT_NOTES_MAX_LENGTH = 2000;
-export const DEFAULT_TOLERANCE_PCT = 10;
-export const MAX_TOLERANCE_PCT = 50;
+
+/**
+ * Status der angezeigten Verträge. Vorschläge und verworfene Verträge der
+ * früheren Erkennung bleiben in der Datenbank, erscheinen aber nirgends
+ * (supabase/migrations/20261014100000_contracts_cleanup.sql).
+ */
+export const LISTED_CONTRACT_STATUSES = ['active', 'cancellation_pending', 'cancelled'] as const satisfies readonly ContractStatus[];
 
 export function isRhythmKey(value: string): value is RhythmKey {
   return (RHYTHM_KEYS as readonly string[]).includes(value);
@@ -79,19 +84,6 @@ export function rhythmKey(rhythm: ContractRhythm, intervalCount: number): Rhythm
   return match ?? null;
 }
 
-export type ConfidenceLevel = 'high' | 'medium' | 'low';
-
-/** Stufen der Erkennungssicherheit (detection_confidence 0–1). */
-export function confidenceLevel(confidence: number | null): ConfidenceLevel {
-  if (confidence !== null && confidence >= 0.9) {
-    return 'high';
-  }
-  if (confidence !== null && confidence >= 0.6) {
-    return 'medium';
-  }
-  return 'low';
-}
-
 /** Gegenpartei-Schlüssel wie transactions.counterparty_key (i:/m:/n:). */
 export function isCounterpartyKey(value: string): boolean {
   return value.length <= 300 && /^[imn]:./.test(value);
@@ -110,7 +102,6 @@ export type ContractField =
   | 'type'
   | 'account'
   | 'category'
-  | 'tolerance'
   | 'notes';
 
 export type ContractFieldError =
@@ -123,7 +114,6 @@ export type ContractFieldError =
   | 'dateInvalid'
   | 'typeInvalid'
   | 'selectionInvalid'
-  | 'toleranceInvalid'
   | 'notesTooLong';
 
 /** Formularwerte als Strings – zum Vorbelegen (Bearbeiten, nach Fehlern). */
@@ -137,7 +127,6 @@ export type ContractFormValues = {
   type: string;
   accountId: string;
   categoryId: string;
-  tolerance: string;
   notes: string;
 };
 
@@ -153,7 +142,6 @@ export type ContractRpcParams = {
   p_account_id: string | null;
   p_category_id: string | null;
   p_notes: string | null;
-  p_tolerance_pct: number;
 };
 
 export type ParsedContractForm =
@@ -177,7 +165,6 @@ export function parseContractForm(formData: FormLike, locale: AppLocale): Parsed
     type: text('type'),
     accountId: text('account'),
     categoryId: text('category'),
-    tolerance: text('tolerance').trim(),
     notes: text('notes').trim(),
   };
   const errors: Partial<Record<ContractField, ContractFieldError>> = {};
@@ -212,10 +199,6 @@ export function parseContractForm(formData: FormLike, locale: AppLocale): Parsed
   if (values.categoryId !== '' && !UUID.test(values.categoryId)) {
     errors.category = 'selectionInvalid';
   }
-  const tolerance = values.tolerance === '' ? DEFAULT_TOLERANCE_PCT : Number(values.tolerance.replace(',', '.'));
-  if (!Number.isFinite(tolerance) || tolerance < 0 || tolerance > MAX_TOLERANCE_PCT) {
-    errors.tolerance = 'toleranceInvalid';
-  }
   if (values.notes.length > CONTRACT_NOTES_MAX_LENGTH) {
     errors.notes = 'notesTooLong';
   }
@@ -240,7 +223,6 @@ export function parseContractForm(formData: FormLike, locale: AppLocale): Parsed
       p_account_id: values.accountId === '' ? null : values.accountId,
       p_category_id: values.categoryId === '' ? null : values.categoryId,
       p_notes: values.notes === '' ? null : values.notes,
-      p_tolerance_pct: Math.round(tolerance * 100) / 100,
     },
   };
 }

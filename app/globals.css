@@ -1318,39 +1318,6 @@
   margin-top: 0;
 }
 
-.contract-cards {
-  display: grid;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.contract-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  background: var(--card);
-  border: var(--border-hairline) solid var(--border);
-  border-radius: var(--radius-lg);
-}
-
-.contract-card-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.contract-card-title {
-  margin: 0;
-  font-size: var(--type-base);
-  font-weight: var(--weight-semibold);
-  line-height: var(--line-tight);
-}
-
 .contract-card-sub {
   margin: 0;
   font-size: var(--type-sm);
@@ -1377,53 +1344,14 @@
   overflow-wrap: anywhere;
 }
 
-.contract-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-2) var(--space-3);
-}
-
-.contract-actions form {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-2);
-  margin: 0;
-}
-
-.contract-actions label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  font-size: var(--type-sm);
-  font-weight: var(--weight-medium);
-}
-
-.contract-actions select {
-  padding: var(--space-1) var(--space-2);
-  font: inherit;
-  font-weight: var(--weight-normal);
-  background: var(--background);
-  border: var(--border-hairline) solid var(--input);
-  border-radius: var(--radius-md);
-}
-
-.contract-actions .button,
-.contract-actions button {
-  margin-top: 0;
-}
-
-.contract-bookings summary,
-.contract-dismissed summary {
+.contract-bookings summary {
   cursor: pointer;
   font-size: var(--type-sm);
   font-weight: var(--weight-medium);
   color: var(--primary);
 }
 
-.contract-bookings ul,
-.contract-dismissed ul {
+.contract-bookings ul {
   display: flex;
   flex-direction: column;
   margin: var(--space-2) 0 0;
@@ -1431,8 +1359,7 @@
   list-style: none;
 }
 
-.contract-bookings li,
-.contract-dismissed li {
+.contract-bookings li {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1448,42 +1375,9 @@
   white-space: nowrap;
 }
 
-.contract-dismissed form {
-  margin: 0;
-}
-
-.contract-dismissed .button {
-  margin-top: 0;
-}
-
-.contract-confidence-high {
-  color: var(--primary);
-  background: color-mix(in oklch, var(--primary) 10%, transparent);
-}
-
-.contract-confidence-medium {
-  color: var(--secondary-foreground);
-  background: var(--secondary);
-}
-
-.contract-confidence-low {
-  color: var(--warning);
-  background: color-mix(in oklch, var(--warning) 12%, transparent);
-}
-
 .contract-status {
   color: var(--secondary-foreground);
   background: var(--secondary);
-}
-
-.contract-status-suggested {
-  color: var(--primary);
-  background: color-mix(in oklch, var(--primary) 10%, transparent);
-}
-
-.contract-status-dismissed {
-  color: var(--muted-foreground);
-  background: var(--muted);
 }
 
 .contract-empty {
@@ -1547,13 +1441,6 @@
 
 .contract-danger .button {
   margin-top: 0;
-}
-
-/* Mandatsreferenz und Gläubiger-ID: Kennungen, ggf. umbrechen. */
-.contract-sepa-ref {
-  font-family: var(--font-mono);
-  font-size: var(--type-sm);
-  overflow-wrap: anywhere;
 }
 
 .contract-costs-table thead .cell-note {

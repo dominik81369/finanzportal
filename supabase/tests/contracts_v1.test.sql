@@ -2,7 +2,8 @@
 --  supabase/tests/contracts_v1.test.sql
 --  Verträge V1: Erkennung, Fortsetzung, Verwerfen, Verknüpfen, manuelle
 --  Verträge, Mandantentrennung und Beraterzugriff
---  (Migration 20261010100000)
+--  (Migration 20261010100000; seit 20261014100000 läuft die Erkennung nur
+--  noch über private.refresh_contracts, public.refresh_contracts verknüpft nur)
 --  Ausführen: supabase test db   (setzt 00000-test-helpers.sql voraus)
 --
 --  Identitäten
@@ -126,7 +127,7 @@ select is(private.guess_contract_type('Max Muster', null), 'other'::public.contr
 -- ---------------------------------------------------------------------
 -- 2. Erkennung
 -- ---------------------------------------------------------------------
-select is((public.refresh_contracts() ->> 'created')::integer, 9, 'Erkennung legt 9 Vorschläge an');
+select is((private.refresh_contracts(auth.uid()) ->> 'created')::integer, 9, 'Erkennung legt 9 Vorschläge an');
 
 select is((select name || '|' || rhythm || '|' || interval_count || '|' || expected_amount || '|' || contract_type || '|' || detection_confidence
              from public.recurring_contracts where id = pg_temp.contract('m:netflix')),
@@ -168,7 +169,7 @@ select is((select abs(expected_amount) from public.recurring_contracts
             where user_id = auth.uid() and counterparty_key = 'n:abc service' and status = 'suggested'), 30::numeric,
   'Verworfen: Vorschlag nur für die Serie außerhalb des Bands');
 
-select is((public.refresh_contracts() ->> 'created')::integer, 0, 'Erneute Erkennung: keine Doppelten');
+select is((private.refresh_contracts(auth.uid()) ->> 'created')::integer, 0, 'Erneute Erkennung: keine Doppelten');
 select private.refresh_recurrence(auth.uid());
 select is((select recurrence from public.transactions where user_id = auth.uid() and purpose = 'Fensterputz 1'), 'biweekly',
   'Wiederkehrende Buchungen (B1) kennen 14-tägig');
@@ -183,7 +184,7 @@ select tests.authenticate_as_service_role();
 select pg_temp.series('v1_alice', :giro, 'PayPal Europe S.a.r.l. et Cie S.C.A', 'PP.9999.PP . Netflix, Ihr Einkauf bei Netflix',
                       null, -13.49, '2026-10-03', interval '1 month', 1);
 select tests.authenticate_as('v1_alice');
-select public.refresh_contracts();
+select private.refresh_contracts(auth.uid());
 select is((select count(*)::integer from public.recurring_contracts where user_id = auth.uid() and counterparty_key = 'm:netflix'), 1,
   'Nach neuen Buchungen und Preiserhöhung: kein neuer Netflix-Vorschlag');
 select is((select status::text from public.recurring_contracts where id = pg_temp.contract('m:netflix')), 'dismissed',
@@ -192,7 +193,8 @@ select is((select status::text from public.recurring_contracts where id = pg_tem
 select public.set_contract_status(pg_temp.contract('m:netflix'), 'suggested');
 select is((select status::text from public.recurring_contracts where id = pg_temp.contract('m:netflix')), 'suggested',
   'Wiederherstellen: wieder Vorschlag');
-select is(pg_temp.linked(pg_temp.contract('m:netflix')), 7, 'Wiederhergestellt: alle Abbuchungen der Serie verknüpft');
+select is(pg_temp.linked(pg_temp.contract('m:netflix')), 6,
+  'Wiederhergestellt: Vorschläge bekommen ohne Erkennung keine neuen Buchungen');
 select is((select abs(expected_amount) from public.recurring_contracts where id = pg_temp.contract('m:netflix')), 9.99::numeric,
   'Wiederhergestellt: Betrag = Median der letzten drei Abbuchungen');
 
@@ -216,8 +218,8 @@ select is((select last_booking_date || '|' || next_expected_date from public.rec
 
 select throws_ok($$ select public.set_contract_status(pg_temp.contract('n:spotify'), 'suggested') $$,
   '22023', 'invalid_transition', 'Ungültiger Statuswechsel abgelehnt');
-select throws_ok($$ select public.delete_contract(pg_temp.contract('n:spotify')) $$,
-  '22023', 'contract_not_deletable', 'Erkannter Vertrag lässt sich nicht löschen (nur verwerfen)');
+select throws_ok($$ select public.delete_contract(gen_random_uuid()) $$,
+  'P0002', 'contract_not_found', 'Unbekannter Vertrag lässt sich nicht löschen');
 
 -- ---------------------------------------------------------------------
 -- 5. Manueller Vertrag
@@ -238,9 +240,9 @@ select is((select status::text || '|' || detection_source || '|' || counterparty
   'active|manual|n:hausverwaltung schmidt|-950.00', 'Manuell: aktiv, Schlüssel aus dem Namen, Betrag als Abbuchung');
 select is(pg_temp.linked((select id from public.recurring_contracts where user_id = auth.uid() and name = 'Wohnung')), 6,
   'Manuell: passende Buchungen beider Konten verknüpft');
-select is((select count(*)::integer from public.recurring_contracts
-            where user_id = auth.uid() and counterparty_key = 'n:hausverwaltung schmidt'), 1,
-  'Manuell: kein zusätzlicher Vorschlag für dieselbe Serie');
+select is((select count(*)::integer from public.transactions t join public.recurring_contracts rc on rc.id = t.recurring_contract_id
+            where t.user_id = auth.uid() and rc.counterparty_key = 'n:hausverwaltung schmidt' and rc.status = 'suggested'), 0,
+  'Manuell: übernimmt die Buchungen des Vorschlags derselben Serie');
 select is((select next_expected_date from public.recurring_contracts where user_id = auth.uid() and name = 'Wohnung'),
   '2026-10-01'::date, 'Manuell: eingetragene nächste Abbuchung bleibt');
 
@@ -268,7 +270,7 @@ select throws_ok($$ select public.set_contract_link(gen_random_uuid(), null) $$,
 
 -- Vorschlag entfällt, wenn die Serie nicht mehr gilt (eigenes Konto).
 select public.add_own_account_identifier('iban', 'DE89370400440532013000');
-select public.refresh_contracts();
+select private.refresh_contracts(auth.uid());
 select is((select count(*)::integer from public.recurring_contracts
             where user_id = auth.uid() and counterparty_key = 'i:' || md5('DE89370400440532013000')), 0,
   'Vorschläge ohne gültige Serie werden entfernt');
@@ -294,7 +296,7 @@ select (select id from public.recurring_contracts where user_id = auth.uid() and
 grant select on alice_ids to authenticated;
 
 select tests.authenticate_as('v1_bob');
-select is((public.refresh_contracts() ->> 'created')::integer, 1, 'Bob: eigene Erkennung');
+select is((private.refresh_contracts(auth.uid()) ->> 'created')::integer, 1, 'Bob: eigene Erkennung');
 select is((select count(*)::integer from public.recurring_contracts), 1, 'Bob sieht nur seinen eigenen Vertrag');
 select is((select count(*)::integer from public.transactions where recurring_contract_id = (select contract_id from alice_ids)), 0,
   'Bob sieht keine Buchungen fremder Verträge');
