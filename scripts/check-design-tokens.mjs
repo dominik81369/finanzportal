@@ -46,6 +46,13 @@ const SECTIONS = [
       'app/[locale]/advisor/clients/[clientId]/spending-section.tsx',
     ],
   },
+  {
+    name: 'import-pdf',
+    files: [
+      'app/[locale]/dashboard/transactions/import/statement-import.tsx',
+      'app/[locale]/dashboard/transactions/rules/bank-category-form.tsx',
+    ],
+  },
 ];
 
 const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|hwb)\(/;

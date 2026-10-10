@@ -34,7 +34,9 @@ import {
   type ImportField,
 } from '@/lib/import/statement';
 
-type AccountOption = { id: string; name: string; currency: string };
+import { StatementImport } from './statement-import';
+
+type AccountOption = { id: string; name: string; currency: string; iban: string | null };
 
 type ImportWizardProps = {
   accounts: AccountOption[];
@@ -50,6 +52,11 @@ type LoadedFile = {
 };
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_PDF_BYTES = 4_000_000;
+
+/** PDF-Kontoauszug (N26): wird auf dem Server gelesen, siehe ./statement-import.tsx. */
+const isPdfFile = (file: File | null | undefined) =>
+  !!file && (/\.pdf$/i.test(file.name) || file.type === 'application/pdf');
 const NEW_ACCOUNT = 'new';
 const SAMPLE_ROWS = 8;
 
@@ -109,6 +116,8 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<ImportSummary | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [pdfSelected, setPdfSelected] = useState(false);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const previewRequest = useRef(0);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -173,8 +182,10 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
     setResult(null);
     setImportError(null);
     setLoadError(null);
+    setPdfFile(null);
     if (clearFile && fileInput.current) {
       fileInput.current.value = '';
+      setPdfSelected(false);
     }
   };
 
@@ -197,6 +208,16 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
     setImportError(null);
     if (!file) {
       setLoadError(t('errors.noFile'));
+      return;
+    }
+    if (isPdfFile(file)) {
+      if (file.size > MAX_PDF_BYTES) {
+        setLoadError(t('pdf.errors.tooLarge', { max: 4 }));
+        return;
+      }
+      setLoaded(null);
+      setLoadError(null);
+      setPdfFile(file);
       return;
     }
     if (file.size > MAX_FILE_BYTES) {
@@ -260,16 +281,27 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
           id="import-file"
           name="file"
           type="file"
-          accept=".csv,.txt,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          accept=".csv,.txt,.xlsx,.pdf,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/pdf"
           aria-describedby="import-file-hint"
-          onChange={() => reset()}
+          onChange={(e) => {
+            reset();
+            setPdfSelected(isPdfFile(e.target.files?.[0]));
+          }}
         />
         <p id="import-file-hint" className="hint">
           {t('fileHint', { max: 5 })}
         </p>
 
-        <label htmlFor="import-account">{t('account')}</label>
-        <select id="import-account" value={target} onChange={(e) => setTarget(e.target.value)}>
+        {pdfSelected ? (
+          <p className="hint" id="import-pdf-hint">
+            {t('pdf.accountsHint')}
+          </p>
+        ) : null}
+
+        <label htmlFor="import-account" hidden={pdfSelected}>
+          {t('account')}
+        </label>
+        <select id="import-account" value={target} onChange={(e) => setTarget(e.target.value)} hidden={pdfSelected}>
           {accounts.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name} ({a.currency})
@@ -278,7 +310,7 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
           <option value={NEW_ACCOUNT}>{t('newAccount')}</option>
         </select>
 
-        {target === NEW_ACCOUNT ? (
+        {target === NEW_ACCOUNT && !pdfSelected ? (
           <div className="field-row">
             <div className="filter-field">
               <label htmlFor="import-new-name">{t('newAccountName')}</label>
@@ -307,6 +339,16 @@ export function ImportWizard({ accounts, currencies }: ImportWizardProps) {
           {loading ? t('analyzing') : t('analyze')}
         </button>
       </form>
+
+      {/* PDF-Kontoauszug: eigene Vorschau je Konto des Auszugs */}
+      {pdfFile ? (
+        <StatementImport
+          key={`${pdfFile.name}-${pdfFile.size}-${pdfFile.lastModified}`}
+          file={pdfFile}
+          accounts={accounts}
+          onReset={() => reset(true)}
+        />
+      ) : null}
 
       {/* Schritt 2: Zuordnung und Vorschau */}
       {loaded && !result ? (

@@ -1,0 +1,282 @@
+{
+  "provisional": true,
+  "number": null,
+  "period": [
+    "01.10.2026",
+    "08.10.2026"
+  ],
+  "created": "08.10.2026",
+  "holder": {
+    "name": "MAX MUSTERMANN",
+    "address": "Musterweg 1, 80331 München"
+  },
+  "sections": [
+    {
+      "kind": "main",
+      "name": null,
+      "opened": null,
+      "iban": "DE75100110019000000001",
+      "bic": "NTSBDEB1XXX",
+      "opening": "+467,67€",
+      "bookings": [
+        {
+          "counterparty": "CAYA GMBH* CAYA BY AMN",
+          "date": "02.10.2026",
+          "amount": "-19,99€",
+          "type": "Mastercard • Medien & Telekom",
+          "value": "01.10.2026"
+        },
+        {
+          "counterparty": "SD TIENDA EJEMPLO",
+          "date": "02.10.2026",
+          "amount": "-2,56€",
+          "type": "Mastercard • Lebensmittel",
+          "value": "02.10.2026"
+        },
+        {
+          "counterparty": "WienMobil Rad",
+          "date": "05.10.2026",
+          "amount": "-1,00€",
+          "type": "Mastercard • Transport",
+          "value": "04.10.2026"
+        },
+        {
+          "counterparty": "SUPERMERCADO RIPOCHE",
+          "date": "05.10.2026",
+          "amount": "-1,45€",
+          "type": "Mastercard • Lebensmittel",
+          "value": "05.10.2026"
+        },
+        {
+          "counterparty": "GC RE OCTOPUS ENERGY GERMANY GMBH",
+          "date": "05.10.2026",
+          "amount": "-48,99€",
+          "type": "Lastschriften",
+          "iban": "FR1917118820089000000000008",
+          "bic": "GOAAFRP1",
+          "purpose": "REF-0000A00A000C000001",
+          "value": "05.10.2026"
+        },
+        {
+          "counterparty": "Vodafone GmbH",
+          "date": "07.10.2026",
+          "amount": "-39,99€",
+          "type": "Lastschriften",
+          "iban": "DE89380700599000000009",
+          "bic": "DEUTDEDK380",
+          "purpose": "10/2026 K-NR. 900000001 Ihre Rechnung online bei www. vodafone.de/meinkabel",
+          "value": "07.10.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Ahornweg 2",
+      "opened": "12.11.2024",
+      "iban": "DE48100110019000000002",
+      "bic": "NTSBDEB1XXX",
+      "opening": "+1.537,08€",
+      "bookings": [
+        {
+          "counterparty": "An Birkenallee 68",
+          "date": "01.10.2026",
+          "amount": "-263,46€",
+          "value": "01.10.2026"
+        },
+        {
+          "counterparty": "WEG Ahornweg 4 80331 München",
+          "date": "01.10.2026",
+          "amount": "-507,03€",
+          "type": "Lastschriften",
+          "iban": "DE95550104009000000013",
+          "bic": "AARBDE5WDOM",
+          "purpose": "Einzug Hausgeld 10/2026 700.001",
+          "value": "01.10.2026"
+        },
+        {
+          "counterparty": "An Ulmer Straße 3",
+          "date": "02.10.2026",
+          "amount": "-369,25€",
+          "value": "02.10.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Birkenallee 68",
+      "opened": "05.03.2025",
+      "iban": "DE21100110019000000003",
+      "bic": "NTSBDEB1XXX",
+      "opening": "+0,54€",
+      "bookings": [
+        {
+          "counterparty": "Von Ahornweg 2",
+          "date": "01.10.2026",
+          "amount": "+263,46€",
+          "value": "01.10.2026"
+        },
+        {
+          "counterparty": "WEG Birkenweg 2-4a/Birkenallee 62-70 (Leipzig)",
+          "date": "01.10.2026",
+          "amount": "-264,00€",
+          "type": "Lastschriften",
+          "iban": "DE38120300009000000016",
+          "bic": "BYLADEM1001",
+          "purpose": "-264,00 VORSCHUSS KOSTEN 1 /",
+          "value": "01.10.2026"
+        },
+        {
+          "counterparty": "Anna Beispiel",
+          "date": "05.10.2026",
+          "amount": "+728,00€",
+          "type": "Gutschriften",
+          "iban": "DE27870500009000000017",
+          "bic": "CHEKDE81",
+          "purpose": "Anna Beispiel /Oktober/2026",
+          "value": "05.10.2026"
+        },
+        {
+          "counterparty": "An Eichenstraße 33",
+          "date": "06.10.2026",
+          "amount": "-86,48€",
+          "value": "06.10.2026"
+        },
+        {
+          "counterparty": "An Lindenstraße 46",
+          "date": "06.10.2026",
+          "amount": "-116,98€",
+          "value": "06.10.2026"
+        }
+      ],
+      "closing": "+999,99€"
+    },
+    {
+      "kind": "space",
+      "name": "Kastanienstr. 73",
+      "opened": "07.03.2025",
+      "iban": "DE91100110019000000004",
+      "bic": "NTSBDEB1XXX",
+      "opening": "+284,00€",
+      "bookings": [
+        {
+          "counterparty": "Max Mustermann",
+          "date": "02.10.2026",
+          "amount": "-198,92€",
+          "type": "Lastschriften",
+          "iban": "DE05672300009000000020",
+          "bic": "MLPBDE61",
+          "purpose": "Teilzahlung Darlehen",
+          "value": "02.10.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Lindenstraße 46",
+      "opened": "08.03.2025",
+      "iban": "DE64100110019000000005",
+      "bic": "NTSBDEB1XXX",
+      "opening": "0,00€",
+      "bookings": [
+        {
+          "counterparty": "Berta Probe",
+          "date": "02.10.2026",
+          "amount": "+895,00€",
+          "type": "Gutschriften",
+          "iban": "DE63100110019000000023",
+          "bic": "NTSBDEB1XXX",
+          "purpose": "Miete Lindenstr. 46,04109 Leipzig Probe-Muster",
+          "value": "02.10.2026"
+        },
+        {
+          "counterparty": "Max Mustermann",
+          "date": "02.10.2026",
+          "amount": "-516,95€",
+          "type": "Lastschriften",
+          "iban": "DE91672300009000000024",
+          "bic": "MLPBDE61",
+          "purpose": "Teilzahlung Darlehen",
+          "value": "02.10.2026"
+        },
+        {
+          "counterparty": "Von Birkenallee 68",
+          "date": "06.10.2026",
+          "amount": "+116,98€",
+          "value": "06.10.2026"
+        },
+        {
+          "counterparty": "WEG Lindenstrase 46",
+          "date": "06.10.2026",
+          "amount": "-495,03€",
+          "type": "Belastungen",
+          "iban": "DE86120300009000000025",
+          "bic": "BYLADEM1001",
+          "purpose": "Hausgeld Mustermann",
+          "value": "06.10.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Eichenstraße 33",
+      "opened": "09.03.2025",
+      "iban": "DE37100110019000000006",
+      "bic": "NTSBDEB1XXX",
+      "opening": "+500,00€",
+      "bookings": [
+        {
+          "counterparty": "Max Mustermann",
+          "date": "02.10.2026",
+          "amount": "-262,15€",
+          "type": "Lastschriften",
+          "iban": "DE37672300009000000026",
+          "bic": "MLPBDE61",
+          "purpose": "Teilzahlung Darlehen",
+          "value": "02.10.2026"
+        },
+        {
+          "counterparty": "Von Birkenallee 68",
+          "date": "06.10.2026",
+          "amount": "+86,48€",
+          "value": "06.10.2026"
+        },
+        {
+          "counterparty": "WEG Eichenstrase 33",
+          "date": "06.10.2026",
+          "amount": "-324,33€",
+          "type": "Belastungen",
+          "iban": "DE32120300009000000027",
+          "bic": "BYLADEM1001",
+          "purpose": "Hausgeld Mustermann",
+          "value": "06.10.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Ulmer Straße 3",
+      "opened": "08.04.2025",
+      "iban": "DE10100110019000000007",
+      "bic": "NTSBDEB1XXX",
+      "opening": "+1,95€",
+      "bookings": [
+        {
+          "counterparty": "Von Ahornweg 2",
+          "date": "02.10.2026",
+          "amount": "+369,25€",
+          "value": "02.10.2026"
+        },
+        {
+          "counterparty": "WEG Ulmer Str.3",
+          "date": "02.10.2026",
+          "amount": "-371,20€",
+          "type": "Lastschriften",
+          "iban": "DE38700901009000000029",
+          "bic": "GENODEF1M04",
+          "purpose": "VS/0100000001 WEGEN Vorschuesse 10/2026",
+          "value": "02.10.2026"
+        }
+      ]
+    }
+  ]
+}

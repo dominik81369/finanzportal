@@ -87,7 +87,9 @@ export async function moveRule(ruleId: string, direction: 'up' | 'down'): Promis
     .from('categorization_rules')
     .select('id, pattern, priority, created_at')
     .eq('user_id', user.id)
-    .neq('origin', 'standard');
+    // Nur eigene Regeln (wie public.reorder_categorization_rules) – eigene
+    // Konten, Kartenkategorien und Standardregeln haben keine Reihenfolge.
+    .in('origin', ['manual', 'learned']);
   if (error || !data) {
     console.error('[rules] Laden für Umsortieren fehlgeschlagen', { code: error?.code });
     return;
@@ -202,11 +204,12 @@ export async function loadStandardRules(): Promise<void> {
     console.error('[rules] Standardregeln laden fehlgeschlagen', { code: error.code });
     await redirectWith(RULES_PATH, { error: '1' });
   }
-  const result = (data ?? {}) as { added?: number; removed?: number; applied?: number };
+  const result = (data ?? {}) as { added?: number; removed?: number; applied?: number; bank_added?: number };
   revalidateCategorization();
   await redirectWith(RULES_PATH, {
     loaded: String(result.added ?? 0),
     removed: String(result.removed ?? 0),
+    bank: String(result.bank_added ?? 0),
     applied: String(result.applied ?? 0),
   });
 }
@@ -339,6 +342,74 @@ export async function setOwnAccountCategory(ruleId: string, formData: FormData):
   }
   revalidateCategorization();
   await redirectWith(RULES_PATH, { ownUpdated: String(data ?? 0) });
+}
+
+export type BankCategoryFormState = {
+  status: 'idle' | 'success' | 'error';
+  message?: string;
+  values?: { label: string; categoryId: string };
+  nonce?: number;
+};
+
+/**
+ * Kartenkategorie der Bank (z. B. N26 „Lebensmittel“ in der Buchungsart
+ * „Mastercard • Lebensmittel“) einer eigenen Kategorie zuordnen. Greift nach
+ * eigenen Regeln, Gedächtnis, eigenen Konten und Standardregeln.
+ */
+export async function addBankCategory(
+  _prevState: BankCategoryFormState,
+  formData: FormData,
+): Promise<BankCategoryFormState> {
+  await requireOnboardedUser(RULES_PATH);
+  const t = await getTranslations('Rules.bankCategories');
+  const label = String(formData.get('label') ?? '').trim();
+  const categoryId = String(formData.get('category') ?? '');
+  const values = { label, categoryId };
+  if (label.length < 2 || label.length > 100) {
+    return { status: 'error', message: t('errors.invalidLabel'), values };
+  }
+  if (!isUuid(categoryId)) {
+    return { status: 'error', message: t('errors.category'), values };
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('add_bank_category_rule', { p_label: label, p_category_id: categoryId });
+  if (error) {
+    const key =
+      error.message === 'invalid_label'
+        ? 'errors.invalidLabel'
+        : error.message === 'rule_exists'
+          ? 'errors.exists'
+          : error.message === 'category_not_found'
+            ? 'errors.category'
+            : 'errors.generic';
+    if (key === 'errors.generic') {
+      console.error('[rules] Kartenkategorie anlegen fehlgeschlagen', { code: error.code });
+    }
+    return { status: 'error', message: t(key), values };
+  }
+  revalidateCategorization();
+  const result = (data ?? {}) as { applied?: number };
+  return { status: 'success', message: t('added', { count: Number(result.applied ?? 0) }), nonce: Date.now() };
+}
+
+/** Zielkategorie einer Kartenkategorie ändern und neu anwenden. */
+export async function setBankCategory(ruleId: string, formData: FormData): Promise<void> {
+  await requireOnboardedUser(RULES_PATH);
+  const categoryId = String(formData.get('category') ?? '');
+  if (!isUuid(ruleId) || !isUuid(categoryId)) {
+    await redirectWith(RULES_PATH, { error: '1' });
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('set_bank_category_rule', {
+    p_rule_id: ruleId,
+    p_category_id: categoryId,
+  });
+  if (error) {
+    console.error('[rules] Kartenkategorie ändern fehlgeschlagen', { code: error.code });
+    await redirectWith(RULES_PATH, { error: '1' });
+  }
+  revalidateCategorization();
+  await redirectWith(RULES_PATH, { bankUpdated: String(data ?? 0) });
 }
 
 /** Regel mit vielen Korrekturen deaktivieren bzw. wieder aktivieren. */

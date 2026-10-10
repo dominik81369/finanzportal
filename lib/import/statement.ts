@@ -315,6 +315,11 @@ export function normalizeIban(text: string): string | null {
   return /^[A-Z]{2}[0-9]{2}[0-9A-Z]{11,30}$/.test(iban) ? iban : null;
 }
 
+/** IBAN zur Anzeige in Vierergruppen („DE89 3704 0044 …“). */
+export function formatIban(iban: string): string {
+  return iban.replace(/\s+/g, '').replace(/(.{4})(?=.)/g, '$1 ');
+}
+
 /** SEPA-Mandatsreferenz: höchstens 35 Zeichen, sonst null (dann liest der Server sie aus dem Zweck). */
 export const MANDATE_REFERENCE_MAX_LENGTH = 35;
 

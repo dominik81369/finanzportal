@@ -73,7 +73,7 @@ select is(private.extract_merchant('Ihr Einkauf', 'PayPal'), null, 'PayPal ohne 
 -- 3. Standardregeln laden (11–14)
 -- ---------------------------------------------------------------------
 select cmp_ok((public.load_standard_rules() ->> 'added')::int, '>', 150, 'Standardregeln geladen');
-select is(public.load_standard_rules(), '{"added": 0, "removed": 0, "reset": 0, "applied": 0}'::jsonb,
+select is(public.load_standard_rules(), '{"added": 0, "removed": 0, "reset": 0, "applied": 0, "bank_added": 0}'::jsonb,
   'Erneutes Laden ist idempotent');
 select is(
   (select count(*)::int from public.categorization_rules r
@@ -257,7 +257,7 @@ select is(
 select lives_ok(
   $$ select public.reorder_categorization_rules(array(
        select id from public.categorization_rules
-        where user_id = auth.uid() and origin <> 'standard' order by created_at desc)) $$,
+        where user_id = auth.uid() and origin in ('manual', 'learned') order by created_at desc)) $$,
   'Umsortieren betrifft nur eigene Regeln'
 );
 select is(
