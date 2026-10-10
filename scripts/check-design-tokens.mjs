@@ -38,6 +38,14 @@ const SECTIONS = [
       'app/[locale]/advisor/clients/[clientId]/budget-section.tsx',
     ],
   },
+  {
+    name: 'spending',
+    files: [
+      'app/[locale]/dashboard/budgets/spending',
+      'app/[locale]/dashboard/spending-tile.tsx',
+      'app/[locale]/advisor/clients/[clientId]/spending-section.tsx',
+    ],
+  },
 ];
 
 const COLOR_LITERAL = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|hwb)\(/;

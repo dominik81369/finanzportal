@@ -9,7 +9,13 @@
 import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
-import { ASSIGNMENTS, SEARCH_MAX_LENGTH, UNCATEGORIZED, type TransactionFilters } from '@/lib/transaction-filters';
+import {
+  ASSIGNMENTS,
+  SEARCH_MAX_LENGTH,
+  UNCATEGORIZED,
+  listQueryString,
+  type TransactionFilters,
+} from '@/lib/transaction-filters';
 import type { Account, Tag } from '@/types/domain';
 
 import type { CategoryOption } from './transaction-form';
@@ -22,6 +28,8 @@ type TransactionFiltersFormProps = {
   accounts: Pick<Account, 'id' | 'name'>[];
   categories: CategoryOption[];
   tags: Pick<Tag, 'id' | 'name'>[];
+  /** Anzeigename der gefilterten Gegenpartei (z. B. aus der ersten Buchung). */
+  counterpartyLabel?: string | null;
 };
 
 export async function TransactionFiltersForm({
@@ -31,6 +39,7 @@ export async function TransactionFiltersForm({
   accounts,
   categories,
   tags,
+  counterpartyLabel = null,
 }: TransactionFiltersFormProps) {
   const t = await getTranslations('Transactions.filters');
   const tForm = await getTranslations('Transactions.form');
@@ -39,8 +48,24 @@ export async function TransactionFiltersForm({
     .map((kind) => ({ kind, options: categories.filter((c) => c.kind === kind) }))
     .filter((group) => group.options.length > 0);
 
+  // Gegenpartei kommt nur per Link (Ausgaben-Dashboard): als Hinweis mit
+  // „entfernen“, im Formular als verstecktes Feld, damit sie beim Filtern bleibt.
+  const withoutCounterparty = listQueryString({ ...filters, counterparty: null }, 1);
+  const counterpartyText =
+    counterpartyLabel ??
+    (filters.counterparty?.startsWith('i:') ? t('counterpartyAccount') : (filters.counterparty?.slice(2) ?? ''));
+
   return (
     <form method="get" className="filters" role="search" aria-label={t('heading')}>
+      {filters.counterparty ? (
+        <p className="filter-chip">
+          <input type="hidden" name="counterparty" value={filters.counterparty} />
+          <span>{t('counterparty', { name: counterpartyText })}</span>{' '}
+          <Link href={`${basePath}${withoutCounterparty}`} aria-label={t('counterpartyRemove', { name: counterpartyText })}>
+            {t('remove')}
+          </Link>
+        </p>
+      ) : null}
       <div className="filter-field filter-search">
         <label htmlFor="filter-q">{t('search')}</label>
         <input

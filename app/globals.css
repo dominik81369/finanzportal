@@ -161,6 +161,8 @@
   --size-fact: 9rem;
   --size-skeleton-card: 7rem;
   --size-skeleton-row: 2.5rem;
+  --size-chart: 10rem;
+  --size-bar: 1.5rem;
   --duration-pulse: 1.6s;
 }
 
@@ -671,6 +673,16 @@
 
 .filter-search {
   grid-column: 1 / -1;
+}
+
+/* Gegenpartei-Filter (nur per Link aus dem Ausgaben-Dashboard). */
+.filter-chip {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+  background: var(--muted);
+  border-radius: var(--radius-md);
 }
 
 .filter-actions {
@@ -1759,3 +1771,518 @@
   border-color: var(--border);
 }
 /* budgets:end */
+
+/* spending:start --------------------------------------------------------
+   Ausgaben-Dashboard. Nur Design-Tokens (siehe budgets). Säulenhöhen und
+   Anteile kommen als CSS-Variablen (--spending-value, --spending-compare,
+   --spending-share, --spending-count).
+   --------------------------------------------------------------------- */
+.spending-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  margin: var(--space-4) 0;
+}
+
+.spending-types ul,
+.spending-currencies ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+  background: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.spending-types a,
+.spending-currencies a {
+  display: block;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--type-sm);
+  font-weight: var(--weight-medium);
+  color: var(--muted-foreground);
+  text-decoration: none;
+  border: var(--border-hairline) solid transparent;
+  border-radius: var(--radius-sm);
+}
+
+.spending-types a[aria-current='page'],
+.spending-currencies a[aria-current='page'] {
+  color: var(--foreground);
+  background: var(--background);
+  border-color: var(--border);
+}
+
+.spending-currencies {
+  margin-bottom: var(--space-4);
+}
+
+.spending-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.spending-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-8);
+  min-height: var(--space-8);
+  font-size: var(--type-lg);
+  color: var(--foreground);
+  text-decoration: none;
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.spending-step-disabled {
+  color: var(--muted-foreground);
+  opacity: 0.4;
+}
+
+.spending-period-label {
+  font-weight: var(--weight-semibold);
+}
+
+.spending-today {
+  font-size: var(--type-sm);
+}
+
+.spending-custom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-3);
+}
+
+.spending-custom .button {
+  margin-top: 0;
+}
+
+.spending-compare {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: var(--type-sm);
+  color: var(--muted-foreground);
+}
+
+.spending-compare a[aria-current='true'] {
+  font-weight: var(--weight-semibold);
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.spending-currency {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.spending-currency h3 {
+  margin: 0;
+  font-size: var(--type-lg);
+  font-weight: var(--weight-semibold);
+}
+
+/* Kopfzahlen */
+.spending-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--size-fact), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.spending-figures > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--card);
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.spending-figures dt {
+  font-size: var(--type-sm);
+  color: var(--muted-foreground);
+}
+
+.spending-figures dd {
+  margin: 0;
+}
+
+.spending-figure-value {
+  font-size: var(--type-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--line-tight);
+}
+
+.spending-figure-note {
+  font-size: var(--type-xs);
+  color: var(--muted-foreground);
+}
+
+.spending-delta {
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.spending-delta-good {
+  color: var(--primary);
+}
+
+.spending-delta-bad {
+  color: var(--destructive);
+}
+
+/* Hinweise */
+.spending-hints {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spending-hint {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--type-sm);
+  background: color-mix(in oklch, var(--warning) 12%, transparent);
+  border-left: var(--space-1) solid var(--warning);
+  border-radius: var(--radius-md);
+}
+
+/* Verlauf */
+.spending-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--card);
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.spending-chart figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+
+.spending-chart-title {
+  font-weight: var(--weight-semibold);
+}
+
+.spending-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  font-size: var(--type-xs);
+  color: var(--muted-foreground);
+  list-style: none;
+}
+
+.spending-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.spending-legend-bar {
+  width: var(--space-2);
+  height: var(--space-3);
+  background: var(--chart-4);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.spending-legend-compare {
+  width: var(--space-3);
+  height: calc(var(--border-hairline) * 2);
+  background: var(--muted-foreground);
+}
+
+.spending-plot-scroll {
+  overflow-x: auto;
+  padding-top: var(--space-8);
+}
+
+.spending-plot-inner {
+  width: max(100%, calc(var(--spending-count) * var(--space-4)));
+}
+
+.spending-plot {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: calc(var(--border-hairline) * 2);
+  height: var(--size-chart);
+  border-top: var(--border-hairline) solid var(--border);
+  border-bottom: var(--border-hairline) solid var(--muted-foreground);
+}
+
+.spending-plot-max {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  font-size: var(--type-xs);
+  color: var(--muted-foreground);
+}
+
+.spending-column {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+}
+
+.spending-column-bar {
+  width: min(100%, var(--size-bar));
+  height: var(--spending-value);
+  background: var(--chart-4);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.spending-column-compare {
+  position: absolute;
+  right: 10%;
+  bottom: var(--spending-compare);
+  left: 10%;
+  height: calc(var(--border-hairline) * 2);
+  background: var(--muted-foreground);
+}
+
+.spending-tip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 1;
+  display: none;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--type-xs);
+  white-space: nowrap;
+  color: var(--popover-foreground);
+  background: var(--popover);
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-sm);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.spending-column:hover .spending-tip {
+  display: block;
+}
+
+.spending-column:hover .spending-column-bar {
+  background: var(--chart-5);
+}
+
+.spending-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-top: var(--space-1);
+  font-size: var(--type-xs);
+  color: var(--muted-foreground);
+}
+
+.spending-table summary {
+  cursor: pointer;
+  font-size: var(--type-sm);
+  color: var(--primary);
+}
+
+/* Kategorien, Gegenparteien, größte Buchungen */
+.spending-columns {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 64rem) {
+  .spending-columns {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+}
+
+.spending-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.spending-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-4);
+  background: var(--card);
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.spending-panel h3 {
+  margin: 0;
+  font-size: var(--type-base);
+  font-weight: var(--weight-semibold);
+}
+
+.spending-categories,
+.spending-subcategories,
+.spending-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spending-categories > li {
+  border-top: var(--border-hairline) solid var(--border);
+}
+
+.spending-subcategories {
+  padding-left: var(--space-5);
+}
+
+.spending-categories summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.spending-categories summary::-webkit-details-marker {
+  display: none;
+}
+
+.spending-categories summary .spending-category-name::before {
+  display: inline-block;
+  width: var(--space-4);
+  content: '▸';
+  color: var(--muted-foreground);
+}
+
+.spending-categories details[open] > summary .spending-category-name::before {
+  content: '▾';
+}
+
+.spending-category {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) 0;
+  font-size: var(--type-sm);
+}
+
+.spending-category-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.spending-category-amount,
+.spending-category-share,
+.spending-category-change {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.spending-category-share {
+  color: var(--muted-foreground);
+}
+
+.spending-category-change {
+  min-width: var(--space-8);
+  font-size: var(--type-xs);
+}
+
+.spending-share-bar {
+  grid-column: 1 / -1;
+  display: block;
+  height: var(--space-1);
+  background: var(--muted);
+  border-radius: var(--radius-4xl);
+}
+
+.spending-share-bar > span {
+  display: block;
+  width: var(--spending-share);
+  height: 100%;
+  background: var(--chart-4);
+  border-radius: var(--radius-4xl);
+}
+
+.spending-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) 0;
+  font-size: var(--type-sm);
+  border-top: var(--border-hairline) solid var(--border);
+}
+
+.spending-list-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.spending-list-meta {
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.spending-list-amount {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.spending-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Kachel auf der Übersicht */
+.spending-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: var(--size-form);
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
+  background: var(--card);
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.spending-tile h2 {
+  margin: 0;
+  font-size: var(--type-sm);
+  font-weight: var(--weight-medium);
+  color: var(--muted-foreground);
+}
+
+.spending-tile p {
+  margin: 0;
+}
+/* spending:end */
+

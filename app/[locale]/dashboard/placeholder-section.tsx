@@ -10,7 +10,7 @@ import { getMessages, getTranslations } from 'next-intl/server';
 
 import { toAppLocale } from '@/i18n/routing';
 
-export type DashboardSection = 'overview' | 'contracts' | 'netWorth' | 'spending';
+export type DashboardSection = 'overview' | 'contracts' | 'netWorth';
 
 type LocaleParams = { params: Promise<{ locale: string }> };
 

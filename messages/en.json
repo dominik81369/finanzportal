@@ -151,13 +151,7 @@
     },
     "spending": {
       "title": "Spending",
-      "description": "Where your money goes – for a week, a month, a quarter, a year or a custom period.",
-      "planned": {
-        "figures": "Spending, income, balance and saved/repaid at a glance",
-        "comparison": "Comparison with the previous period (current period to date) and the previous year",
-        "categories": "Categories with subcategories, top counterparties and largest transactions",
-        "history": "History over the selected period"
-      }
+      "description": "Where your money goes – per week, month, quarter, year or a custom period, compared with the previous period."
     },
     "rule": {
       "title": "50/30/20 rule",
@@ -266,7 +260,11 @@
       "from": "From",
       "to": "To",
       "apply": "Filter",
-      "reset": "Reset"
+      "reset": "Reset",
+      "counterparty": "Counterparty: {name}",
+      "counterpartyAccount": "Counterparty account (IBAN)",
+      "counterpartyRemove": "Remove counterparty filter {name}",
+      "remove": "remove"
     },
     "pagination": {
       "label": "Pagination",
@@ -1011,5 +1009,119 @@
     "assign": "Accept",
     "withoutSuggestion": "{count, plural, one {# uncategorised transaction has no suggestion yet.} other {# uncategorised transactions have no suggestion yet.}}",
     "toGroups": "Assign by counterparty"
+  },
+  "Spending": {
+    "loading": "Loading spending …",
+    "loadError": "The analysis could not be loaded right now. Please reload the page.",
+    "noTransactions": {
+      "title": "No transactions yet",
+      "text": "Once there are transactions, this page shows where your money goes.",
+      "import": "Import a statement"
+    },
+    "empty": "No transactions in this period.",
+    "period": {
+      "label": "Period",
+      "types": {
+        "week": "Week",
+        "month": "Month",
+        "quarter": "Quarter",
+        "year": "Year",
+        "custom": "Custom"
+      },
+      "previous": "Previous period",
+      "next": "Next period",
+      "today": "Today",
+      "toDate": "to date",
+      "week": "Week {week} · {range}",
+      "quarter": "Q{quarter} {year}",
+      "from": "From",
+      "to": "To",
+      "apply": "Show",
+      "compare": "Compare with",
+      "compareOptions": {
+        "previous": "previous period",
+        "year": "previous year"
+      }
+    },
+    "currency": "Currency",
+    "figures": {
+      "heading": "Key figures",
+      "expenses": "Spending",
+      "income": "Income",
+      "balance": "Balance",
+      "saved": "Saved/repaid",
+      "versus": "vs. {range}",
+      "perDay": "Avg. {amount} per day",
+      "savedNote": "Savings & investments and loan repayment – not part of spending. The 50/30/20 view counts savings in the savings & debt group."
+    },
+    "change": {
+      "up": "▲ {value}",
+      "down": "▼ {value}",
+      "same": "± 0",
+      "new": "new"
+    },
+    "hints": {
+      "heading": "Notes",
+      "flagged": "{count, plural, one {# transaction} other {# transactions}} without a category or in “Other expenses/income” ({expenses} spending, {income} income) – included in the totals.",
+      "flaggedLink": "Assign now",
+      "sameHolder": "{count, plural, one {# transaction} other {# transactions}} to or from {ibans, plural, one {an IBAN} other {# IBANs}} in your name that {ibans, plural, one {is} other {are}} not recorded as your own account ({outflow} out, {inflow} in). Probably an own account is missing – until then these count as spending or income.",
+      "sameHolderAdvisor": "{count, plural, one {# transaction} other {# transactions}} to or from {ibans, plural, one {an IBAN} other {# IBANs}} in the client's name that {ibans, plural, one {is} other {are}} not recorded as an own account ({outflow} out, {inflow} in) – probably a missing own account.",
+      "sameHolderLink": "Add own account"
+    },
+    "chart": {
+      "heading": "History",
+      "caption": "Spending per {bucket, select, day {day} week {week} other {month}} in {currency}",
+      "current": "Spending",
+      "compare": "Comparison period",
+      "tip": "{label}: {amount}",
+      "tipCompare": "{label}: {amount} (comparison {compare})",
+      "showTable": "Show as table",
+      "columns": {
+        "bucket": "Period",
+        "current": "Spending",
+        "compare": "Comparison"
+      },
+      "weekOf": "Week of {date}"
+    },
+    "categories": {
+      "heading": "Spending by category",
+      "share": "Share",
+      "change": "Change",
+      "uncategorized": "No category",
+      "unknown": "Unknown category",
+      "subcategories": "{count, plural, one {# subcategory} other {# subcategories}}",
+      "empty": "No spending in this period.",
+      "transactionsLabel": "Show transactions in {name}"
+    },
+    "counterparties": {
+      "heading": "Top counterparties",
+      "count": "{count}×",
+      "empty": "No counterparties.",
+      "transactionsLabel": "Show transactions with {name}",
+      "unnamed": "Unnamed"
+    },
+    "largest": {
+      "heading": "Largest transactions",
+      "empty": "No debits.",
+      "editLabel": "Open transaction from {date}"
+    },
+    "info": {
+      "transfers": "Transfers between your own accounts (not counted): {outflow} out, {inflow} in.",
+      "refunds": "Refunds, offset against spending: {amount}.",
+      "rules": "All transactions count except those excluded from the budget and transfers to or from recorded own accounts (IBAN). Refunds reduce the spending of their category. Amounts in different currencies are not converted."
+    },
+    "tile": {
+      "heading": "Spending this month",
+      "link": "Go to spending",
+      "empty": "No spending this month yet.",
+      "loading": "Loading spending …",
+      "loadError": "Spending could not be loaded right now.",
+      "otherCurrencies": "Other currencies: {currencies}"
+    },
+    "advisor": {
+      "heading": "Spending",
+      "intro": "{month} to date, compared with the same days of the previous month.",
+      "noTransactions": "The client has not recorded any transactions yet."
+    }
   }
 }

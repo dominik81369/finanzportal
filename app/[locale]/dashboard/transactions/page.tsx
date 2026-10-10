@@ -158,7 +158,13 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
 
       {/* Ohne Buchungen und ohne Filter gibt es nichts zu filtern. */}
       {options && (filtered || (transactions && transactions.length > 0)) ? (
-        <TransactionFiltersForm filters={filters} active={filtered} basePath={LIST_PATH} {...options} />
+        <TransactionFiltersForm
+            filters={filters}
+            active={filtered}
+            basePath={LIST_PATH}
+            counterpartyLabel={filters.counterparty ? (transactions?.[0]?.counterparty_name ?? null) : null}
+            {...options}
+          />
       ) : null}
 
       {filtered && transactions ? (

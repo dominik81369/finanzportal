@@ -32,6 +32,7 @@ import { loadTransactionList } from '../../../dashboard/transactions/transaction
 import { TransactionTable } from '../../../dashboard/transactions/transaction-table';
 import { AdvisorBudgetSection } from './budget-section';
 import { AdvisorContractsSection } from './contracts-section';
+import { AdvisorSpendingSection } from './spending-section';
 
 type ClientPageProps = {
   params: Promise<{ locale: string; clientId: string }>;
@@ -168,6 +169,8 @@ export default async function AdvisorClientPage({ params, searchParams }: Client
         )}
       </section>
 
+      <AdvisorSpendingSection clientId={clientId} />
+
       <AdvisorBudgetSection clientId={clientId} />
 
       <AdvisorContractsSection clientId={clientId} name={name} />
@@ -176,7 +179,13 @@ export default async function AdvisorClientPage({ params, searchParams }: Client
         <h2 id="transactions-heading">{t('transactions.heading')}</h2>
 
         {options && (filtered || (transactions && transactions.length > 0)) ? (
-          <TransactionFiltersForm filters={filters} active={filtered} basePath={listPath} {...options} />
+          <TransactionFiltersForm
+            filters={filters}
+            active={filtered}
+            basePath={listPath}
+            counterpartyLabel={filters.counterparty ? (transactions?.[0]?.counterparty_name ?? null) : null}
+            {...options}
+          />
         ) : null}
 
         {filtered && transactions ? (

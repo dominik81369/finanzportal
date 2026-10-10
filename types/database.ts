@@ -1134,6 +1134,17 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: number;
       };
+      spending_report: {
+        Args: {
+          p_user_id: string;
+          p_from: string;
+          p_to: string;
+          p_bucket: string;
+          p_details?: boolean;
+          p_limit?: number;
+        };
+        Returns: Json;
+      };
       budget_category_totals: {
         Args: { p_user_id: string; p_from: string; p_to: string };
         Returns: {
