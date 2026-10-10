@@ -662,6 +662,10 @@
         "accountNotFound": "{account}: the chosen account no longer exists or cannot be imported into.",
         "tooManyRows": "The statement contains more than {max} transactions.",
         "generic": "The import failed. Nothing was imported. Please try again.",
+        "timeout": "The import exceeded the database time limit (SQLSTATE {code}). Nothing was imported. Please try again; if the error persists, please report it.",
+        "database": "The import failed in the database (SQLSTATE {code}: {message}). Nothing was imported.",
+        "network": "No response from the server (connection or timeout). Please reload the page and check whether anything was imported.",
+        "nameRequired": "{account}: please enter a name for the new account.",
         "mainAccount": "Main account",
         "space": "Space “{name}”"
       }

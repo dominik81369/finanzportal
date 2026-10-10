@@ -160,6 +160,7 @@ async function run(formData: FormData, dryRun: boolean): Promise<StatementRespon
     };
   });
 
+  const started = Date.now();
   const { data, error } = await supabase.rpc('import_statement', {
     p_sections: chosen.map(({ section, accountId, newAccountName }) => ({
       iban: section.iban,
@@ -176,7 +177,17 @@ async function run(formData: FormData, dryRun: boolean): Promise<StatementRespon
   });
 
   if (error) {
-    console.error('[import-pdf] import_statement fehlgeschlagen', { code: error.code, message: error.message });
+    // Ursache serverseitig protokollieren – ohne Buchungsdaten und ohne DETAIL
+    // (kann Zeilenwerte enthalten).
+    console.error('[import-pdf] import_statement fehlgeschlagen', {
+      code: error.code,
+      message: error.message,
+      hint: error.hint,
+      dryRun,
+      ms: Date.now() - started,
+      sections: statement.sections.length,
+      rows: statement.sections.reduce((sum, s) => sum + s.rows.length, 0),
+    });
     const section = statement.sections.find((s) => s.iban === error.details);
     const account = section ? sectionLabel(section, t) : (error.details ?? '');
     switch (error.message) {
@@ -196,7 +207,10 @@ async function run(formData: FormData, dryRun: boolean): Promise<StatementRespon
       case 'too_many_rows':
         return { status: 'error', message: t('tooManyRows', { max: 5000 }) };
       default:
-        return { status: 'error', message: t('generic') };
+        // Unbekannte Ursache: SQLSTATE und Meldung der Datenbank anzeigen.
+        return error.code === '57014'
+          ? { status: 'error', message: t('timeout', { code: error.code }) }
+          : { status: 'error', message: t('database', { code: error.code || '?', message: safeDbMessage(error.message) }) };
     }
   }
 
@@ -276,6 +290,20 @@ async function run(formData: FormData, dryRun: boolean): Promise<StatementRespon
 }
 
 type ErrorTranslator = Awaited<ReturnType<typeof getTranslations<'Import.pdf.errors'>>>;
+
+/**
+ * Meldung der Datenbank zur Anzeige: erste Zeile, gekürzt, IBANs und
+ * E-Mail-Adressen unkenntlich (Meldungen nennen sonst nur Funktionen,
+ * Tabellen, Spalten und Constraints; DETAIL mit Zeilenwerten wird nie
+ * angezeigt).
+ */
+function safeDbMessage(message: string | undefined): string {
+  return (message ?? '')
+    .split('\n')[0]!
+    .replace(/\b[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}\b/g, '[IBAN]')
+    .replace(/[^\s@"]+@[^\s@"]+/g, '[E-Mail]')
+    .slice(0, 200);
+}
 
 function sectionLabel(section: { kind: 'main' | 'space'; name: string | null; iban: string }, t: ErrorTranslator): string {
   return section.kind === 'main' ? t('mainAccount') : t('space', { name: section.name ?? section.iban });
