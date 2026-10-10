@@ -68,7 +68,9 @@ export async function TransactionTable({ transactions, caption, editable }: Tran
                           ? 'autoStandardRule'
                           : tx.rule.origin === 'own_account'
                             ? 'autoOwnAccount'
-                            : 'autoOwnRule',
+                            : tx.rule.origin === 'bank_category'
+                              ? 'autoBankCategory'
+                              : 'autoOwnRule',
                         { pattern: tx.rule.pattern },
                       );
             return (

@@ -1,0 +1,515 @@
+{
+  "provisional": false,
+  "number": "09/2026",
+  "period": [
+    "01.09.2026",
+    "30.09.2026"
+  ],
+  "created": "08.10.2026",
+  "holder": {
+    "name": "MAX MUSTERMANN",
+    "address": "Musterweg 1, 80331 München"
+  },
+  "sections": [
+    {
+      "kind": "main",
+      "name": null,
+      "opened": null,
+      "iban": "DE75100110019000000001",
+      "bic": "NTSBDEB1XXX",
+      "opening": "+914,08€",
+      "bookings": [
+        {
+          "counterparty": "CAYA GMBH* CAYA BY AMN",
+          "date": "02.09.2026",
+          "amount": "-19,99€",
+          "type": "Mastercard • Medien & Telekom",
+          "value": "01.09.2026"
+        },
+        {
+          "counterparty": "An Ulmer Straße 3",
+          "date": "02.09.2026",
+          "amount": "-371,20€",
+          "value": "02.09.2026"
+        },
+        {
+          "counterparty": "GC RE OCTOPUS ENERGY GERMANY GMBH",
+          "date": "03.09.2026",
+          "amount": "-48,99€",
+          "type": "Lastschriften",
+          "iban": "FR1917118820089000000000008",
+          "bic": "GOAAFRP1",
+          "purpose": "REF-0000A00A000C000002",
+          "value": "03.09.2026"
+        },
+        {
+          "counterparty": "Corendon Touristik",
+          "date": "05.09.2026",
+          "amount": "-201,18€",
+          "type": "Mastercard • Transport",
+          "value": "05.09.2026"
+        },
+        {
+          "counterparty": "Vodafone GmbH",
+          "date": "07.09.2026",
+          "amount": "-39,99€",
+          "type": "Lastschriften",
+          "iban": "DE89380700599000000009",
+          "bic": "DEUTDEDK380",
+          "purpose": "09/2026 K-NR. 900000001 Ihre Rechnung online bei www. vodafone.de/meinkabel",
+          "value": "07.09.2026"
+        },
+        {
+          "counterparty": "C24* MIETWAGEN LAS PAL",
+          "date": "12.09.2026",
+          "amount": "-36,85€",
+          "type": "Mastercard • Transport",
+          "value": "12.09.2026"
+        },
+        {
+          "counterparty": "Baeckerei Zoettl",
+          "date": "13.09.2026",
+          "amount": "-6,60€",
+          "type": "Mastercard • Lebensmittel",
+          "value": "13.09.2026"
+        },
+        {
+          "counterparty": "Penny Konrad-Celti",
+          "date": "13.09.2026",
+          "amount": "-13,21€",
+          "type": "Mastercard • Lebensmittel",
+          "value": "13.09.2026"
+        },
+        {
+          "counterparty": "Hagebaumarkt M-Sendlin",
+          "date": "13.09.2026",
+          "amount": "-5,98€",
+          "type": "Mastercard • Wohnen & Energie",
+          "value": "13.09.2026"
+        },
+        {
+          "counterparty": "GAiA Gasteig",
+          "date": "15.09.2026",
+          "amount": "-9,50€",
+          "type": "Mastercard • Bars & Restaurants",
+          "value": "15.09.2026"
+        },
+        {
+          "counterparty": "Rundfunk ARD, ZDF, DRadio",
+          "date": "15.09.2026",
+          "amount": "-55,08€",
+          "type": "Lastschriften",
+          "iban": "DE59700500009000000010",
+          "bic": "BYLADEMMXXX",
+          "purpose": "Rundfunk 08.2026 - 10.2026 Beitragsnr. 900000002 Aenderungen ganz bequem: www.rundfunkbeitrag.de",
+          "value": "15.09.2026"
+        },
+        {
+          "counterparty": "Alwin Kiosk 1",
+          "date": "15.09.2026",
+          "amount": "-4,00€",
+          "type": "Mastercard • Freizeit",
+          "value": "15.09.2026"
+        },
+        {
+          "counterparty": "PAYPAL *KINGUINDIGI",
+          "date": "18.09.2026",
+          "amount": "-1,85€",
+          "type": "Mastercard",
+          "value": "18.09.2026"
+        },
+        {
+          "counterparty": "PayPal_*Midnightbazar",
+          "date": "19.09.2026",
+          "amount": "-7,00€",
+          "type": "Mastercard • Freizeit",
+          "value": "19.09.2026"
+        },
+        {
+          "counterparty": "Buena Vista",
+          "date": "19.09.2026",
+          "amount": "-11,00€",
+          "type": "Mastercard • Bars & Restaurants",
+          "value": "19.09.2026"
+        },
+        {
+          "counterparty": "Buena Vista bar",
+          "date": "19.09.2026",
+          "amount": "-23,00€",
+          "type": "Mastercard • Bars & Restaurants",
+          "value": "19.09.2026"
+        },
+        {
+          "counterparty": "Buena Vista bar",
+          "date": "19.09.2026",
+          "amount": "-24,00€",
+          "type": "Mastercard • Bars & Restaurants",
+          "value": "19.09.2026"
+        },
+        {
+          "counterparty": "Buena Vista",
+          "date": "19.09.2026",
+          "amount": "-10,00€",
+          "type": "Mastercard • Bars & Restaurants",
+          "value": "19.09.2026"
+        },
+        {
+          "counterparty": "Hans Testmann",
+          "date": "25.09.2026",
+          "amount": "-7,00€",
+          "type": "Mastercard • Bars & Restaurants",
+          "value": "25.09.2026"
+        },
+        {
+          "counterparty": "Gerda Dummy",
+          "date": "30.09.2026",
+          "amount": "+1.900,00€",
+          "type": "Gutschriften",
+          "iban": "DE96100110019000000011",
+          "bic": "NTSBDEB1XXX",
+          "purpose": "Okt Musterweg Wohnung miete",
+          "value": "30.09.2026"
+        },
+        {
+          "counterparty": "SL Beteiligungs-GmbH Co Immobilien VI KG",
+          "date": "30.09.2026",
+          "amount": "-1.189,99€",
+          "type": "Belastungen",
+          "iban": "DE05700500009000000012",
+          "bic": "BYLADEMMXXX",
+          "purpose": "MV 100001 Miete-Wohnen",
+          "value": "30.09.2026"
+        },
+        {
+          "counterparty": "SL Beteiligungs-GmbH Co Immobilien VI KG",
+          "date": "30.09.2026",
+          "amount": "-250,00€",
+          "type": "Belastungen",
+          "iban": "DE05700500009000000012",
+          "bic": "BYLADEMMXXX",
+          "purpose": "MV 100001 Miete-Wohnen",
+          "value": "30.09.2026"
+        },
+        {
+          "counterparty": "An Birkenallee 68",
+          "date": "30.09.2026",
+          "amount": "-10,00€",
+          "value": "30.09.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Ahornweg 2",
+      "opened": "12.11.2024",
+      "iban": "DE48100110019000000002",
+      "bic": "NTSBDEB1XXX",
+      "opening": "+805,31€",
+      "bookings": [
+        {
+          "counterparty": "WEG Ahornweg 4 80331 München",
+          "date": "01.09.2026",
+          "amount": "-507,03€",
+          "type": "Lastschriften",
+          "iban": "DE95550104009000000013",
+          "bic": "AARBDE5WDOM",
+          "purpose": "Einzug Hausgeld 09/2026 700.001",
+          "value": "01.09.2026"
+        },
+        {
+          "counterparty": "An Birkenallee 68",
+          "date": "02.09.2026",
+          "amount": "-264,00€",
+          "value": "02.09.2026"
+        },
+        {
+          "counterparty": "Von Freelancer-Konto",
+          "date": "30.09.2026",
+          "amount": "+912,00€",
+          "purpose": "Privatentnahme",
+          "value": "30.09.2026"
+        },
+        {
+          "counterparty": "Commerzbank AG",
+          "date": "30.09.2026",
+          "amount": "-946,20€",
+          "type": "Lastschriften",
+          "iban": "DE55700400489000000014",
+          "bic": "COBADEFF",
+          "purpose": "LEISTUNGEN PER 30.09.2026, IBAN DE55700400489000000014, AZ 1000000001, IN EUR: Tilgung 262,59 Zinsen 683,61",
+          "value": "30.09.2026"
+        },
+        {
+          "counterparty": "Frieda Platzhalter",
+          "date": "30.09.2026",
+          "amount": "+1.537,00€",
+          "type": "Gutschriften",
+          "iban": "DE67701500009000000015",
+          "bic": "SSKMDEMMXXX",
+          "purpose": "Miete für Oktober",
+          "value": "30.09.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Birkenallee 68",
+      "opened": "05.03.2025",
+      "iban": "DE21100110019000000003",
+      "bic": "NTSBDEB1XXX",
+      "opening": "0,00€",
+      "bookings": [
+        {
+          "counterparty": "Von Ahornweg 2",
+          "date": "02.09.2026",
+          "amount": "+264,00€",
+          "value": "02.09.2026"
+        },
+        {
+          "counterparty": "WEG Birkenweg 2-4a/Birkenallee 62-70 (Leipzig)",
+          "date": "02.09.2026",
+          "amount": "-264,00€",
+          "type": "Lastschriften",
+          "iban": "DE38120300009000000016",
+          "bic": "BYLADEM1001",
+          "purpose": "-264,00 VORSCHUSS KOSTEN 0 /",
+          "value": "02.09.2026"
+        },
+        {
+          "counterparty": "Anna Beispiel",
+          "date": "04.09.2026",
+          "amount": "+728,00€",
+          "type": "Gutschriften",
+          "iban": "DE27870500009000000017",
+          "bic": "CHEKDE81",
+          "purpose": "Anna Beispiel /September/ 2026",
+          "value": "04.09.2026"
+        },
+        {
+          "counterparty": "An Lindenstraße 46",
+          "date": "08.09.2026",
+          "amount": "-116,98€",
+          "value": "08.09.2026"
+        },
+        {
+          "counterparty": "An Eichenstraße 33",
+          "date": "08.09.2026",
+          "amount": "-86,48€",
+          "value": "08.09.2026"
+        },
+        {
+          "counterparty": "Von Hauptkonto",
+          "date": "30.09.2026",
+          "amount": "+10,00€",
+          "value": "30.09.2026"
+        },
+        {
+          "counterparty": "Max Mustermann",
+          "date": "30.09.2026",
+          "amount": "-534,00€",
+          "type": "Lastschriften",
+          "iban": "DE29870540009000000018",
+          "bic": "WELADED1STB",
+          "purpose": "Rechnung Darl.-Leistung 6000000001 Tilgung 112,65 Zinsen 421,35",
+          "value": "30.09.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Kastanienstr. 73",
+      "opened": "07.03.2025",
+      "iban": "DE91100110019000000004",
+      "bic": "NTSBDEB1XXX",
+      "opening": "+104,03€",
+      "bookings": [
+        {
+          "counterparty": "Max Mustermann",
+          "date": "01.09.2026",
+          "amount": "+94,89€",
+          "type": "Gutschriften",
+          "iban": "DE46500240249000000019",
+          "bic": "DEFFDEFFXXX",
+          "value": "01.09.2026"
+        },
+        {
+          "counterparty": "Max Mustermann",
+          "date": "01.09.2026",
+          "amount": "-198,92€",
+          "type": "Lastschriften",
+          "iban": "DE05672300009000000020",
+          "bic": "MLPBDE61",
+          "purpose": "Teilzahlung Darlehen",
+          "value": "01.09.2026"
+        },
+        {
+          "counterparty": "Dieter Ersatz",
+          "date": "14.09.2026",
+          "amount": "+505,00€",
+          "type": "Gutschriften",
+          "iban": "DE89870400009000000021",
+          "bic": "COBADEFF",
+          "purpose": "Miete 09/26 Ersatz, Dieter",
+          "value": "14.09.2026"
+        },
+        {
+          "counterparty": "WEG Kastanienstrase 73",
+          "date": "16.09.2026",
+          "amount": "-221,00€",
+          "type": "Belastungen",
+          "iban": "DE70120300009000000022",
+          "bic": "BYLADEM1001",
+          "purpose": "00100/0000001",
+          "value": "16.09.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Lindenstraße 46",
+      "opened": "08.03.2025",
+      "iban": "DE64100110019000000005",
+      "bic": "NTSBDEB1XXX",
+      "opening": "0,00€",
+      "bookings": [
+        {
+          "counterparty": "Berta Probe",
+          "date": "01.09.2026",
+          "amount": "+895,00€",
+          "type": "Gutschriften",
+          "iban": "DE63100110019000000023",
+          "bic": "NTSBDEB1XXX",
+          "purpose": "Miete Lindenstr. 46,04109 Leipzig Probe-Muster",
+          "value": "01.09.2026"
+        },
+        {
+          "counterparty": "Max Mustermann",
+          "date": "01.09.2026",
+          "amount": "-516,95€",
+          "type": "Lastschriften",
+          "iban": "DE91672300009000000024",
+          "bic": "MLPBDE61",
+          "purpose": "Teilzahlung Darlehen",
+          "value": "01.09.2026"
+        },
+        {
+          "counterparty": "Von Birkenallee 68",
+          "date": "08.09.2026",
+          "amount": "+116,98€",
+          "value": "08.09.2026"
+        },
+        {
+          "counterparty": "WEG Lindenstrase 46",
+          "date": "08.09.2026",
+          "amount": "-495,03€",
+          "type": "Belastungen",
+          "iban": "DE86120300009000000025",
+          "bic": "BYLADEM1001",
+          "purpose": "Hausgeld Mustermann",
+          "value": "08.09.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Eichenstraße 33",
+      "opened": "09.03.2025",
+      "iban": "DE37100110019000000006",
+      "bic": "NTSBDEB1XXX",
+      "opening": "+500,00€",
+      "bookings": [
+        {
+          "counterparty": "Max Mustermann",
+          "date": "01.09.2026",
+          "amount": "-262,15€",
+          "type": "Lastschriften",
+          "iban": "DE37672300009000000026",
+          "bic": "MLPBDE61",
+          "purpose": "Teilzahlung Darlehen",
+          "value": "01.09.2026"
+        },
+        {
+          "counterparty": "Von Birkenallee 68",
+          "date": "08.09.2026",
+          "amount": "+86,48€",
+          "value": "08.09.2026"
+        },
+        {
+          "counterparty": "WEG Eichenstrase 33",
+          "date": "08.09.2026",
+          "amount": "-324,33€",
+          "type": "Belastungen",
+          "iban": "DE32120300009000000027",
+          "bic": "BYLADEM1001",
+          "purpose": "Hausgeld Mustermann",
+          "value": "08.09.2026"
+        },
+        {
+          "counterparty": "Carl Vorlage",
+          "date": "28.09.2026",
+          "amount": "+500,00€",
+          "type": "Gutschriften",
+          "iban": "DE21870500009000000028",
+          "bic": "CHEKDE81",
+          "purpose": "Miete Vorlage/Muster",
+          "value": "28.09.2026"
+        }
+      ]
+    },
+    {
+      "kind": "space",
+      "name": "Ulmer Straße 3",
+      "opened": "08.04.2025",
+      "iban": "DE10100110019000000007",
+      "bic": "NTSBDEB1XXX",
+      "opening": "0,00€",
+      "bookings": [
+        {
+          "counterparty": "Von Hauptkonto",
+          "date": "02.09.2026",
+          "amount": "+371,20€",
+          "value": "02.09.2026"
+        },
+        {
+          "counterparty": "WEG Ulmer Str.3",
+          "date": "02.09.2026",
+          "amount": "-371,20€",
+          "type": "Lastschriften",
+          "iban": "DE38700901009000000029",
+          "bic": "GENODEF1M04",
+          "purpose": "VS/0100000001 WEGEN Vorschuesse 09/2026",
+          "value": "02.09.2026"
+        },
+        {
+          "counterparty": "Emil Fiktiv",
+          "date": "14.09.2026",
+          "amount": "+1.220,00€",
+          "type": "Gutschriften",
+          "iban": "DE19700700249000000030",
+          "bic": "DEUTDEDBMUC",
+          "purpose": "MIETE/NK WHG. NR. 13 ULMER STR. 3",
+          "value": "14.09.2026"
+        },
+        {
+          "counterparty": "Max Mustermann",
+          "date": "30.09.2026",
+          "amount": "+317,02€",
+          "type": "Gutschriften",
+          "iban": "DE46500240249000000019",
+          "bic": "DEFFDEFFXXX",
+          "value": "30.09.2026"
+        },
+        {
+          "counterparty": "Max Mustermann",
+          "date": "30.09.2026",
+          "amount": "-1.535,07€",
+          "type": "Lastschriften",
+          "iban": "DE66870540009000000031",
+          "bic": "WELADED1STB",
+          "purpose": "Rechnung Darl.-Leistung 6000000002 Tilgung 359,45 Zinsen 1.175,62",
+          "value": "30.09.2026"
+        }
+      ]
+    }
+  ]
+}

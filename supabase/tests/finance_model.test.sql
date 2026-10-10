@@ -192,7 +192,7 @@ select is_empty($$ select 1 from public.tags $$,                 'Bob sieht kein
 select is_empty($$ select 1 from public.transaction_tags $$,     'Bob sieht keine fremden Tag-Zuordnungen');
 select is_empty($$ select 1 from public.budgets $$,              'Bob sieht keine fremden Budgets');
 select is_empty($$ select 1 from public.recurring_contracts $$,  'Bob sieht keine fremden Verträge');
-select is_empty($$ select 1 from public.categorization_rules $$, 'Bob sieht keine fremden Regeln');
+select is_empty($$ select 1 from public.categorization_rules where user_id <> auth.uid() $$, 'Bob sieht keine fremden Regeln');
 
 select throws_ok(
   $$ insert into public.transaction_tags (transaction_id, tag_id)

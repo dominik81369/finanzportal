@@ -5,7 +5,9 @@
  *   1. manuelle Zuordnungen bleiben immer,
  *   2. eigene Regeln (angelegt oder aus Korrekturen gelernt),
  *   3. eigene Konten (Name/IBAN → Umbuchung),
- *   4. Standardregeln (REWE, MVG, Zinszahlung … – per Knopf geladen).
+ *   4. Standardregeln (REWE, MVG, Zinszahlung … – per Knopf geladen),
+ *   5. Kartenkategorien der Bank (N26 „Mastercard • Lebensmittel“ → eigene
+ *      Kategorie; Zuordnung je Nutzer änderbar).
  * Oben Kennzahlen und Massenaktionen (anwenden, zurücksetzen), darunter die
  * eigenen Regeln in Prüfreihenfolge (lib/import/rules.ts) und eingeklappt
  * die Standardregeln.
@@ -21,6 +23,7 @@ import {
   loadStandardRules,
   moveRule,
   resetMachineCategorization,
+  setBankCategory,
   setOwnAccountCategory,
   setRuleActive,
 } from '@/lib/actions/categorization-rules';
@@ -31,6 +34,7 @@ import { requireOnboardedUser, createClient } from '@/lib/supabase/server';
 import { CategorySelect } from '../category-select';
 import { loadTransactionFormOptions } from '../form-options';
 import { QualityStats } from '../quality-stats';
+import { BankCategoryForm } from './bank-category-form';
 import { LearningForm } from './learning-form';
 import { OwnAccountForm } from './own-account-form';
 import { RuleForm } from './rule-form';
@@ -83,7 +87,7 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
   const tCategories = await getTranslations('DefaultCategories');
 
   const supabase = await createClient();
-  const [rules, options, statsResult, profile, quality, settings, evaluation] = await Promise.all([
+  const [rules, options, statsResult, profile, quality, settings, evaluation, accounts] = await Promise.all([
     supabase
       .from('categorization_rules')
       .select(
@@ -97,6 +101,8 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
     supabase.rpc('rule_quality', {}),
     supabase.from('categorization_settings').select('bayes_threshold, review_amount_limit').eq('user_id', user.id).maybeSingle(),
     supabase.rpc('bayes_evaluate'),
+    // Konten mit IBAN: zeigt bei eigenen Konten, welches Konto der App dazugehört.
+    supabase.from('accounts').select('name, iban').eq('user_id', user.id).not('iban', 'is', null),
   ]);
   if (evaluation.error) {
     console.error('[rules] Auswertung fehlgeschlagen', { code: evaluation.error.code });
@@ -118,6 +124,7 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
   const ownAccounts = all
     .filter((rule) => rule.origin === 'own_account')
     .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  const accountByIban = new Map((accounts.data ?? []).map((account) => [account.iban, account.name]));
   // Vorschlag für die Erkennung eigener Konten: Vor- und Nachname aus dem
   // Profil, solange noch keine Namensregel existiert.
   const profileName = [profile.data?.first_name, profile.data?.last_name]
@@ -134,14 +141,19 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
     .map((rule) => ({ rule, category: rule.category ? categoryDisplayName(rule.category, tCategories) : '' }))
     .sort((a, b) => collator.compare(a.category, b.category) || collator.compare(a.rule.pattern, b.rule.pattern))
     .map(({ rule }) => rule);
+  const bankCategories = all
+    .filter((rule) => rule.origin === 'bank_category')
+    .sort((a, b) => collator.compare(a.pattern, b.pattern));
   const categoryOptions = options?.categories ?? [];
   const stats = (statsResult.data as Stats | null) ?? null;
 
   const loaded = countParam(query.loaded);
   const removed = countParam(query.removed) ?? 0;
+  const bankAdded = countParam(query.bank) ?? 0;
   const applied = countParam(query.applied);
   const reset = countParam(query.reset);
   const ownUpdated = countParam(query.ownUpdated);
+  const bankUpdated = countParam(query.bankUpdated);
   const failed = query.error === '1';
 
   const describe = (rule: (typeof all)[number]) => {
@@ -196,6 +208,7 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
       ) : loaded !== null ? (
         <p role="status" className="form-success">
           {t('notices.loaded', { count: loaded })} {removed > 0 ? `${t('notices.removed', { count: removed })} ` : ''}
+          {bankAdded > 0 ? `${t('notices.bankAdded', { count: bankAdded })} ` : ''}
           {t('notices.applied', { count: applied ?? 0 })}
         </p>
       ) : applied !== null ? (
@@ -205,6 +218,10 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
       ) : ownUpdated !== null ? (
         <p role="status" className="form-success">
           {t('notices.ownUpdated', { count: ownUpdated })}
+        </p>
+      ) : bankUpdated !== null ? (
+        <p role="status" className="form-success">
+          {t('notices.bankUpdated', { count: bankUpdated })}
         </p>
       ) : reset !== null ? (
         <p role="status" className="form-success">
@@ -284,6 +301,9 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
                   <span className="cell-note">
                     <span className="badge badge-muted">{t('ownAccounts.badge')}</span>
                     {` · ${t(rule.match_field === 'counterparty_iban' ? 'ownAccounts.kinds.iban' : 'ownAccounts.kinds.nameSuggestion')}`}
+                    {rule.match_field === 'counterparty_iban' && accountByIban.has(rule.pattern.toUpperCase())
+                      ? ` · ${t('ownAccounts.account', { name: accountByIban.get(rule.pattern.toUpperCase()) ?? '' })}`
+                      : null}
                   </span>
                 </div>
                 <div className="link-item-actions">
@@ -313,6 +333,47 @@ export default async function RulesPage({ searchParams }: RulesPageProps) {
           </ul>
         ) : null}
         <OwnAccountForm suggestedName={suggestedName} categories={categoryOptions} />
+      </section>
+
+      <section className="advisor-section" aria-labelledby="rule-bank-heading" id="bank-categories">
+        <h2 id="rule-bank-heading">{t('bankCategories.heading')}</h2>
+        <p>{t('bankCategories.intro')}</p>
+        {bankCategories.length > 0 ? (
+          <ul className="link-list rule-list bank-category-list">
+            {bankCategories.map((rule) => (
+              <li key={rule.id} className="link-item" data-bank-category={rule.pattern}>
+                <div className="link-item-text">
+                  {ruleTitle(rule)}
+                  <span className="cell-note">
+                    <span className="badge badge-muted">{t('bankCategories.badge')}</span>
+                  </span>
+                </div>
+                <div className="link-item-actions">
+                  <form action={setBankCategory.bind(null, rule.id)} className="inline-form">
+                    <label htmlFor={`bank-category-${rule.id}`} className="sr-only">
+                      {t('bankCategories.categoryFor', { pattern: rule.pattern })}
+                    </label>
+                    <CategorySelect
+                      id={`bank-category-${rule.id}`}
+                      name="category"
+                      categories={categoryOptions}
+                      defaultValue={rule.category_id}
+                      emptyLabel={t('choose')}
+                      required
+                    />
+                    <button type="submit" className="button button-secondary button-small">
+                      {t('bankCategories.change')}
+                    </button>
+                  </form>
+                  {deleteForm(rule)}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="empty-state">{t('bankCategories.empty')}</p>
+        )}
+        <BankCategoryForm categories={categoryOptions} />
       </section>
 
       <section className="advisor-section" aria-labelledby="rule-new-heading">

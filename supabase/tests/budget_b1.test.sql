@@ -41,7 +41,7 @@ select results_eq(
 );
 select is(
   (select count(*)::integer from public.categories where user_id = tests.get_supabase_uid('b1b_alice') and default_key is not null),
-  21, 'Neue Nutzerin: 21 Standardkategorien'
+  22, 'Neue Nutzerin: 22 Standardkategorien'
 );
 
 -- ---------------------------------------------------------------------

@@ -2286,3 +2286,57 @@
 }
 /* spending:end */
 
+
+/* import-pdf:start -------------------------------------------------------
+   PDF-Import (N26): Vorschau und Ergebnis je Konto des Auszugs,
+   Kartenkategorien auf der Regeln-Seite. Nur Design-Tokens.
+   --------------------------------------------------------------------- */
+.statement-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.statement-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.statement-section p {
+  margin: 0;
+}
+
+.statement-section-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+}
+
+.statement-balance {
+  font-size: var(--type-sm);
+}
+
+.statement-counts {
+  font-size: var(--type-sm);
+}
+
+.statement-probable summary {
+  cursor: pointer;
+}
+
+.statement-probable ul {
+  margin-top: var(--space-2);
+}
+
+.bank-category-form {
+  margin-top: var(--space-4);
+}
+/* import-pdf:end */

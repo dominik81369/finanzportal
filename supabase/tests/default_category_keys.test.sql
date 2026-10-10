@@ -16,13 +16,13 @@ select tests.authenticate_as('dk_alice');
 
 select is(
   (select count(*)::int from public.categories where user_id = auth.uid() and default_key is not null),
-  21,
-  'Neues Konto: alle 21 Standardkategorien haben einen Schlüssel'
+  22,
+  'Neues Konto: alle 22 Standardkategorien haben einen Schlüssel'
 );
 
 select is(
   (select count(distinct default_key)::int from public.categories where user_id = auth.uid()),
-  21,
+  22,
   'Schlüssel sind je Nutzer eindeutig'
 );
 

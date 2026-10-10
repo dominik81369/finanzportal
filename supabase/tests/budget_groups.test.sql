@@ -33,12 +33,12 @@ select results_eq(
              where user_id = %L and default_key is not null order by sort_order $$,
          tests.get_supabase_uid('bg_alice')),
   $$ values
-    ('salary'::text, null::text), ('investment_income', null), ('rental_income', null), ('other_income', null),
+    ('salary'::text, null::text), ('investment_income', null), ('rental_income', null), ('private_withdrawal', null), ('other_income', null),
     ('housing', 'needs'), ('groceries', 'needs'), ('mobility', 'needs'), ('insurance', 'needs'),
     ('health', 'needs'), ('leisure_travel', 'wants'), ('subscriptions_media', 'wants'),
     ('shopping', 'wants'), ('education', 'wants'), ('taxes', 'needs'), ('capital_gains_tax', 'needs'), ('loan', 'needs'), ('loan_interest', 'needs'), ('other_expenses', 'wants'),
     ('savings_investments', 'savings'), ('loan_repayment', 'savings'), ('transfer', null) $$,
-  'Neue Nutzerin: 21 Standardkategorien mit der vereinbarten Zuordnung'
+  'Neue Nutzerin: 22 Standardkategorien mit der vereinbarten Zuordnung'
 );
 select has_type('public', 'budget_group', 'Typ public.budget_group existiert');
 

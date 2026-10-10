@@ -1,10 +1,11 @@
 /**
  * app/[locale]/dashboard/transactions/import/page.tsx
  *
- * Kontoauszug (CSV/Excel) importieren. Die Datei wird im Browser gelesen
- * (./import-wizard.tsx, lib/import/); importiert wird über
- * lib/actions/import-transactions.ts. Zielkonto: eigenes manuelles oder
- * CSV-Konto – synchronisierte Konten liefert die Bank.
+ * Kontoauszug importieren: CSV/Excel wird im Browser gelesen
+ * (./import-wizard.tsx, lib/import/, importiert über
+ * lib/actions/import-transactions.ts), PDF-Auszüge von N26 auf dem Server
+ * (./statement-import.tsx, lib/actions/import-statement.ts). Zielkonto:
+ * eigenes manuelles oder Import-Konto – synchronisierte Konten liefert die Bank.
  */
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -32,7 +33,7 @@ export default async function ImportPage() {
   // Ausdrücklich eigene Konten: RLS gibt Beratern auch die ihrer Mandanten frei.
   const { data: accounts, error } = await supabase
     .from('accounts')
-    .select('id, name, currency')
+    .select('id, name, currency, iban')
     .eq('user_id', user.id)
     .in('provider', ['manual', 'csv'])
     .is('archived_at', null)

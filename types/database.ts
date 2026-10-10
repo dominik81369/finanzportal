@@ -134,6 +134,7 @@ export type Database = {
           provider: Database['public']['Enums']['account_provider'];
           provider_account_id: string | null;
           institution_name: string | null;
+          iban: string | null;
           iban_last4: string | null;
           currency: string;
           opening_balance: number;
@@ -154,6 +155,7 @@ export type Database = {
           provider?: Database['public']['Enums']['account_provider'];
           provider_account_id?: string | null;
           institution_name?: string | null;
+          iban?: string | null;
           iban_last4?: string | null;
           currency?: string;
           opening_balance?: number;
@@ -174,6 +176,7 @@ export type Database = {
           provider?: Database['public']['Enums']['account_provider'];
           provider_account_id?: string | null;
           institution_name?: string | null;
+          iban?: string | null;
           iban_last4?: string | null;
           currency?: string;
           opening_balance?: number;
@@ -1081,6 +1084,14 @@ export type Database = {
         Args: { p_rule_id: string; p_category_id: string };
         Returns: number;
       };
+      add_bank_category_rule: {
+        Args: { p_label: string; p_category_id: string };
+        Returns: Json;
+      };
+      set_bank_category_rule: {
+        Args: { p_rule_id: string; p_category_id: string };
+        Returns: number;
+      };
       categorization_quality: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
@@ -1272,6 +1283,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      import_statement: {
+        Args: { p_sections: Json; p_dry_run?: boolean };
+        Returns: Json;
+      };
       set_transaction_category: {
         Args: { p_id: string; p_category_id: string | null };
         Returns: Json;
@@ -1296,7 +1311,7 @@ export type Database = {
         | 'emerging_markets'
         | 'other';
       real_estate_usage: 'self_occupied' | 'rented' | 'mixed' | 'vacant';
-      transaction_source: 'manual' | 'csv_import' | 'bank_sync';
+      transaction_source: 'manual' | 'csv_import' | 'pdf_import' | 'bank_sync';
       budget_period: 'weekly' | 'monthly' | 'quarterly' | 'yearly';
       budget_group: 'needs' | 'wants' | 'savings';
       contract_rhythm: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly';
@@ -1370,7 +1385,7 @@ export const Constants = {
         'other',
       ],
       real_estate_usage: ['self_occupied', 'rented', 'mixed', 'vacant'],
-      transaction_source: ['manual', 'csv_import', 'bank_sync'],
+      transaction_source: ['manual', 'csv_import', 'pdf_import', 'bank_sync'],
       budget_period: ['weekly', 'monthly', 'quarterly', 'yearly'],
       budget_group: ['needs', 'wants', 'savings'],
       contract_rhythm: ['weekly', 'monthly', 'quarterly', 'semiannual', 'yearly'],

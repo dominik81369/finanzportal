@@ -86,7 +86,9 @@ select is(public.apply_categorization_rules((select id from learned), false, tru
 -- ---------------------------------------------------------------------
 select is(
   (select count(*)::int from public.categorization_rules
-    where user_id = auth.uid() and origin = 'standard' and pattern in ('uber', 'starbucks', 'miete', 'versicherung', 'gehalt')),
+    where user_id = auth.uid() and origin = 'standard' and pattern in ('uber', 'starbucks', 'miete', 'versicherung', 'gehalt')
+      -- „Miete“ nur als Gutschrift im Verwendungszweck (Mieteinnahmen, 20261016100100)
+      and not (pattern = 'miete' and match_field = 'purpose' and amount_min > 0 and amount_max is null)),
   0, 'Keine US-Händler und Allerweltsbegriffe im Regelset'
 );
 -- Altbestand simulieren: Regel aus dem früheren Regelset mit Zuordnung.
@@ -99,7 +101,7 @@ select is(pg_temp.state('Versicherungsbeitrag'), 'insurance:rule', 'Alte Standar
 update public.categorization_rules set priority = 50
  where user_id = auth.uid() and origin = 'standard' and pattern = 'rewe';
 
-select is(public.load_standard_rules(), '{"added": 0, "removed": 1, "reset": 1, "applied": 0}'::jsonb,
+select is(public.load_standard_rules(), '{"added": 0, "removed": 1, "reset": 1, "applied": 0, "bank_added": 0}'::jsonb,
   'Abgleich: veraltete Regel entfernt, ihre Zuordnung zurückgesetzt');
 select is(pg_temp.state('Versicherungsbeitrag'), '-:-', 'Buchung ist wieder ohne Kategorie');
 select is(

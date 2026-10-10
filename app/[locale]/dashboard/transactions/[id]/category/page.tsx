@@ -20,14 +20,16 @@ import { loadTransactionFormOptions } from '../../form-options';
 import { CategoryForm } from './category-form';
 
 /** Textschlüssel für „Warum diese Kategorie?“ je Herkunft der Regel. */
-function whyKey(origin: string): 'standard' | 'learned' | 'ownAccount' | 'rule' {
+function whyKey(origin: string): 'standard' | 'learned' | 'ownAccount' | 'bankCategory' | 'rule' {
   return origin === 'standard'
     ? 'standard'
     : origin === 'learned'
       ? 'learned'
       : origin === 'own_account'
         ? 'ownAccount'
-        : 'rule';
+        : origin === 'bank_category'
+          ? 'bankCategory'
+          : 'rule';
 }
 
 type CategoryPageProps = { params: Promise<{ locale: string; id: string }> };

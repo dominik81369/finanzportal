@@ -60,7 +60,8 @@ insert into rule_ids select 'amazon', public.create_categorization_rule('Amazon'
 insert into rule_ids select 'prime',  public.create_categorization_rule('  AMAZON   Prime ', (select subscriptions from cat));
 
 select results_eq(
-  $$ select pattern, priority::int, origin from public.categorization_rules order by priority, char_length(pattern) desc $$,
+  $$ select pattern, priority::int, origin from public.categorization_rules where origin = 'manual'
+      order by priority, char_length(pattern) desc $$,
   $$ values ('amazon prime'::text, 1, 'manual'::text), ('amazon', 1, 'manual') $$,
   'Muster normalisiert gespeichert; spezifischere Regel erhält die Priorität der allgemeineren'
 );
