@@ -1,7 +1,7 @@
 /**
  * lib/contract-labels.ts
  *
- * Beschriftungen für Verträge (Rhythmus, Typ, Status, Sicherheit) in der
+ * Beschriftungen für Verträge (Rhythmus, Typ, Status) in der
  * Sprache der Seite – für die eigenen Vertragsseiten und die Leseansicht
  * des Beraters.
  */
@@ -9,13 +9,7 @@ import 'server-only';
 
 import { getTranslations } from 'next-intl/server';
 
-import {
-  confidenceLevel,
-  rhythmKey,
-  type ContractRhythm,
-  type ContractStatus,
-  type ContractType,
-} from '@/lib/contracts';
+import { rhythmKey, type ContractRhythm, type ContractStatus, type ContractType } from '@/lib/contracts';
 
 export async function getContractLabels() {
   const t = await getTranslations('Contracts');
@@ -29,9 +23,6 @@ export async function getContractLabels() {
     },
     status(status: ContractStatus): string {
       return t(`status.${status}`);
-    },
-    confidence(confidence: number | null): string {
-      return t(`confidenceLevels.${confidenceLevel(confidence)}`);
     },
   };
 }

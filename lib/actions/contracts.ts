@@ -3,14 +3,15 @@
 /**
  * lib/actions/contracts.ts
  *
- * Server Actions für Verträge: erneut erkennen, Vorschläge bestätigen,
- * verwerfen und wiederherstellen, manuelle Verträge anlegen, ändern und
- * löschen, Buchungen lösen bzw. verknüpfen.
+ * Server Actions für Verträge: anlegen, ändern und löschen, Buchungen lösen
+ * bzw. verknüpfen. Verträge werden nur noch von Hand angelegt; die frühere
+ * Erkennung ruft die App nicht mehr auf.
  *
  * IDs kommen per .bind() vom Client und sind nicht vertrauenswürdig: die
  * SECURITY-INVOKER-RPCs prüfen Eigentum (user_id = auth.uid()) selbst; RLS
  * lässt Beratern ohnehin nur Lesen zu. Siehe
- * supabase/migrations/20261010100000_contracts_v1.sql.
+ * supabase/migrations/20261010100000_contracts_v1.sql und
+ * supabase/migrations/20261014100000_contracts_cleanup.sql.
  *
  * Kein redirect() und kein revalidatePath(): Die Vertragsseiten streamen
  * ihre Daten (Suspense); eine Weiterleitung aus der Action auf eine solche
@@ -24,7 +25,6 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { localizedPath } from '@/i18n/paths';
 import { toAppLocale } from '@/i18n/routing';
 import {
-  isContractType,
   parseContractForm,
   type ContractField,
   type ContractFieldError,
@@ -53,70 +53,7 @@ async function target(path: string, params: Record<string, string>): Promise<Con
   return { redirectTo: `${await localizedPath(path)}${query ? `?${query}` : ''}` };
 }
 
-/** Erkennung neu laufen lassen; meldet die Anzahl neuer Vorschläge. */
-export async function refreshContracts(): Promise<ContractActionResult> {
-  await requireOnboardedUser(CONTRACTS_PATH);
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc('refresh_contracts');
-  if (error) {
-    console.error('[contracts] Erkennung fehlgeschlagen', { code: error.code });
-    return target(CONTRACTS_PATH, { error: '1' });
-  }
-  const created = Number((data as { created?: number } | null)?.created ?? 0);
-  return target(CONTRACTS_PATH, { refreshed: String(created) });
-}
-
-/** Vorschlag bestätigen, optional mit geändertem Vertragstyp. */
-export async function confirmContract(contractId: string, formData: FormData): Promise<ContractActionResult> {
-  await requireOnboardedUser(CONTRACTS_PATH);
-  const type = String(formData.get('type') ?? '');
-  if (!isUuid(contractId) || (type !== '' && !isContractType(type))) {
-    return target(CONTRACTS_PATH, { error: '1' });
-  }
-  const supabase = await createClient();
-  const { error } = await supabase.rpc('set_contract_status', {
-    p_id: contractId,
-    p_status: 'active',
-    p_contract_type: isContractType(type) ? type : null,
-  });
-  if (error) {
-    console.error('[contracts] Bestätigen fehlgeschlagen', { code: error.code });
-    return target(CONTRACTS_PATH, { error: '1' });
-  }
-  return target(CONTRACTS_PATH, { confirmed: '1' });
-}
-
-/** Vorschlag oder erkannten Vertrag verwerfen (wird nicht erneut vorgeschlagen). */
-export async function dismissContract(contractId: string): Promise<ContractActionResult> {
-  await requireOnboardedUser(CONTRACTS_PATH);
-  if (!isUuid(contractId)) {
-    return target(CONTRACTS_PATH, { error: '1' });
-  }
-  const supabase = await createClient();
-  const { error } = await supabase.rpc('set_contract_status', { p_id: contractId, p_status: 'dismissed' });
-  if (error) {
-    console.error('[contracts] Verwerfen fehlgeschlagen', { code: error.code });
-    return target(CONTRACTS_PATH, { error: '1' });
-  }
-  return target(CONTRACTS_PATH, { dismissed: '1' });
-}
-
-/** Verworfenen Vorschlag wiederherstellen. */
-export async function restoreContract(contractId: string): Promise<ContractActionResult> {
-  await requireOnboardedUser(CONTRACTS_PATH);
-  if (!isUuid(contractId)) {
-    return target(CONTRACTS_PATH, { error: '1' });
-  }
-  const supabase = await createClient();
-  const { error } = await supabase.rpc('set_contract_status', { p_id: contractId, p_status: 'suggested' });
-  if (error) {
-    console.error('[contracts] Wiederherstellen fehlgeschlagen', { code: error.code });
-    return target(CONTRACTS_PATH, { error: '1' });
-  }
-  return target(CONTRACTS_PATH, { restored: '1' });
-}
-
-/** Manuell angelegten Vertrag löschen. */
+/** Vertrag löschen; seine Buchungen bleiben und werden gelöst. */
 export async function deleteContract(contractId: string): Promise<ContractActionResult> {
   await requireOnboardedUser(CONTRACTS_PATH);
   if (!isUuid(contractId)) {
@@ -169,7 +106,6 @@ const RPC_FIELD_ERRORS: Record<string, { field: ContractField; key: ContractFiel
   invalid_counterparty: { field: 'counterparty', key: 'counterpartyInvalid' },
   invalid_rhythm: { field: 'rhythm', key: 'rhythmInvalid' },
   invalid_amount: { field: 'amount', key: 'amountInvalid' },
-  invalid_tolerance: { field: 'tolerance', key: 'toleranceInvalid' },
   invalid_notes: { field: 'notes', key: 'notesTooLong' },
   account_not_found: { field: 'account', key: 'selectionInvalid' },
   category_not_found: { field: 'category', key: 'selectionInvalid' },

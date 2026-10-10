@@ -1,13 +1,14 @@
 /**
  * Detailseite eines Vertrags, gestreamter Teil: verknüpfte Buchungen
- * (lösen), manuell gelöste Buchungen derselben Gegenpartei (wieder
- * verknüpfen) und das Bearbeiten-Formular. Nur eigene Daten
+ * (lösen), weitere nicht verknüpfte Buchungen derselben Gegenpartei (von
+ * Hand verknüpfen – z. B. eine zweite Abbuchung im selben Zeitraum oder
+ * eine von Ihnen gelöste) und das Bearbeiten-Formular. Nur eigene Daten
  * (user_id = eigener Nutzer).
  */
 import { getFormatter, getTranslations } from 'next-intl/server';
 
 import { linkContractTransaction, saveContract, unlinkContractTransaction } from '@/lib/actions/contracts';
-import type { ContractFormValues, ContractStatus } from '@/lib/contracts';
+import type { ContractFormValues } from '@/lib/contracts';
 import { createClient } from '@/lib/supabase/server';
 
 import { ActionForm } from '../../action-form';
@@ -15,13 +16,15 @@ import { ContractForm } from '../contract-form';
 import { loadContractFormData } from '../form-data';
 
 type ContractBookingsProps = {
-  contract: { id: string; name: string; status: ContractStatus; counterpartyKey: string | null };
+  contract: { id: string; name: string; counterpartyKey: string | null };
   userId: string;
-  editable: boolean;
   initialValues: ContractFormValues;
 };
 
-export async function ContractBookings({ contract, userId, editable, initialValues }: ContractBookingsProps) {
+/** Angezeigte nicht verknüpfte Buchungen derselben Gegenpartei. */
+const OTHER_BOOKINGS_LIMIT = 50;
+
+export async function ContractBookings({ contract, userId, initialValues }: ContractBookingsProps) {
   const t = await getTranslations('Contracts');
   const format = await getFormatter();
   const supabase = await createClient();
@@ -36,19 +39,18 @@ export async function ContractBookings({ contract, userId, editable, initialValu
       .eq('recurring_contract_id', contract.id)
       .order('booking_date', { ascending: false })
       .limit(500),
-    contract.counterpartyKey && contract.status !== 'dismissed'
+    contract.counterpartyKey
       ? supabase
           .from('transactions')
-          .select('id, booking_date, amount, currency, purpose')
+          .select('id, booking_date, amount, currency, purpose, contract_link_manual')
           .eq('user_id', userId)
           .eq('counterparty_key', contract.counterpartyKey)
           .is('recurring_contract_id', null)
-          .eq('contract_link_manual', true)
-          .lt('amount', 0)
           .order('booking_date', { ascending: false })
-          .limit(50)
+          .order('id', { ascending: false })
+          .limit(OTHER_BOOKINGS_LIMIT)
       : Promise.resolve({ data: [], error: null }),
-    editable ? loadContractFormData(userId) : Promise.resolve(null),
+    loadContractFormData(userId),
   ]);
   if (linked.error || unlinked.error) {
     console.error('[contracts] Buchungen nicht ladbar', { code: (linked.error ?? unlinked.error)?.code });
@@ -56,6 +58,9 @@ export async function ContractBookings({ contract, userId, editable, initialValu
 
   const money = (amount: number, currency: string) =>
     format.number(Math.abs(amount), { style: 'currency', currency });
+  // Gutschriften (Gegenbuchungen) mit Vorzeichen, Abbuchungen ohne.
+  const signed = (amount: number, currency: string) =>
+    amount > 0 ? format.number(amount, { style: 'currency', currency, signDisplay: 'always' }) : money(amount, currency);
   const date = (value: string) =>
     format.dateTime(new Date(`${value}T00:00:00Z`), { dateStyle: 'medium', timeZone: 'UTC' });
   const linkedRows = linked.data ?? [];
@@ -87,11 +92,9 @@ export async function ContractBookings({ contract, userId, editable, initialValu
                     <th scope="col" className="amount">
                       {t('detail.amount')}
                     </th>
-                    {contract.status !== 'dismissed' ? (
-                      <th scope="col">
-                        <span className="sr-only">{t('detail.actions')}</span>
-                      </th>
-                    ) : null}
+                    <th scope="col">
+                      <span className="sr-only">{t('detail.actions')}</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -109,24 +112,18 @@ export async function ContractBookings({ contract, userId, editable, initialValu
                         {tx.purpose ? <span className="cell-note">{tx.purpose}</span> : null}
                       </td>
                       <td>{tx.account?.name ?? t('notSet')}</td>
-                      <td className="amount">
-                        {tx.amount > 0
-                          ? format.number(tx.amount, { style: 'currency', currency: tx.currency, signDisplay: 'always' })
-                          : money(tx.amount, tx.currency)}
+                      <td className="amount">{signed(tx.amount, tx.currency)}</td>
+                      <td className="row-actions">
+                        <ActionForm action={unlinkContractTransaction.bind(null, contract.id, tx.id)}>
+                          <button
+                            type="submit"
+                            className="link-button"
+                            aria-label={t('detail.unlinkLabel', { date: date(tx.booking_date) })}
+                          >
+                            {t('detail.unlink')}
+                          </button>
+                        </ActionForm>
                       </td>
-                      {contract.status !== 'dismissed' ? (
-                        <td className="row-actions">
-                          <ActionForm action={unlinkContractTransaction.bind(null, contract.id, tx.id)}>
-                            <button
-                              type="submit"
-                              className="link-button"
-                              aria-label={t('detail.unlinkLabel', { date: date(tx.booking_date) })}
-                            >
-                              {t('detail.unlink')}
-                            </button>
-                          </ActionForm>
-                        </td>
-                      ) : null}
                     </tr>
                   ))}
                 </tbody>
@@ -145,7 +142,13 @@ export async function ContractBookings({ contract, userId, editable, initialValu
               {(unlinked.data ?? []).map((tx) => (
                 <li key={tx.id}>
                   <span>
-                    {date(tx.booking_date)} · {money(tx.amount, tx.currency)}
+                    {date(tx.booking_date)} · {signed(tx.amount, tx.currency)}
+                    {tx.contract_link_manual ? (
+                      <>
+                        {' '}
+                        <span className="badge badge-muted">{t('detail.unlinkedByYou')}</span>
+                      </>
+                    ) : null}
                     {tx.purpose ? <span className="cell-note">{tx.purpose}</span> : null}
                   </span>
                   <ActionForm action={linkContractTransaction.bind(null, contract.id, tx.id)}>
@@ -164,25 +167,23 @@ export async function ContractBookings({ contract, userId, editable, initialValu
         </section>
       ) : null}
 
-      {editable ? (
-        <section className="contracts-section" aria-labelledby="edit-heading">
-          <h2 id="edit-heading">{t('detail.editHeading')}</h2>
-          {formData ? (
-            <ContractForm
-              mode="edit"
-              action={saveContract.bind(null, contract.id)}
-              counterparties={formData.counterparties}
-              accounts={formData.accounts}
-              categories={formData.categories}
-              initialValues={initialValues}
-            />
-          ) : (
-            <p role="alert" className="form-error">
-              {t('errors.loadError')}
-            </p>
-          )}
-        </section>
-      ) : null}
+      <section className="contracts-section" aria-labelledby="edit-heading">
+        <h2 id="edit-heading">{t('detail.editHeading')}</h2>
+        {formData ? (
+          <ContractForm
+            mode="edit"
+            action={saveContract.bind(null, contract.id)}
+            counterparties={formData.counterparties}
+            accounts={formData.accounts}
+            categories={formData.categories}
+            initialValues={initialValues}
+          />
+        ) : (
+          <p role="alert" className="form-error">
+            {t('errors.loadError')}
+          </p>
+        )}
+      </section>
     </>
   );
 }

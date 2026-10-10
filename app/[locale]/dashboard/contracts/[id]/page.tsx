@@ -1,14 +1,14 @@
 /**
  * app/[locale]/dashboard/contracts/[id]/page.tsx
  *
- * Ein Vertrag: Angaben (mit Jahreskosten, tatsächlich abgebucht in den
- * letzten 12 vollen Monaten, Mandatsreferenz und Gläubiger-ID) und
- * Status-Aktionen (Vorschlag bestätigen/verwerfen, erkannten Vertrag
- * verwerfen, wiederherstellen, manuellen löschen) sofort; verknüpfte
- * Buchungen und Bearbeiten gestreamt (contract-bookings.tsx).
+ * Ein Vertrag: Angaben (mit letzter Abbuchung als reine Information,
+ * Jahreskosten und tatsächlich abgebucht in den letzten 12 vollen Monaten)
+ * und Löschen sofort; verknüpfte Buchungen, weitere Buchungen derselben
+ * Gegenpartei und Bearbeiten gestreamt (contract-bookings.tsx).
  *
- * Nur eigene Verträge (user_id = eigener Nutzer); für Berater und fremde
- * IDs ist die Seite ein 404. Die RPCs prüfen Eigentum zusätzlich selbst.
+ * Nur eigene, angezeigte Verträge (user_id = eigener Nutzer, Status aktiv,
+ * Kündigung vorgemerkt oder gekündigt); für Berater, fremde IDs und alte
+ * Vorschläge ist die Seite ein 404. Die RPCs prüfen Eigentum selbst.
  */
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -17,12 +17,12 @@ import { Suspense } from 'react';
 
 import { Link } from '@/i18n/navigation';
 import { toAppLocale } from '@/i18n/routing';
-import { confirmContract, deleteContract, dismissContract, restoreContract } from '@/lib/actions/contracts';
+import { deleteContract } from '@/lib/actions/contracts';
 import { rangeDates } from '@/lib/budget-rule';
 import { categoryDisplayName } from '@/lib/categories';
 import { actualsByContract, actualsWindow, annualCents, paymentsPerYear, type ContractActualRow } from '@/lib/contract-costs';
 import { getContractLabels } from '@/lib/contract-labels';
-import { CONTRACT_TYPES, rhythmKey, type ContractFormValues } from '@/lib/contracts';
+import { LISTED_CONTRACT_STATUSES, rhythmKey, type ContractFormValues } from '@/lib/contracts';
 import { createClient, requireOnboardedUser } from '@/lib/supabase/server';
 import { formatAmountInput, isUuid, todayInGermany } from '@/lib/transactions';
 
@@ -59,13 +59,13 @@ export default async function ContractPage({ params, searchParams }: ContractPag
     .from('recurring_contracts')
     .select(
       `id, name, counterparty_name, counterparty_key, contract_type, rhythm, interval_count, expected_amount,
-       amount_tolerance_pct, currency, first_booking_date, last_booking_date, next_expected_date, status,
-       detection_source, detection_confidence, notes, account_id, category_id, mandate_reference, creditor_id,
+       currency, first_booking_date, last_booking_date, next_expected_date, status, notes, account_id, category_id,
        account:accounts!recurring_contracts_account_fkey ( name ),
        category:categories!recurring_contracts_category_fkey ( name, default_key )`,
     )
     .eq('id', id)
     .eq('user_id', user.id)
+    .in('status', LISTED_CONTRACT_STATUSES)
     .maybeSingle();
   if (error) {
     console.error('[contracts] Vertrag nicht ladbar', { code: error.code });
@@ -89,9 +89,21 @@ export default async function ContractPage({ params, searchParams }: ContractPag
 
   const window = actualsWindow(todayInGermany().slice(0, 7));
   const { fromDate, toDate } = rangeDates(window);
-  const actualRows = await supabase.rpc('contract_actuals', { p_user_id: user.id, p_from: fromDate, p_to: toDate });
-  if (actualRows.error) {
-    console.error('[contracts] Abbuchungen des Vertrags nicht ladbar', { code: actualRows.error.code });
+  const [actualRows, lastDebit] = await Promise.all([
+    supabase.rpc('contract_actuals', { p_user_id: user.id, p_from: fromDate, p_to: toDate }),
+    supabase
+      .from('transactions')
+      .select('booking_date, amount, currency')
+      .eq('user_id', user.id)
+      .eq('recurring_contract_id', contract.id)
+      .lt('amount', 0)
+      .order('booking_date', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  if (actualRows.error || lastDebit.error) {
+    console.error('[contracts] Abbuchungen des Vertrags nicht ladbar', { code: (actualRows.error ?? lastDebit.error)?.code });
   }
   const actual = actualRows.error
     ? null
@@ -104,7 +116,6 @@ export default async function ContractPage({ params, searchParams }: ContractPag
   const monthShort = (month: string) =>
     format.dateTime(new Date(`${month}-01T00:00:00Z`), { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
-  const editable = ['active', 'cancellation_pending', 'cancelled'].includes(contract.status);
   const money = (amount: number | null, currency: string) =>
     amount === null ? t('notSet') : format.number(Math.abs(amount), { style: 'currency', currency });
   const date = (value: string | null) =>
@@ -135,10 +146,8 @@ export default async function ContractPage({ params, searchParams }: ContractPag
     type: contract.contract_type,
     accountId: contract.account_id ?? '',
     categoryId: contract.category_id ?? '',
-    tolerance: String(Number(contract.amount_tolerance_pct)),
     notes: contract.notes ?? '',
   };
-  const auto = contract.detection_source === 'auto';
 
   return (
     <section aria-labelledby="page-title" className="contracts-page">
@@ -175,13 +184,7 @@ export default async function ContractPage({ params, searchParams }: ContractPag
         </div>
         <div>
           <dt>{t('fields.amount')}</dt>
-          <dd>
-            {money(contract.expected_amount, contract.currency)}
-            <span className="cell-note">
-              {' '}
-              {t('detail.tolerance', { pct: Number(contract.amount_tolerance_pct) })}
-            </span>
-          </dd>
+          <dd>{money(contract.expected_amount, contract.currency)}</dd>
         </div>
         <div>
           <dt>{t('fields.next')}</dt>
@@ -189,7 +192,14 @@ export default async function ContractPage({ params, searchParams }: ContractPag
         </div>
         <div>
           <dt>{t('fields.last')}</dt>
-          <dd>{date(contract.last_booking_date)}</dd>
+          <dd>
+            {lastDebit.data
+              ? t('detail.lastValue', {
+                  date: date(lastDebit.data.booking_date),
+                  amount: money(lastDebit.data.amount, lastDebit.data.currency),
+                })
+              : t('notSet')}
+          </dd>
         </div>
         <div>
           <dt>{t('fields.first')}</dt>
@@ -227,69 +237,8 @@ export default async function ContractPage({ params, searchParams }: ContractPag
                 })}
           </dd>
         </div>
-        {contract.mandate_reference ? (
-          <div>
-            <dt>{t('fields.mandate')}</dt>
-            <dd className="contract-sepa-ref">{contract.mandate_reference}</dd>
-          </div>
-        ) : null}
-        {contract.creditor_id ? (
-          <div>
-            <dt>{t('fields.creditor')}</dt>
-            <dd className="contract-sepa-ref">{contract.creditor_id}</dd>
-          </div>
-        ) : null}
-        <div>
-          <dt>{t('fields.source')}</dt>
-          <dd>
-            {auto
-              ? t('detail.sourceAuto', { level: labels.confidence(contract.detection_confidence) })
-              : t('detail.sourceManual')}
-          </dd>
-        </div>
       </dl>
       {contract.notes ? <p className="contract-card-sub">{contract.notes}</p> : null}
-
-      <div className="contract-actions">
-        {contract.status === 'suggested' ? (
-          <>
-            <ActionForm action={confirmContract.bind(null, contract.id)}>
-              <label htmlFor="detail-type">
-                {t('fields.type')}
-                <select id="detail-type" name="type" defaultValue={contract.contract_type}>
-                  {CONTRACT_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {labels.type(type)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button type="submit" className="button button-small">
-                {t('suggestions.confirm')}
-              </button>
-            </ActionForm>
-            <ActionForm action={dismissContract.bind(null, contract.id)}>
-              <button type="submit" className="button button-secondary button-small">
-                {t('suggestions.dismiss')}
-              </button>
-            </ActionForm>
-          </>
-        ) : null}
-        {contract.status === 'active' && auto ? (
-          <ActionForm action={dismissContract.bind(null, contract.id)}>
-            <button type="submit" className="button button-secondary button-small">
-              {t('detail.dismissActive')}
-            </button>
-          </ActionForm>
-        ) : null}
-        {contract.status === 'dismissed' && auto ? (
-          <ActionForm action={restoreContract.bind(null, contract.id)}>
-            <button type="submit" className="button button-secondary button-small">
-              {t('dismissed.restore')}
-            </button>
-          </ActionForm>
-        ) : null}
-      </div>
 
       {/* Neuer Schlüssel je Server-Render, siehe ../page.tsx. */}
       <Suspense key={crypto.randomUUID()} fallback={<ContractsSkeleton variant="detail" />}>
@@ -297,26 +246,22 @@ export default async function ContractPage({ params, searchParams }: ContractPag
           contract={{
             id: contract.id,
             name: contract.name,
-            status: contract.status,
             counterpartyKey: contract.counterparty_key,
           }}
           userId={user.id}
-          editable={editable}
           initialValues={initialValues}
         />
       </Suspense>
 
-      {contract.detection_source === 'manual' ? (
-        <details className="contract-danger">
-          <summary>{t('detail.delete')}</summary>
-          <p>{t('detail.deleteConfirm')}</p>
-          <ActionForm action={deleteContract.bind(null, contract.id)}>
-            <button type="submit" className="button button-danger button-small">
-              {t('detail.deleteButton')}
-            </button>
-          </ActionForm>
-        </details>
-      ) : null}
+      <details className="contract-danger">
+        <summary>{t('detail.delete')}</summary>
+        <p>{t('detail.deleteConfirm')}</p>
+        <ActionForm action={deleteContract.bind(null, contract.id)}>
+          <button type="submit" className="button button-danger button-small">
+            {t('detail.deleteButton')}
+          </button>
+        </ActionForm>
+      </details>
     </section>
   );
 }

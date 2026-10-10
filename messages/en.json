@@ -410,10 +410,9 @@
       },
       "contracts": {
         "heading": "Contracts",
-        "empty": "The client has not confirmed or added any contracts yet.",
+        "empty": "The client has not added any contracts yet.",
         "loadError": "The contracts could not be loaded right now. Please reload the page.",
-        "caption": "Contracts of {name}, sorted by next debit",
-        "openSuggestions": "{count, plural, one {# detected contract is still awaiting the client's confirmation.} other {# detected contracts are still awaiting the client's confirmation.}}"
+        "caption": "Contracts of {name}, sorted by next debit"
       },
       "transactions": {
         "heading": "Transactions",
@@ -743,9 +742,7 @@
       "enriched": "{count, plural, one {# existing transaction was completed.} other {# existing transactions were completed.}}",
       "learned": "{count, plural, one {# transaction assigned by the learning method.} other {# transactions assigned by the learning method.}}",
       "suggested": "{count, plural, one {# suggestion in the review list.} other {# suggestions in the review list.}}",
-      "toReview": "Go to review list",
-      "contracts": "{count, plural, one {# new contract suggestion.} other {# new contract suggestions.}}",
-      "toContracts": "Go to contracts"
+      "toReview": "Go to review list"
     },
     "balance": {
       "ok": "Balance check: opening balance {opening} + transactions = closing balance {closing} ✓",
@@ -974,17 +971,12 @@
   "Contracts": {
     "metaTitle": "Contracts",
     "heading": "Contracts",
-    "intro": "Recurring payments such as subscriptions, insurance and memberships – detected from your transactions or added by you.",
+    "intro": "Recurring payments such as subscriptions, insurance and memberships. You add a contract; matching debits are linked automatically – across all accounts.",
     "back": "Back to contracts",
     "new": "Add contract",
-    "refresh": "Check again",
     "notSet": "–",
     "loading": "Loading contracts …",
     "messages": {
-      "refreshed": "{count, plural, =0 {No new suggestions.} one {# new suggestion detected.} other {# new suggestions detected.}}",
-      "confirmed": "Contract confirmed.",
-      "dismissed": "Suggestion dismissed. It will not be suggested again.",
-      "restored": "Suggestion restored.",
       "deleted": "Contract deleted.",
       "created": "Contract added. Matching debits have been linked.",
       "saved": "Changes saved.",
@@ -998,38 +990,18 @@
     "empty": {
       "noTransactions": {
         "title": "No transactions yet",
-        "text": "Once you import bank statements, the portal detects regular debits and suggests them as contracts.",
-        "import": "Import a statement",
-        "new": "Add a contract manually"
+        "text": "Once you import bank statements, you can add contracts from your transactions – regular debits are offered in the form.",
+        "import": "Import a statement"
       },
-      "nothingDetected": {
-        "title": "No contracts detected yet",
-        "text": "A contract is suggested once the same counterparty debits at least three times at regular intervals – for semi-annual and annual payments two debits are enough."
-      }
-    },
-    "suggestions": {
-      "heading": "Detected contracts",
-      "intro": "Detected from regular debits. Confirm what is a contract – dismissed suggestions will not come back.",
-      "empty": "No open suggestions.",
-      "confidence": "Confidence: {level}",
-      "fewBookings": "only {count} debits so far",
-      "showBookings": "{count, plural, one {Show # linked transaction} other {Show # linked transactions}}",
-      "moreBookings": "… and {count} more",
-      "confirm": "Confirm",
-      "confirmLabel": "Confirm {name} as a contract",
-      "dismiss": "Dismiss",
-      "dismissLabel": "Dismiss suggestion {name}"
+      "noContracts": {
+        "title": "No contracts yet",
+        "text": "Add subscriptions, insurance and other contracts. The form offers regular debits from your transactions; name, amount and interval are prefilled."
+      },
+      "new": "Add a contract"
     },
     "list": {
       "heading": "My contracts",
-      "empty": "No confirmed contracts yet. Confirm a suggestion or add a contract.",
-      "caption": "Confirmed and added contracts, sorted by next debit"
-    },
-    "dismissed": {
-      "heading": "Dismissed ({count})",
-      "hint": "These suggestions will not be suggested again – not even after new imports.",
-      "restore": "Restore",
-      "restoreLabel": "Restore {name}"
+      "caption": "Your contracts, sorted by next debit"
     },
     "fields": {
       "name": "Contract",
@@ -1043,10 +1015,7 @@
       "account": "Account (default)",
       "category": "Category",
       "bookings": "Linked transactions",
-      "source": "Origin",
       "notes": "Note",
-      "mandate": "Mandate reference",
-      "creditor": "Creditor ID",
       "annual": "Annual costs",
       "actual": "Actual ({window})"
     },
@@ -1079,20 +1048,12 @@
       "cancelled": "Cancelled",
       "dismissed": "Dismissed"
     },
-    "confidenceLevels": {
-      "high": "high",
-      "medium": "medium",
-      "low": "low"
-    },
     "detail": {
       "metaTitle": "Contract",
-      "tolerance": "(±{pct} %)",
-      "sourceAuto": "Detected automatically (confidence {level})",
-      "sourceManual": "Added manually",
-      "dismissActive": "Not a contract – dismiss",
+      "lastValue": "on {date} ({amount})",
       "linkedHeading": "Linked transactions ({count})",
-      "linkedHint": "Debits from this counterparty within the tolerance are linked automatically – across all accounts.",
-      "linkedEmpty": "No transactions linked yet. Debits from this counterparty within the tolerance are linked automatically.",
+      "linkedHint": "Debits from this counterparty with a similar amount (at most 50 % deviation) are linked automatically – at most one per period, across all accounts.",
+      "linkedEmpty": "No transactions linked yet. Debits from this counterparty with a similar amount are linked automatically.",
       "linkedEmptyNoCounterparty": "Without a counterparty no transactions are linked. Choose a counterparty from your transactions under “Edit”.",
       "linkedCaption": "Transactions for {name}, newest first",
       "date": "Date",
@@ -1102,8 +1063,9 @@
       "actions": "Actions",
       "unlink": "Unlink",
       "unlinkLabel": "Unlink transaction from {date}",
-      "unlinkedHeading": "Unlinked transactions of this counterparty",
-      "unlinkedHint": "Unlinked by you – automatic linking skips them.",
+      "unlinkedHeading": "Other transactions of this counterparty",
+      "unlinkedHint": "Not linked – for example purchases, a second debit in the same period or a very different amount. You can link a transaction manually.",
+      "unlinkedByYou": "unlinked by you",
       "link": "Link",
       "linkLabel": "Link transaction from {date}",
       "editHeading": "Edit",
@@ -1117,21 +1079,25 @@
     },
     "form": {
       "newTitle": "Add contract",
-      "newIntro": "With a counterparty from your transactions, matching debits are linked automatically – across all accounts.",
+      "newIntro": "Choose a counterparty from your transactions: name, amount, interval and type are prefilled, matching debits are linked automatically – across all accounts.",
       "counterparty": "Counterparty from your transactions",
       "counterpartyNone": "None (enter freely)",
-      "counterpartyOption": "{label} ({count, plural, one {# debit} other {# debits}})",
+      "counterpartyRecurring": "Regular debits",
+      "counterpartyOthers": "Other counterparties",
+      "counterpartyCount": "{count, plural, one {# debit} other {# debits}}",
+      "counterpartyLast": "last {amount}",
+      "counterpartyHasContract": "contract exists",
       "counterpartyHint": "For payments via PayPal & co. the merchant from the reference counts.",
+      "prefilled": "Prefilled from your transactions – please check.",
+      "hasContract": "There is already a contract for this counterparty. A second one only makes sense if there really are two (e.g. home contents and liability insurance with the same insurer).",
       "counterpartyFree": "Counterparty (free text, optional)",
       "name": "Name",
       "amount": "Debit amount",
-      "amountHint": "Without sign, e.g. 12.99.",
+      "amountHint": "Without sign, e.g. 12.99. With linked debits the amount follows the middle one of the last three – a single deviation does not change it.",
       "nextHint": "Optional. With linked transactions the date moves on after each debit.",
       "noAccount": "No default account",
       "accountHint": "Default only – debits are linked across all accounts.",
       "noCategory": "No category",
-      "tolerance": "Tolerance (%)",
-      "toleranceHint": "Debits from this counterparty deviating at most this much from the amount are linked automatically (0–50 %).",
       "create": "Add contract",
       "save": "Save changes",
       "saving": "Saving …",
@@ -1139,7 +1105,7 @@
         "summary": "Please check the highlighted fields.",
         "generic": "The contract could not be saved right now. Please try again.",
         "notFound": "This contract no longer exists. Please reload the page.",
-        "notEditable": "Suggestions and dismissed contracts cannot be edited. Please confirm the suggestion first.",
+        "notEditable": "This contract cannot be edited. Please reload the page.",
         "nameRequired": "Please enter a name.",
         "nameTooLong": "The name may be at most 120 characters long.",
         "counterpartyTooLong": "The counterparty may be at most 200 characters long.",
@@ -1149,7 +1115,6 @@
         "dateInvalid": "Please enter a valid date.",
         "typeInvalid": "Please choose a contract type.",
         "selectionInvalid": "Please choose an entry from the list.",
-        "toleranceInvalid": "Please enter a tolerance between 0 and 50 %.",
         "notesTooLong": "The note may be at most 2,000 characters long."
       }
     },

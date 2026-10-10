@@ -3,7 +3,8 @@
 --  Verträge V2a: Mandatsreferenz und Gläubiger-ID (Auslesen, Import,
 --  Nachtrag), Mandat in Erkennung und Verknüpfung, Gegenbuchungen,
 --  contract_actuals(), Mandantentrennung und Beraterzugriff
---  (Migration 20261013100000)
+--  (Migration 20261013100000; seit 20261014100000 verknüpft die Automatik
+--  ohne Mandat, die Erkennung läuft nur noch über private.refresh_contracts)
 --  Ausführen: supabase test db   (setzt 00000-test-helpers.sql voraus)
 --
 --  Identitäten
@@ -150,7 +151,7 @@ select pg_temp.series('Allianz Versicherungs-AG', 'Beitrag Haftpflicht', -12.50,
 select pg_temp.series('Fitnessstudio Kraftwerk', 'Mitgliedsbeitrag', -39.90, '2026-02-05', interval '1 month', 4, 'FIT-ALT');
 select pg_temp.series('Fitnessstudio Kraftwerk', 'Mitgliedsbeitrag', -39.90, '2026-06-05', interval '1 month', 3, 'FIT-NEU');
 
-select public.refresh_contracts();
+select private.refresh_contracts(auth.uid());
 select is(pg_temp.contracts('Allianz Versicherungs-AG'), 2::bigint, 'Parallele Mandate: zwei Vorschläge trotz gleichem Betrag');
 select is(
   (select count(distinct t.mandate_reference) from public.transactions t
@@ -182,7 +183,7 @@ select public.refresh_contracts();
 select is(
   (select rc.mandate_reference from public.transactions t join public.recurring_contracts rc on rc.id = t.recurring_contract_id
     where t.counterparty_name = 'Allianz Versicherungs-AG' and t.booking_date = '2026-09-03'),
-  'ALZ-HAFT', 'Neue Abbuchung beim Vertrag mit gleichem Mandat'
+  'ALZ-HAFT', 'Gleicher Betrag bei zwei Verträgen: Abbuchung beim Vertrag mit dem nächsten Termin'
 );
 
 -- ---------------------------------------------------------------------
@@ -193,13 +194,14 @@ select public.set_contract_status(rc.id, 'active', 'membership')
  where rc.counterparty_key = (select counterparty_key from public.transactions where counterparty_name = 'Fitnessstudio Kraftwerk' limit 1);
 select set_config('test.fit', pg_temp.contract('Fitnessstudio Kraftwerk', -39.90)::text, true);
 
--- Ein weiteres Mandat, das parallel zum aktuellen läuft, wird nicht verknüpft.
-select pg_temp.series('Fitnessstudio Kraftwerk', 'Mitgliedsbeitrag Partner', -39.90, '2026-08-20', interval '1 month', 2, 'FIT-PARTNER');
+-- Eine zweite Abbuchung in derselben Periode wird nicht verknüpft (das
+-- Mandat spielt keine Rolle mehr).
+select pg_temp.series('Fitnessstudio Kraftwerk', 'Mitgliedsbeitrag Partner', -39.90, '2026-08-12', interval '1 month', 2, 'FIT-PARTNER');
 select pg_temp.series('Fitnessstudio Kraftwerk', 'Mitgliedsbeitrag', -39.90, '2026-09-05', interval '1 month', 1, 'FIT-NEU');
 select private.link_contract_bookings(tests.get_supabase_uid('v2_alice'));
 select is(
   (select count(*)::integer from public.transactions where mandate_reference = 'FIT-PARTNER' and recurring_contract_id is not null),
-  0, 'Parallel laufendes anderes Mandat wird nicht verknüpft'
+  0, 'Zweite Abbuchung in derselben Periode wird nicht verknüpft'
 );
 select is(
   (select recurring_contract_id::text from public.transactions where mandate_reference = 'FIT-NEU' and booking_date = '2026-09-05'),
@@ -216,8 +218,8 @@ select public.refresh_contracts();
 select results_eq(
   $$ select purpose, recurring_contract_id is not null from public.transactions
       where counterparty_name = 'Fitnessstudio Kraftwerk' and amount > 0 order by booking_date $$,
-  $$ values ('Gutschrift vor Beginn'::text, false), ('Rücklastschrift', true), ('Bonus', false), ('Gutschrift Partner', false) $$,
-  'Gegenbuchung in Toleranz ab der ersten Abbuchung; nicht davor, nicht außerhalb der Toleranz, nicht vom parallelen Mandat'
+  $$ values ('Gutschrift vor Beginn'::text, false), ('Rücklastschrift', true), ('Bonus', false), ('Gutschrift Partner', true) $$,
+  'Gegenbuchung im Band ab der ersten Abbuchung, unabhängig vom Mandat; nicht davor, nicht außerhalb des Bands'
 );
 select results_eq(
   format($$ select first_booking_date, last_booking_date, mandate_reference from public.recurring_contracts where id = %L $$,
@@ -233,7 +235,7 @@ select is(
 -- Gläubiger-ID des Vertrags aus der letzten Abbuchung.
 select pg_temp.series('Stadtwerke Musterstadt', 'Abschlag Strom CRED+DE77ZZZ00000077777', -80, '2026-04-15', interval '1 month', 5,
                       'SWM-STROM');
-select public.refresh_contracts();
+select private.refresh_contracts(auth.uid());
 select results_eq(
   $$ select mandate_reference, creditor_id from public.recurring_contracts
       where counterparty_key = (select counterparty_key from public.transactions where counterparty_name = 'Stadtwerke Musterstadt' limit 1) $$,
@@ -270,8 +272,8 @@ select results_eq(
 select results_eq(
   format($$ select debit_count, debits, credit_count, credits from public.contract_actuals(%L, '2026-01-01', '2026-12-31')
              where contract_id = %L $$, tests.get_supabase_uid('v2_alice'), current_setting('test.fit')),
-  $$ values (8, 319.20::numeric, 1, 39.90::numeric) $$,
-  'Abbuchungen (8 × 39,90) und Gegenbuchung (39,90) je Vertrag'
+  $$ values (8, 319.20::numeric, 2, 79.80::numeric) $$,
+  'Abbuchungen (8 × 39,90) und Gegenbuchungen (2 × 39,90) je Vertrag'
 );
 select results_eq(
   format($$ select debit_count, debits from public.contract_actuals(%L, '2026-09-01', '2026-09-30') where contract_id = %L $$,
