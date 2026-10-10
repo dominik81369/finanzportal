@@ -42,7 +42,11 @@ export function StatementImport({ file, accounts: initialAccounts, onReset }: St
   const [names, setNames] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<OkResponse | null>(null);
   const [result, setResult] = useState<OkResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  /** Fehler der Vorschau (z. B. ungültige Kontenwahl): sperrt den Import, bis die Auswahl stimmt. */
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  /** Fehler beim Import: erneuter Versuch möglich; verschwindet beim Ändern eines Namens. */
+  const [importError, setImportError] = useState<string | null>(null);
+  const error = previewError ?? importError;
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
   const request = useRef(0);
@@ -77,9 +81,12 @@ export function StatementImport({ file, accounts: initialAccounts, onReset }: St
   useEffect(() => {
     const id = ++request.current;
     setLoading(true);
-    setError(null);
+    setPreviewError(null);
+    setImportError(null);
     const current = preview;
-    previewStatement(formData(current ? targets(current.sections) : null)).then((response) => {
+    // Ohne Antwort (Verbindung, Zeitüberschreitung der Funktion): eigene Meldung.
+    const noAnswer = (): StatementResponse => ({ status: 'error', message: t('errors.network') });
+    previewStatement(formData(current ? targets(current.sections) : null)).catch(noAnswer).then((response) => {
       if (id !== request.current) {
         return;
       }
@@ -92,31 +99,43 @@ export function StatementImport({ file, accounts: initialAccounts, onReset }: St
         if (!current) {
           setPreview(null);
         }
-        setError(response.message);
+        setPreviewError(response.message);
       }
     });
     // Neue Vorschau nur bei anderer Datei oder anderen Zielkonten (nicht bei
     // jeder Eingabe im Namen eines neuen Kontos).
   }, [file, choiceKey]);
 
+  const label = (section: StatementSectionResult) =>
+    section.kind === 'main' ? t('mainAccount') : t('space', { name: section.name ?? '' });
+
   const handleImport = async () => {
     if (!preview) {
       return;
     }
+    // Neue Konten brauchen einen Namen (vorbelegt; nur wenn geleert).
+    const unnamed = preview.sections.find(
+      (section) =>
+        (choices[section.iban] ?? (section.accountId ?? NEW_ACCOUNT)) === NEW_ACCOUNT &&
+        (names[section.iban] ?? section.newAccountName).trim() === '',
+    );
+    if (unnamed) {
+      setImportError(t('errors.nameRequired', { account: label(unnamed) }));
+      return;
+    }
     setImporting(true);
-    setError(null);
-    const response = await importStatement(formData(targets(preview.sections)));
+    setImportError(null);
+    const response = await importStatement(formData(targets(preview.sections))).catch(
+      (): StatementResponse => ({ status: 'error', message: t('errors.network') }),
+    );
     setImporting(false);
     if (response.status === 'ok') {
       setResult(response);
       setPreview(null);
     } else {
-      setError(response.message);
+      setImportError(response.message);
     }
   };
-
-  const label = (section: StatementSectionResult) =>
-    section.kind === 'main' ? t('mainAccount') : t('space', { name: section.name ?? '' });
 
   const totals = preview
     ? preview.sections.reduce(
@@ -248,8 +267,13 @@ export function StatementImport({ file, accounts: initialAccounts, onReset }: St
                           id={`statement-name-${section.iban}`}
                           value={names[section.iban] ?? section.newAccountName}
                           maxLength={120}
+                          required
+                          aria-invalid={(names[section.iban] ?? section.newAccountName).trim() === '' ? true : undefined}
                           disabled={importing}
-                          onChange={(e) => setNames((current) => ({ ...current, [section.iban]: e.target.value }))}
+                          onChange={(e) => {
+                            setNames((current) => ({ ...current, [section.iban]: e.target.value }));
+                            setImportError(null);
+                          }}
                         />
                       </div>
                     ) : null}
@@ -291,7 +315,7 @@ export function StatementImport({ file, accounts: initialAccounts, onReset }: St
             className="button"
             id="statement-import-button"
             onClick={handleImport}
-            disabled={loading || importing || error !== null || !totals || (totals.new === 0 && totals.newAccounts === 0)}
+            disabled={loading || importing || previewError !== null || !totals || (totals.new === 0 && totals.newAccounts === 0)}
           >
             {importing
               ? t('importing')

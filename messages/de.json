@@ -662,6 +662,10 @@
         "accountNotFound": "{account}: Das gewählte Konto gibt es nicht mehr oder es ist nicht importierbar.",
         "tooManyRows": "Der Auszug enthält mehr als {max} Buchungen.",
         "generic": "Der Import ist fehlgeschlagen. Es wurde nichts importiert. Bitte versuchen Sie es erneut.",
+        "timeout": "Der Import hat das Zeitlimit der Datenbank überschritten (SQLSTATE {code}). Es wurde nichts importiert. Bitte versuchen Sie es erneut; bleibt der Fehler, melden Sie ihn bitte.",
+        "database": "Der Import ist in der Datenbank fehlgeschlagen (SQLSTATE {code}: {message}). Es wurde nichts importiert.",
+        "network": "Keine Antwort vom Server (Verbindung oder Zeitüberschreitung). Bitte laden Sie die Seite neu und prüfen Sie, ob etwas importiert wurde.",
+        "nameRequired": "{account}: Bitte geben Sie einen Namen für das neue Konto an.",
         "mainAccount": "Hauptkonto",
         "space": "Space „{name}“"
       }
