@@ -125,7 +125,9 @@
     "nav": {
       "overview": "Übersicht",
       "transactions": "Transaktionen",
-      "budgets": "Budgets",
+      "budgets": "Budget",
+      "spending": "Ausgaben",
+      "rule": "50/30/20",
       "contracts": "Verträge",
       "netWorth": "Net Worth",
       "advisors": "Berater"
@@ -137,18 +139,6 @@
         "balances": "Kontostände und Vermögen im Überblick",
         "cashflow": "Einnahmen und Ausgaben des laufenden Monats",
         "alerts": "Hinweise zu anstehenden Kündigungsfristen"
-      },
-      "alerts": {
-        "heading": "Hinweise",
-        "loading": "Hinweise werden geladen …",
-        "loadError": "Die Hinweise konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
-        "atThreshold": "{count, plural, one {# Budget über der Schwelle} other {# Budgets über der Schwelle}}",
-        "over": "(davon {count} überschritten)",
-        "allOk": "{count, plural, one {Ihr Budget liegt unter der Schwelle.} other {Alle # Budgets liegen unter der Schwelle.}}",
-        "toBudgets": "Zu den Budgets",
-        "noBudgets": "Noch keine Einzelbudgets angelegt.",
-        "create": "Einzelbudget anlegen",
-        "scope": "Monatsbudgets im {month}, Jahresbudgets {year} bis heute."
       }
     },
     "transactions": {
@@ -156,8 +146,22 @@
       "description": "Alle Buchungen Ihrer Konten – manuell erfasst, importiert oder synchronisiert."
     },
     "budgets": {
-      "title": "Budgets",
-      "description": "Ihre Ausgaben nach der 50/30/20-Regel: Bedarf, Wünsche sowie Sparen & Schulden – mit Zielbeträgen als Anteil Ihrer Gesamtausgaben. Dazu Einzelbudgets je Kategorie mit Warnschwelle."
+      "title": "Budget",
+      "tabsLabel": "Budget-Ansichten"
+    },
+    "spending": {
+      "title": "Ausgaben",
+      "description": "Wohin Ihr Geld fließt – für eine Woche, einen Monat, ein Quartal, ein Jahr oder einen frei gewählten Zeitraum.",
+      "planned": {
+        "figures": "Ausgaben, Einnahmen, Saldo und Gespart/getilgt auf einen Blick",
+        "comparison": "Vergleich mit der Vorperiode (laufende Periode bis heute) und dem Vorjahr",
+        "categories": "Kategorien mit Unterkategorien, Top-Gegenparteien und größte Buchungen",
+        "history": "Verlauf im gewählten Zeitraum"
+      }
+    },
+    "rule": {
+      "title": "50/30/20-Regel",
+      "description": "Ihre Ausgaben nach der 50/30/20-Regel: Bedarf, Wünsche sowie Sparen & Schulden. Ziel ist fest 50/30/20 % Ihrer Gesamtausgaben im gewählten Zeitraum."
     },
     "contracts": {
       "title": "Verträge",
@@ -440,14 +444,12 @@
         "thisYear": "Dieses Jahr"
       },
       "single": "Zeitraum: {month}",
-      "range": "Zeitraum: {from} bis {to} ({count} Monate)",
-      "basis": "Bezugsgröße"
+      "range": "Zeitraum: {from} bis {to} ({count} Monate)"
     },
     "loadError": "Die Auswertung konnte gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
     "empty": "Keine Buchungen in diesem Zeitraum.",
     "rules": "Gezählt werden alle Buchungen – manuell erfasst, importiert oder synchronisiert – außer Umbuchungen, Kategorien ohne Gruppe und vom Budget ausgenommenen Buchungen. Erstattungen mindern die Ausgaben ihrer Gruppe. Überweisungen auf eigene Konten zählen nur, wenn ihre Kategorie einer Gruppe angehört (z. B. „Sparen & Investieren“). Beträge in unterschiedlichen Währungen werden nicht umgerechnet, sondern getrennt ausgewiesen.",
     "currencyHeading": "{currency}",
-    "income": "Einkommen",
     "caption": "Ist und Ziel nach {targets} in {currency}",
     "monthsCaption": "Verlauf je Monat in {currency}",
     "columns": {
@@ -457,8 +459,7 @@
       "targetAmount": "Zielbetrag",
       "month": "Monat",
       "share": "Anteil",
-      "deviation": "Abweichung",
-      "budgetSum": "Budget (Summe)"
+      "deviation": "Abweichung"
     },
     "groups": {
       "needs": "Bedarf (Needs)",
@@ -466,10 +467,9 @@
       "savings": "Sparen & Schulden"
     },
     "unassigned": "Ohne Kategorie",
-    "budgetCount": "{count, plural, one {# Budget} other {# Budgets}}",
     "assignment": {
       "heading": "Zuordnung der Kategorien",
-      "intro": "Legen Sie fest, welcher Gruppe jede Ausgaben- und Transferkategorie angehört. „Nicht gezählt“ eignet sich für Umbuchungen zwischen eigenen Konten. Einkommenskategorien haben keine Gruppe; sie bestimmen „Nicht erfasst“ und die Bezugsgröße „Einkommen“.",
+      "intro": "Legen Sie fest, welcher Gruppe jede Ausgaben- und Transferkategorie angehört. „Nicht gezählt“ eignet sich für Umbuchungen zwischen eigenen Konten. Einkommenskategorien haben keine Gruppe.",
       "excluded": "Nicht gezählt",
       "save": "Zuordnung speichern",
       "saving": "Wird gespeichert …",
@@ -485,175 +485,16 @@
       "import": "Kontoauszug importieren"
     },
     "totalExpenses": "Gesamtausgaben",
-    "basisAmount": "Bezugsgröße ({basis})",
     "sub": {
       "taxes": "davon Steuern & Abgaben",
       "loan": "davon Darlehen",
-      "ownSavings": "davon auf eigene Sparkonten",
-      "ownTransfers": "davon auf eigene Konten umgebucht (netto)"
+      "ownSavings": "davon auf eigene Sparkonten"
     },
     "toGroups": "Zur Gruppenansicht",
-    "notCaptured": "Nicht erfasst",
-    "notCapturedHint": "Nicht erfasst = Einkommen minus Gesamtausgaben; Umbuchungen auf eigene Konten zählen nicht als Ausgabe.",
-    "netIncomeHint": "Die 50/30/20-Regel zielt ursprünglich auf das Nettoeinkommen; hier zählen Steuern zu Needs.",
-    "basis": {
-      "options": {
-        "expenses": "Ausgaben des Monats",
-        "expenses_avg3": "Durchschnitt letzte 3 Monate",
-        "fixed": "Fester Betrag",
-        "income": "Einkommen"
-      },
-      "explain": {
-        "expenses": "Zielbeträge = Prozentanteil der Gesamtausgaben dieses Monats.",
-        "expensesRange": "Zielbeträge = Prozentanteil der Gesamtausgaben dieses Zeitraums.",
-        "expenses_avg3": "Zielbeträge = Prozentanteil der durchschnittlichen monatlichen Gesamtausgaben der drei vollen Monate vor dem gewählten Zeitraum.",
-        "expenses_avg3Range": "Zielbeträge = Prozentanteil der durchschnittlichen monatlichen Gesamtausgaben der drei vollen Monate vor dem gewählten Zeitraum, mal {count} Monate.",
-        "fixed": "Zielbeträge = Prozentanteil Ihres festen Monatsbetrags von {amount}.",
-        "fixedRange": "Zielbeträge = Prozentanteil Ihres festen Monatsbetrags von {amount}, mal {count} Monate.",
-        "fixedMissing": "Zielbeträge = Prozentanteil eines festen Monatsbetrags – noch nicht festgelegt, daher vorerst aus den Gesamtausgaben.",
-        "income": "Zielbeträge = Prozentanteil des Einkommens dieses Monats.",
-        "incomeRange": "Zielbeträge = Prozentanteil des Einkommens dieses Zeitraums."
-      },
-      "viewOnly": "Nur für diese Ansicht gewählt – die Voreinstellung steht in den Einstellungen.",
-      "fallback": {
-        "fixedMissing": "Noch kein fester Monatsbetrag hinterlegt – Zielbeträge daher aus den Gesamtausgaben.",
-        "fixedOtherCurrency": "Der feste Betrag gilt für {currency} – in dieser Währung zählen die Gesamtausgaben.",
-        "noHistory": "Für die drei Vormonate liegen keine Ausgaben vor – Zielbeträge daher aus den Gesamtausgaben dieses Zeitraums."
-      },
-      "noBasis": {
-        "expenses": "Ohne Ausgaben gibt es keine Zielbeträge.",
-        "income": "Ohne Einkommen in diesem Zeitraum lassen sich keine Zielbeträge berechnen."
-      },
-      "toSettings": "Betrag festlegen"
-    },
-    "settings": {
-      "heading": "Einstellungen",
-      "intro": "Prozentziele je Gruppe (zusammen 100 %) und die Bezugsgröße, mit der die Seite startet. Oben lässt sich die Bezugsgröße jederzeit nur für die aktuelle Ansicht umschalten.",
-      "basis": "Voreinstellung der Bezugsgröße",
-      "targets": "Prozentziele",
-      "sum": "Summe: {sum}",
-      "fixedAmount": "Fester Monatsbetrag",
-      "fixedCurrency": "Währung",
-      "fixedHint": "Nur für die Bezugsgröße „Fester Betrag“; gilt für Buchungen in dieser Währung.",
-      "save": "Einstellungen speichern",
-      "saving": "Wird gespeichert …",
-      "saved": "Einstellungen gespeichert.",
-      "loadError": "Die Einstellungen konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
-      "errors": {
-        "summary": "Bitte prüfen Sie die markierten Felder.",
-        "generic": "Die Einstellungen konnten gerade nicht gespeichert werden. Bitte versuchen Sie es erneut.",
-        "basisInvalid": "Bitte wählen Sie eine Bezugsgröße.",
-        "percentInvalid": "Bitte eine Zahl zwischen 0 und 100 mit höchstens einer Nachkommastelle eingeben.",
-        "percentSum": "Die Prozentziele müssen zusammen genau 100 % ergeben.",
-        "fixedAmountInvalid": "Bitte geben Sie einen Betrag größer als 0 ein, z. B. 9.600,00.",
-        "fixedAmountRequired": "Für die Bezugsgröße „Fester Betrag“ ist ein Monatsbetrag nötig.",
-        "currencyInvalid": "Bitte wählen Sie eine Währung."
-      }
-    },
     "advisor": {
       "heading": "Budget",
-      "intro": "{month}, mit Bezugsgröße und Prozentzielen des Mandanten.",
+      "intro": "{month}, feste Regel 50/30/20 der Gesamtausgaben.",
       "noTransactions": "Der Mandant hat noch keine Buchungen erfasst."
-    }
-  },
-  "CategoryBudgets": {
-    "heading": "Einzelbudgets",
-    "intro": "Höchstbetrag je Kategorie samt Unterkategorien, nur in der Währung des Budgets, netto nach Erstattungen. Monatsbudgets gelten für den angezeigten Zeitraum, Jahresbudgets für das Jahr bis zum Ende des Zeitraums. In der Spalte „Budget (Summe)“ zählt ein Jahresbudget je Monat ein Zwölftel.",
-    "add": "Budget anlegen",
-    "loadError": "Die Einzelbudgets konnten gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
-    "empty": {
-      "title": "Noch keine Einzelbudgets",
-      "text": "Legen Sie für eine Kategorie einen Höchstbetrag je Monat oder Jahr fest. Ab der Warnschwelle (Standard 80 %) erscheint ein Hinweis, auch auf der Übersicht.",
-      "readOnly": "Der Mandant hat keine Einzelbudgets angelegt."
-    },
-    "variableHint": "Tipp: Kategorien mit aktiven Verträgen sind meist Fixkosten. Budgets lohnen sich vor allem bei variablen Ausgaben wie Lebensmitteln, Freizeit oder Einkäufen.",
-    "status": {
-      "ok": "Im Rahmen",
-      "warning": "Schwelle erreicht",
-      "over": "Überschritten"
-    },
-    "periods": {
-      "monthly": "Monatsbudget",
-      "yearly": "Jahresbudget"
-    },
-    "perPeriod": {
-      "monthly": "{amount} pro Monat",
-      "yearly": "{amount} pro Jahr"
-    },
-    "timesMonths": "× {count} Monate",
-    "threshold": "Warnschwelle {pct} %",
-    "noGroup": "in 50/30/20 nicht gezählt",
-    "used": "{actual} von {limit} ({pct})",
-    "remaining": "noch {amount}",
-    "overBy": "{amount} darüber",
-    "yearWindow": "{year}: {months} – {elapsed} von 12 Monaten",
-    "yearWindowCross": "{year}: {months} – {elapsed} von 12 Monaten. Der Zeitraum reicht über den Jahreswechsel; Jahresbudgets zeigen das Jahr, in dem er endet.",
-    "monthSpan": "{from} bis {to}",
-    "hints": {
-      "divergent": "„{category}“ gehört zur Gruppe {group}, zählt in diesem Budget aber mit.",
-      "divergentNone": "„{category}“ zählt in der 50/30/20-Ansicht nicht, in diesem Budget aber mit.",
-      "exceedsParent": "Höher als das Budget der Oberkategorie „{category}“ ({amount}).",
-      "childrenExceed": "Die Budgets der Unterkategorien ergeben zusammen {amount} – mehr als dieses Budget.",
-      "notInGroupSum": "Zählt in „Budget (Summe)“ nicht extra, weil „{category}“ schon ein Budget hat."
-    },
-    "edit": "Bearbeiten",
-    "editLabel": "Budget „{category}“ bearbeiten",
-    "notices": {
-      "created": "Budget angelegt.",
-      "saved": "Budget gespeichert.",
-      "deleted": "Budget gelöscht."
-    },
-    "form": {
-      "newTitle": "Budget anlegen",
-      "editTitle": "Budget bearbeiten",
-      "intro": "Ein Höchstbetrag je Kategorie für Monat oder Jahr. Ausgaben der Unterkategorien zählen mit.",
-      "back": "Zurück zu den Budgets",
-      "loadError": "Das Formular konnte gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
-      "category": "Kategorie",
-      "categoryPlaceholder": "Bitte wählen",
-      "categoryTaken": "{category} (hat schon ein Budget)",
-      "categoryHint": "Nur Ausgabenkategorien; je Kategorie ein Budget.",
-      "contractsHint": "Für diese Kategorie gibt es aktive Verträge ({names}{more, plural, =0 {} other { und # weitere}}). Das sind meist Fixkosten – Budgets lohnen sich vor allem bei variablen Ausgaben.",
-      "period": "Zeitraum",
-      "periods": {
-        "monthly": "Monat",
-        "yearly": "Jahr"
-      },
-      "amount": {
-        "monthly": "Höchstbetrag pro Monat",
-        "yearly": "Höchstbetrag pro Jahr"
-      },
-      "currency": "Währung",
-      "amountHint": "Gezählt werden nur Buchungen in dieser Währung, netto nach Erstattungen; Buchungen „nicht im Budget“ zählen nicht.",
-      "suggest": "Aus Durchschnitt übernehmen",
-      "suggestion": {
-        "monthly": "Vorschlag: Durchschnitt {window}: {amount} pro Monat.",
-        "yearly": "Vorschlag: Summe {window}: {amount}.",
-        "none": {
-          "monthly": "Keine Ausgaben in dieser Kategorie und Währung im Zeitraum {window} – kein Vorschlag.",
-          "yearly": "Keine Ausgaben in dieser Kategorie und Währung im Zeitraum {window} – kein Vorschlag."
-        },
-        "pickCategory": "Wählen Sie eine Kategorie für einen Vorschlag aus Ihren Ausgaben."
-      },
-      "threshold": "Warnschwelle in %",
-      "thresholdHint": "Ab diesem Anteil des Höchstbetrags erscheint ein Hinweis (Standard 80 %).",
-      "create": "Budget anlegen",
-      "save": "Speichern",
-      "saving": "Wird gespeichert …",
-      "delete": "Budget löschen",
-      "deleteConfirm": "Das Budget wird gelöscht. Buchungen und Kategorie bleiben unverändert.",
-      "deleteButton": "Ja, Budget löschen",
-      "errors": {
-        "summary": "Bitte prüfen Sie die markierten Felder.",
-        "generic": "Das Budget konnte gerade nicht gespeichert werden. Bitte versuchen Sie es erneut.",
-        "notFound": "Dieses Budget gibt es nicht mehr.",
-        "categoryRequired": "Bitte wählen Sie eine Ausgabenkategorie.",
-        "categoryTaken": "Für diese Kategorie gibt es schon ein Budget.",
-        "periodInvalid": "Bitte wählen Sie Monat oder Jahr.",
-        "amountInvalid": "Bitte geben Sie einen Betrag größer als 0 ein, z. B. 400,00.",
-        "currencyInvalid": "Bitte wählen Sie eine Währung.",
-        "thresholdInvalid": "Bitte eine ganze Zahl von 1 bis 100 eingeben."
-      }
     }
   },
   "AccountTypes": {
