@@ -26,7 +26,7 @@ export async function saveBudgetGroups(
   _prevState: BudgetGroupsState,
   formData: FormData,
 ): Promise<BudgetGroupsState> {
-  await requireOnboardedUser('/dashboard/budgets');
+  await requireOnboardedUser('/dashboard/budgets/50-30-20');
   const t = await getTranslations('Budgets.assignment');
 
   const assignments: { id: string; budget_group: BudgetGroupKey | null }[] = [];
@@ -57,6 +57,6 @@ export async function saveBudgetGroups(
     return { status: 'error', message: error.code === '22023' ? t('invalid') : t('generic') };
   }
 
-  revalidatePath('/[locale]/dashboard/budgets', 'page');
+  revalidatePath('/[locale]/dashboard/budgets/50-30-20', 'page');
   return { status: 'success', message: t('saved', { count: data ?? 0 }) };
 }

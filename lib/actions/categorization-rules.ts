@@ -183,7 +183,7 @@ function revalidateCategorization() {
   revalidatePath(`/[locale]${RULES_PATH}`, 'page');
   revalidatePath(`/[locale]${GROUPS_PATH}`, 'page');
   revalidatePath('/[locale]/dashboard', 'page');
-  revalidatePath('/[locale]/dashboard/budgets', 'page');
+  revalidatePath('/[locale]/dashboard/budgets', 'layout');
 }
 
 async function redirectWith(path: string, params: Record<string, string>): Promise<never> {
