@@ -151,13 +151,7 @@
     },
     "spending": {
       "title": "Ausgaben",
-      "description": "Wohin Ihr Geld fließt – für eine Woche, einen Monat, ein Quartal, ein Jahr oder einen frei gewählten Zeitraum.",
-      "planned": {
-        "figures": "Ausgaben, Einnahmen, Saldo und Gespart/getilgt auf einen Blick",
-        "comparison": "Vergleich mit der Vorperiode (laufende Periode bis heute) und dem Vorjahr",
-        "categories": "Kategorien mit Unterkategorien, Top-Gegenparteien und größte Buchungen",
-        "history": "Verlauf im gewählten Zeitraum"
-      }
+      "description": "Wohin Ihr Geld fließt – je Woche, Monat, Quartal, Jahr oder frei gewähltem Zeitraum, im Vergleich zur Vorperiode."
     },
     "rule": {
       "title": "50/30/20-Regel",
@@ -266,7 +260,11 @@
       "from": "Von",
       "to": "Bis",
       "apply": "Filtern",
-      "reset": "Zurücksetzen"
+      "reset": "Zurücksetzen",
+      "counterparty": "Gegenpartei: {name}",
+      "counterpartyAccount": "Gegenkonto (IBAN)",
+      "counterpartyRemove": "Filter Gegenpartei {name} entfernen",
+      "remove": "entfernen"
     },
     "pagination": {
       "label": "Seitennavigation",
@@ -1011,5 +1009,119 @@
     "assign": "Übernehmen",
     "withoutSuggestion": "{count, plural, one {# Buchung ohne Kategorie hat noch keinen Vorschlag.} other {# Buchungen ohne Kategorie haben noch keinen Vorschlag.}}",
     "toGroups": "Nach Gegenpartei zuordnen"
+  },
+  "Spending": {
+    "loading": "Ausgaben werden geladen …",
+    "loadError": "Die Auswertung konnte gerade nicht geladen werden. Bitte laden Sie die Seite neu.",
+    "noTransactions": {
+      "title": "Noch keine Buchungen",
+      "text": "Sobald Buchungen vorhanden sind, zeigt diese Seite, wohin Ihr Geld fließt.",
+      "import": "Kontoauszug importieren"
+    },
+    "empty": "Keine Buchungen in diesem Zeitraum.",
+    "period": {
+      "label": "Zeitraum",
+      "types": {
+        "week": "Woche",
+        "month": "Monat",
+        "quarter": "Quartal",
+        "year": "Jahr",
+        "custom": "Zeitraum"
+      },
+      "previous": "Vorherige Periode",
+      "next": "Nächste Periode",
+      "today": "Heute",
+      "toDate": "bis heute",
+      "week": "KW {week} · {range}",
+      "quarter": "{quarter}. Quartal {year}",
+      "from": "Von",
+      "to": "Bis",
+      "apply": "Anzeigen",
+      "compare": "Vergleich mit",
+      "compareOptions": {
+        "previous": "Vorperiode",
+        "year": "Vorjahr"
+      }
+    },
+    "currency": "Währung",
+    "figures": {
+      "heading": "Kennzahlen",
+      "expenses": "Ausgaben",
+      "income": "Einnahmen",
+      "balance": "Saldo",
+      "saved": "Gespart/getilgt",
+      "versus": "ggü. {range}",
+      "perDay": "Ø {amount} pro Tag",
+      "savedNote": "Sparen & Investieren und Kredittilgung – nicht in den Ausgaben. Die 50/30/20-Ansicht zählt Gespartes zur Gruppe Sparen & Schulden."
+    },
+    "change": {
+      "up": "▲ {value}",
+      "down": "▼ {value}",
+      "same": "± 0",
+      "new": "neu"
+    },
+    "hints": {
+      "heading": "Hinweise",
+      "flagged": "{count, plural, one {# Buchung} other {# Buchungen}} ohne Kategorie oder in „Sonstige Ausgaben/Einnahmen“ ({expenses} Ausgaben, {income} Einnahmen) – in den Summen enthalten.",
+      "flaggedLink": "Jetzt zuordnen",
+      "sameHolder": "{count, plural, one {# Buchung} other {# Buchungen}} an oder von {ibans, plural, one {einer IBAN} other {# IBANs}} mit Ihrem Namen, die nicht als eigenes Konto erfasst {ibans, plural, one {ist} other {sind}} ({outflow} raus, {inflow} rein). Vermutlich fehlt ein eigenes Konto – bis dahin zählen diese Buchungen als Ausgaben bzw. Einnahmen.",
+      "sameHolderAdvisor": "{count, plural, one {# Buchung} other {# Buchungen}} an oder von {ibans, plural, one {einer IBAN} other {# IBANs}} mit dem Namen des Mandanten, die nicht als eigenes Konto erfasst {ibans, plural, one {ist} other {sind}} ({outflow} raus, {inflow} rein) – vermutlich ein fehlendes eigenes Konto.",
+      "sameHolderLink": "Eigenes Konto erfassen"
+    },
+    "chart": {
+      "heading": "Verlauf",
+      "caption": "Ausgaben je {bucket, select, day {Tag} week {Woche} other {Monat}} in {currency}",
+      "current": "Ausgaben",
+      "compare": "Vergleichszeitraum",
+      "tip": "{label}: {amount}",
+      "tipCompare": "{label}: {amount} (Vergleich {compare})",
+      "showTable": "Als Tabelle anzeigen",
+      "columns": {
+        "bucket": "Zeitraum",
+        "current": "Ausgaben",
+        "compare": "Vergleich"
+      },
+      "weekOf": "Woche ab {date}"
+    },
+    "categories": {
+      "heading": "Ausgaben nach Kategorie",
+      "share": "Anteil",
+      "change": "Veränderung",
+      "uncategorized": "Ohne Kategorie",
+      "unknown": "Unbekannte Kategorie",
+      "subcategories": "{count, plural, one {# Unterkategorie} other {# Unterkategorien}}",
+      "empty": "Keine Ausgaben in diesem Zeitraum.",
+      "transactionsLabel": "Buchungen in {name} anzeigen"
+    },
+    "counterparties": {
+      "heading": "Top-Gegenparteien",
+      "count": "{count}×",
+      "empty": "Keine Gegenparteien.",
+      "transactionsLabel": "Buchungen mit {name} anzeigen",
+      "unnamed": "Ohne Namen"
+    },
+    "largest": {
+      "heading": "Größte Buchungen",
+      "empty": "Keine Abbuchungen.",
+      "editLabel": "Buchung vom {date} öffnen"
+    },
+    "info": {
+      "transfers": "Umbuchungen zwischen eigenen Konten (nicht gezählt): {outflow} raus, {inflow} rein.",
+      "refunds": "Erstattungen, mit den Ausgaben verrechnet: {amount}.",
+      "rules": "Gezählt werden alle Buchungen außer vom Budget ausgenommenen und Umbuchungen auf bzw. von erfassten eigenen Konten (IBAN). Erstattungen mindern die Ausgaben ihrer Kategorie. Beträge in unterschiedlichen Währungen werden nicht umgerechnet."
+    },
+    "tile": {
+      "heading": "Ausgaben diesen Monat",
+      "link": "Zu den Ausgaben",
+      "empty": "Noch keine Ausgaben in diesem Monat.",
+      "loading": "Ausgaben werden geladen …",
+      "loadError": "Die Ausgaben konnten gerade nicht geladen werden.",
+      "otherCurrencies": "Weitere Währungen: {currencies}"
+    },
+    "advisor": {
+      "heading": "Ausgaben",
+      "intro": "{month} bis heute, im Vergleich zum gleichen Zeitraum des Vormonats.",
+      "noTransactions": "Der Mandant hat noch keine Buchungen erfasst."
+    }
   }
 }

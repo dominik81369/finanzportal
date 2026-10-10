@@ -18,7 +18,7 @@ export type TransactionFilters = {
   q: string;
   type: 'expense' | 'income' | null;
   accountId: string | null;
-  /** UUID oder UNCATEGORIZED. */
+  /** UUID oder UNCATEGORIZED; eine Oberkategorie umfasst ihre Unterkategorien. */
   categoryId: string | null;
   tagId: string | null;
   /** YYYY-MM-DD, jeweils einschließlich. */
@@ -26,7 +26,12 @@ export type TransactionFilters = {
   to: string | null;
   /** Herkunft der Kategorie: manuell gesetzt oder automatisch per Regel. */
   assigned: Assignment | null;
+  /** Gegenpartei-Schlüssel (transactions.counterparty_key, i:/m:/n:), z. B. aus dem Ausgaben-Dashboard. */
+  counterparty: string | null;
 };
+
+/** Gegenpartei-Schlüssel wie transactions.counterparty_key. */
+const COUNTERPARTY_KEY = /^[imn]:.{1,298}$/;
 
 export const ASSIGNMENTS = ['manual', 'auto'] as const;
 export type Assignment = (typeof ASSIGNMENTS)[number];
@@ -44,6 +49,7 @@ export function parseTransactionFilters(params: SearchParams): TransactionFilter
   const category = single(params.category);
   const tag = single(params.tag);
   const assigned = single(params.assigned);
+  const counterparty = single(params.counterparty);
   let from = parseIsoDate(single(params.from));
   let to = parseIsoDate(single(params.to));
 
@@ -61,6 +67,7 @@ export function parseTransactionFilters(params: SearchParams): TransactionFilter
     from,
     to,
     assigned: (ASSIGNMENTS as readonly string[]).includes(assigned) ? (assigned as Assignment) : null,
+    counterparty: COUNTERPARTY_KEY.test(counterparty) ? counterparty : null,
   };
 }
 
@@ -73,7 +80,8 @@ export function hasActiveFilters(filters: TransactionFilters): boolean {
     filters.tagId !== null ||
     filters.from !== null ||
     filters.to !== null ||
-    filters.assigned !== null
+    filters.assigned !== null ||
+    filters.counterparty !== null
   );
 }
 
@@ -136,6 +144,7 @@ export function listQueryString(filters: TransactionFilters, page: number): stri
   if (filters.from) params.set('from', filters.from);
   if (filters.to) params.set('to', filters.to);
   if (filters.assigned) params.set('assigned', filters.assigned);
+  if (filters.counterparty) params.set('counterparty', filters.counterparty);
   if (page > 1) params.set('page', String(page));
   const query = params.toString();
   return query ? `?${query}` : '';

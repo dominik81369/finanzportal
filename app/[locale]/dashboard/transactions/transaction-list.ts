@@ -40,6 +40,21 @@ type LoadTransactionListOptions = {
 export async function loadTransactionList({ userId, filters, page, listPath }: LoadTransactionListOptions) {
   const supabase = await createClient();
 
+  // Eine Oberkategorie umfasst ihre Unterkategorien (Drilldown aus dem
+  // Ausgaben-Dashboard, Auswahl im Filter).
+  let categoryIds: string[] | null = null;
+  if (filters.categoryId && filters.categoryId !== UNCATEGORIZED) {
+    const { data: children, error: childrenError } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('parent_category_id', filters.categoryId);
+    if (childrenError) {
+      console.error('[transactions] Unterkategorien nicht ladbar', { code: childrenError.code });
+    }
+    categoryIds = [filters.categoryId, ...(children ?? []).map((child) => child.id)];
+  }
+
   /** Gefilterte Abfrage; head: nur zählen (für Seiten jenseits des Endes). */
   const buildQuery = (head = false) => {
     let request = supabase
@@ -71,8 +86,11 @@ export async function loadTransactionList({ userId, filters, page, listPath }: L
     }
     if (filters.categoryId === UNCATEGORIZED) {
       request = request.is('category_id', null);
-    } else if (filters.categoryId) {
-      request = request.eq('category_id', filters.categoryId);
+    } else if (categoryIds) {
+      request = categoryIds.length === 1 ? request.eq('category_id', categoryIds[0]!) : request.in('category_id', categoryIds);
+    }
+    if (filters.counterparty) {
+      request = request.eq('counterparty_key', filters.counterparty);
     }
     if (filters.tagId) {
       // Eingebettete Zeilen filtern und Buchungen ohne Treffer ausschließen
